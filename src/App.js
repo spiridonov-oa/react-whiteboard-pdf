@@ -6,7 +6,7 @@ const App = () => {
   return (
     <div className={styles.app}>
       <main>
-        <Whiteboard aspectRatio={4 / 3} />
+        <Whiteboard />
       </main>
     </div>
   );

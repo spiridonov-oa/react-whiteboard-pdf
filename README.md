@@ -30,21 +30,23 @@ yarn add react-whiteboard-pdf
 import { Whiteboard } from 'react-whiteboard-pdf';
 
 const App = () => {
-  return <Whiteboard aspectRatio={4 / 3}
-  options={{
-    brushWidth: 5, // :number (optional) (default: 5) - brush size for drawing
-    background: false, // :boolean (optional) (default: false) - polkadot as background picture
-    currentMode: modes.PENCIL, //
-    currentColor: '#000000',
-    brushWidth: 5,
-    fill: false,
-    group: {},
-  }}
-  controls={}
-  canvasJSON={null}
-  onObjectAdded = {() => {}}
-  onObjectRemoved = {() => {}}
-  />;
+  return (
+    <Whiteboard
+      options={{
+        brushWidth: 5, // :number (optional) (default: 5) - brush size for drawing
+        background: false, // :boolean (optional) (default: false) - polkadot as background picture
+        currentMode: modes.PENCIL, //
+        currentColor: '#000000',
+        brushWidth: 5,
+        fill: false,
+        group: {},
+      }}
+      controls={}
+      canvasJSON={null}
+      onObjectAdded = {() => {}}
+      onObjectRemoved = {() => {}}
+    />
+  );
 };
 ```
 
