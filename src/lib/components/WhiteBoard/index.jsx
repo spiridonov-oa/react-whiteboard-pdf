@@ -12,7 +12,7 @@ import LineIcon from './../images/line.svg';
 import EllipseIcon from './../images/ellipse.svg';
 import TriangleIcon from './../images/triangle.svg';
 import PencilIcon from './../images/pencil.svg';
-import DeleteFileIcon from './../images/delete-file.svg';
+import DeleteIcon from './../images/delete.svg';
 import ZoomInIcon from './../images/zoom-in.svg';
 import ZoomOutIcon from './../images/zoom-out.svg';
 import DownloadIcon from './../images/download.svg';
@@ -38,7 +38,6 @@ const modes = {
 };
 
 const initCanvas = (options) => {
-  console.log(options.width, options.height);
   const canvas = new fabric.Canvas('canvas', { width: options.width, height: options.height });
   fabric.Object.prototype.transparentCorners = false;
   fabric.Object.prototype.cornerStyle = 'circle';
@@ -108,7 +107,7 @@ function drawBackground(canvas) {
       <svg xmlns="http://www.w3.org/2000/svg" width="${dotSize * 10}" height="${
     dotSize * 10
   }" viewBox="0 0 ${dotSize * 10} ${dotSize * 10}">
-        <circle cx="${dotSize / 2}" cy="${dotSize / 2}" r="${dotSize / 2}" fill="#00000030" />
+        <circle cx="${dotSize / 2}" cy="${dotSize / 2}" r="${dotSize / 2}" fill="#00000020" />
       </svg>
     `;
 
@@ -123,6 +122,8 @@ function drawBackground(canvas) {
 
     const width = canvas.getWidth();
     const height = canvas.getHeight();
+
+    console.log('canvas', width, height);
 
     const rect = new fabric.Rect({
       left: -width,
@@ -514,7 +515,7 @@ function resizeCanvas(canvas, whiteboard) {
 const Whiteboard = ({
   options = {
     brushWidth: 5,
-    background: false,
+    background: true,
     currentMode: modes.PENCIL,
     currentColor: '#000000',
     brushWidth: 5,
@@ -563,11 +564,10 @@ const Whiteboard = ({
 
   useEffect(() => {
     if (!canvas && canvasRef.current) {
+      console.log('size');
       const newCanvas = initCanvas({
-        width: canvasOptions.width ? canvasOptions.width : whiteboardRef.current.clientWidth,
-        height: canvasOptions.height
-          ? canvasOptions.height
-          : whiteboardRef.current.clientHeight / aspectRatio,
+        width: whiteboardRef.current.clientWidth,
+        height: whiteboardRef.current.clientHeight,
         ...canvasOptions,
       });
 
@@ -579,6 +579,10 @@ const Whiteboard = ({
 
       // init mode
       setDrawingMode(newCanvas, canvasOptions);
+
+      if (options.background) {
+        drawBackground(newCanvas);
+      }
     }
   }, [canvasRef, canvasJSON]);
 
@@ -682,7 +686,11 @@ const Whiteboard = ({
     if (canvas) {
       const center = canvas.getCenter();
       fabric.Image.fromURL(fileReaderInfo.currentPage, (img) => {
-        img.scaleToWidth(canvas.width);
+        if (canvas.width > canvas.height) {
+          img.scaleToWidth(canvas.width);
+        } else {
+          img.scaleToHeight(canvas.height - 100);
+        }
         canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
           top: center.top,
           left: center.left,
@@ -851,7 +859,7 @@ const Whiteboard = ({
             className={styles.toolbarButton}
             onClick={() => clearCanvas(canvas, canvasOptions)}
           >
-            <img src={DeleteFileIcon} alt="Delete" />
+            <img src={DeleteIcon} alt="Delete" />
           </button>
         )}
 
