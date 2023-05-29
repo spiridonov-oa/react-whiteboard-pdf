@@ -1,0 +1,53 @@
+.pdfReader {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    padding: 12px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    color: #333;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    cursor: pointer;
+
+    img {
+      width: 16px;
+      vertical-align: middle;
+    }
+
+    &:hover {
+      background-color: #c6c7f9;
+    }
+
+    &.selected {
+      background-color: #c6c7f9;
+    }
+  }
+}
+
+.fileContainer {
+  display: none;
+}
+
+.pageInfo {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  border: none;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.pageInfoDetails {
+  color: #333;
+  display: flex;
+  align-items: center;
+  padding: 0 1em;
+}
