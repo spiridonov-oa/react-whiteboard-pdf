@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import PropTypes, { func } from 'prop-types';
+import PropTypes from 'prop-types';
 import { fabric } from 'fabric';
 import PdfReader from '../PdfReader';
 import { saveAs } from 'file-saver';
@@ -38,11 +38,21 @@ const modes = {
 };
 
 const initCanvas = (options) => {
+  fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
+    var object = null,
+      objects = this.getObjects();
+    for (var i = 0, len = this.size(); i < len; i++) {
+      if (objects[i][attr] && objects[i][attr] === name) {
+        object = objects[i];
+        break;
+      }
+    }
+    return object;
+  };
+
   const canvas = new fabric.Canvas('canvas', { width: options.width, height: options.height });
   fabric.Object.prototype.transparentCorners = false;
   fabric.Object.prototype.cornerStyle = 'circle';
-  fabric.Object.prototype.borderColor = '#4447A9';
-  fabric.Object.prototype.cornerColor = '#4447A9';
   fabric.Object.prototype.cornerSize = 6;
   fabric.Object.prototype.padding = 10;
   fabric.Object.prototype.borderDashArray = [5, 5];
@@ -102,7 +112,7 @@ function resetCanvas(canvas) {
 }
 
 function drawBackground(canvas) {
-  const dotSize = 4; // Adjust the size of the dots as needed
+  const dotSize = 5; // Adjust the size of the dots as needed
   const dotSvg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${dotSize * 10}" height="${
     dotSize * 10
@@ -113,7 +123,7 @@ function drawBackground(canvas) {
 
   const dotImage = new Image();
   dotImage.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dotSvg);
-
+  let rect;
   dotImage.onload = function () {
     const dotPattern = new fabric.Pattern({
       source: dotImage,
@@ -125,7 +135,8 @@ function drawBackground(canvas) {
 
     console.log('canvas', width, height);
 
-    const rect = new fabric.Rect({
+    rect = new fabric.Rect({
+      itemId: 'background-id-rectangle',
       left: -width,
       top: -height,
       width: width * 3,
@@ -138,7 +149,12 @@ function drawBackground(canvas) {
     });
 
     canvas.add(rect);
+
+    const test = canvas.getItemByAttr('itemId', 'background-id-rectangle');
+    console.log(test);
   };
+
+  return rect;
 }
 
 // function removeObject(canvas, options) {
@@ -563,28 +579,38 @@ const Whiteboard = ({
   );
 
   useEffect(() => {
-    if (!canvas && canvasRef.current) {
-      console.log('size');
-      const newCanvas = initCanvas({
-        width: whiteboardRef.current.clientWidth,
-        height: whiteboardRef.current.clientHeight,
-        ...canvasOptions,
-      });
+    const newCanvas = initCanvas({
+      width: whiteboardRef.current.clientWidth,
+      height: whiteboardRef.current.clientHeight,
+      ...canvasOptions,
+    });
 
-      if (canvasJSON) {
-        newCanvas.loadFromJSON(canvasJSON);
-      }
-
-      setCanvas(newCanvas);
-
-      // init mode
-      setDrawingMode(newCanvas, canvasOptions);
-
-      if (options.background) {
-        drawBackground(newCanvas);
-      }
+    if (canvasJSON) {
+      newCanvas.loadFromJSON(canvasJSON);
     }
-  }, [canvasRef, canvasJSON]);
+
+    setCanvas(newCanvas);
+
+    // init mode
+    setDrawingMode(newCanvas, canvasOptions);
+  }, [canvasJSON]);
+
+  useEffect(() => {
+    if (!canvas || !canvasJSON) return;
+
+    canvas.loadFromJSON(canvasJSON);
+  }, [canvas, canvasJSON]);
+
+  useEffect(() => {
+    if (!canvas || !options.background) return;
+
+    const bg = drawBackground(canvas);
+    console.log('bg', bg);
+
+    return () => {
+      canvas.remove(bg);
+    };
+  }, [canvas, options, options.background]);
 
   useEffect(() => {
     if (!canvas || !whiteboardRef.current) return;
