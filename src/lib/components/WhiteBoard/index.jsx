@@ -16,6 +16,7 @@ import DeleteIcon from './../images/delete.svg';
 import ZoomInIcon from './../images/zoom-in.svg';
 import ZoomOutIcon from './../images/zoom-out.svg';
 import DownloadIcon from './../images/download.svg';
+import UploadIcon from './../images/add-photo.svg';
 
 import './eraserBrush';
 
@@ -899,7 +900,7 @@ const Whiteboard = ({
               onChange={onFileChange}
             />
             <button className={styles.toolbarButton} onClick={() => uploadPdfRef.current.click()}>
-              +Upload
+              <img src={UploadIcon} alt="Delete" />
             </button>
           </div>
         )}
