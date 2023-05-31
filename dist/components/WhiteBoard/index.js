@@ -143,53 +143,40 @@ function resetCanvas(canvas) {
   removeCanvasListener(canvas);
   canvas.isDrawingMode = false;
   canvas.hoverCursor = 'auto';
-}
-
-function drawBackground(canvas) {
-  var dotSize = 3; // Adjust the size of the dots as needed
-
-  var dotSvg = "\n      <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + dotSize * 10 + "\" height=\"" + dotSize * 10 + "\" viewBox=\"0 0 " + dotSize * 10 + " " + dotSize * 10 + "\">\n        <circle cx=\"" + dotSize / 2 + "\" cy=\"" + dotSize / 2 + "\" r=\"" + dotSize / 2 + "\" fill=\"#00000020\" />\n      </svg>\n    ";
-  var dotImage = new Image();
-  dotImage.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dotSvg);
-  var rect;
-
-  dotImage.onload = function () {
-    var dotPattern = new _fabric.fabric.Pattern({
-      source: dotImage,
-      repeat: 'repeat' // Adjust the repeat property to change the pattern repetition
-
-    });
-    var width = canvas.getWidth();
-    var height = canvas.getHeight();
-    console.log('canvas', width, height);
-    rect = new _fabric.fabric.Rect({
-      itemId: 'background-id-rectangle',
-      left: -width,
-      top: -height,
-      width: width * 3,
-      height: height * 3,
-      fill: dotPattern,
-      selectable: false,
-      // Prevent the dot from being selected
-      evented: false,
-      // Prevent the dot from receiving events
-      lockMovementX: true,
-      // Prevent horizontal movement of the dot
-      lockMovementY: true // Prevent vertical movement of the dot
-
-    });
-    canvas.add(rect);
-    var test = canvas.getItemByAttr('itemId', 'background-id-rectangle');
-    console.log('test', test);
-  };
-
-  return rect;
-} // function removeObject(canvas, options) {
-//   return (e) => {
-//     if (options.currentMode === modes.ERASER) {
-//       canvas.remove(e.target);
-//     }
-//   };
+} // function drawBackground(canvas) {
+//   const dotSize = 4; // Adjust the size of the dots as needed
+//   const dotSvg = `
+//       <svg xmlns="http://www.w3.org/2000/svg" width="${dotSize * 10}" height="${
+//     dotSize * 10
+//   }" viewBox="0 0 ${dotSize * 10} ${dotSize * 10}">
+//         <circle cx="${dotSize / 2}" cy="${dotSize / 2}" r="${dotSize / 2}" fill="#00000010" />
+//       </svg>
+//     `;
+//   let rect;
+//   return new Promise((resolve) => {
+//     const dotImage = new Image();
+//     dotImage.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dotSvg);
+//     dotImage.onload = function () {
+//       const dotPattern = new fabric.Pattern({
+//         source: dotImage,
+//         repeat: 'repeat', // Adjust the repeat property to change the pattern repetition
+//       });
+//       const width = canvas.getWidth();
+//       const height = canvas.getHeight();
+//       const rect = new fabric.Rect({
+//         itemId: 'background-id-rectangle',
+//         width: width,
+//         height: height,
+//         fill: dotPattern,
+//         selectable: false, // Prevent the dot from being selected
+//         evented: false, // Prevent the dot from receiving events
+//         lockMovementX: true, // Prevent horizontal movement of the dot
+//         lockMovementY: true, // Prevent vertical movement of the dot
+//       });
+//       canvas.add(rect);
+//       resolve(rect);
+//     };
+//   });
 // }
 
 
@@ -507,28 +494,49 @@ function clearCanvas(canvas, options) {
   canvas.getObjects().forEach(function (item) {
     if (item !== canvas.backgroundImage) {
       canvas.remove(item);
-    }
+    } // if (options.background) {
+    //   drawBackground(canvas);
+    // }
 
-    if (options.background) {
-      drawBackground(canvas);
-    }
   });
 }
 
 function eraserOn(canvas) {
+  canvas.isDrawingMode = false;
   canvas.on('mouse:down', function (event) {
-    var clickedObject = event.target;
     canvas.remove(event.target);
-  }); // canvas.on('mouse:over', function (event) {
-  //   console.log(event);
-  //   const clickedObject = event.target;
-  //   if (clickedObject) {
-  //     clickedObject.shadowColor = 'red';
-  //     clickedObject.shadowBlur = 10;
-  //   }
-  // });
-  // canvas.isDrawingMode = false;
+    console.log('mouse:down');
+    canvas.on('mouse:move', function (e) {
+      console.log('mouse:move');
+      canvas.remove(e.target);
+    });
+  });
+  canvas.on('mouse:up', function () {
+    canvas.off('mouse:move');
+  });
+  canvas.on('mouse:over', function (event) {
+    var hoveredObject = event.target;
 
+    if (hoveredObject) {
+      hoveredObject.set({
+        shadow: {
+          color: 'red',
+          blur: 6
+        }
+      });
+      canvas.requestRenderAll();
+    }
+  });
+  canvas.on('mouse:out', function (event) {
+    var hoveredObject = event.target;
+
+    if (hoveredObject) {
+      hoveredObject.set({
+        shadow: null
+      });
+      canvas.requestRenderAll();
+    }
+  });
   canvas.hoverCursor = "url(" + (0, _cursors.default)({
     type: 'eraser'
   }) + "), default";
@@ -588,10 +596,9 @@ var Whiteboard = function Whiteboard(_ref10) {
   var _ref10$options = _ref10.options,
       options = _ref10$options === void 0 ? (_ref11 = {
     brushWidth: 5,
-    background: true,
     currentMode: modes.PENCIL,
     currentColor: '#000000'
-  }, _ref11["brushWidth"] = 5, _ref11.fill = false, _ref11.group = {}, _ref11) : _ref10$options,
+  }, _ref11["brushWidth"] = 5, _ref11.fill = false, _ref11) : _ref10$options,
       _ref10$controls = _ref10.controls,
       controls = _ref10$controls === void 0 ? {} : _ref10$controls,
       _ref10$canvasJSON = _ref10.canvasJSON,
@@ -622,23 +629,9 @@ var Whiteboard = function Whiteboard(_ref10) {
   var whiteboardRef = (0, _react.useRef)(null);
   var uploadPdfRef = (0, _react.useRef)(null);
   var enabledControls = (0, _react.useMemo)(function () {
-    return _extends({
-      line: true,
-      rectangle: true,
-      ellipse: true,
-      triangle: true,
-      pencil: true,
-      text: true,
-      selection: true,
-      eraser: true,
-      delete: true,
-      fill: true,
-      brush: true,
-      color: true,
-      files: true,
-      toJson: true,
-      saveAsImage: true
-    }, controls);
+    var _extends2;
+
+    return _extends((_extends2 = {}, _extends2[modes.PENCIL] = true, _extends2[modes.LINE] = true, _extends2[modes.RECTANGLE] = true, _extends2[modes.ELLIPSE] = true, _extends2[modes.TRIANGLE] = true, _extends2[modes.TEXT] = true, _extends2[modes.SELECT] = true, _extends2[modes.ERASER] = true, _extends2.CLEAR = true, _extends2.FILL = true, _extends2.BRUSH = true, _extends2.COLOR = true, _extends2.FILES = true, _extends2.TO_JSON = true, _extends2.SAVE_AS_IMAGE = true, _extends2.ZOOM = true, _extends2), controls);
   }, [controls]);
   (0, _react.useEffect)(function () {
     var newCanvas = initCanvas(_extends({
@@ -657,15 +650,16 @@ var Whiteboard = function Whiteboard(_ref10) {
   (0, _react.useEffect)(function () {
     if (!canvas || !canvasJSON) return;
     canvas.loadFromJSON(canvasJSON);
-  }, [canvas, canvasJSON]);
-  (0, _react.useEffect)(function () {
-    if (!canvas || !options.background) return;
-    var bg = drawBackground(canvas);
-    console.log('bg', bg);
-    return function () {
-      canvas.remove(bg);
-    };
-  }, [canvas, options, options.background]);
+  }, [canvas, canvasJSON]); // useEffect(() => {
+  //   if (!canvas || !options.background) return;
+  //   const promiseBackground = drawBackground(canvas);
+  //   return () => {
+  //     promiseBackground.then((bg) => {
+  //       canvas.remove(bg);
+  //     });
+  //   };
+  // }, [canvas, options.background]);
+
   (0, _react.useEffect)(function () {
     if (!canvas || !whiteboardRef.current) return;
     var element = handleResize(resizeCanvas(canvas, whiteboardRef.current));
@@ -879,6 +873,7 @@ var Whiteboard = function Whiteboard(_ref10) {
       name: 'Eraser'
     }, _modeButtons);
     return Object.keys(modeButtons).map(function (buttonKey) {
+      if (!enabledControls[buttonKey]) return;
       var btn = modeButtons[buttonKey];
       return /*#__PURE__*/_react.default.createElement("button", {
         key: buttonKey,
@@ -902,24 +897,23 @@ var Whiteboard = function Whiteboard(_ref10) {
   }, /*#__PURE__*/_react.default.createElement("div", {
     style: {
       borderRadius: canvasOptions.brushWidth + 'px',
-      width: canvasOptions.brushWidth + 'px',
       height: canvasOptions.brushWidth + 'px',
       background: canvasOptions.brushWidth.currentColor
     }
-  }), !!enabledControls.color && /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("input", {
+  }), !!enabledControls.COLOR && /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("input", {
     className: _indexModule.default.currentColor,
     type: "color",
     name: "color",
     id: "color",
     onChange: changeCurrentColor
-  })), !!enabledControls.brush && /*#__PURE__*/_react.default.createElement("input", {
+  })), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement("input", {
     type: "range",
     min: 1,
     max: 20,
     step: 1,
     value: canvasOptions.brushWidth,
     onChange: changeCurrentWidth
-  }), !!enabledControls.fill && /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("input", {
+  }), !!enabledControls.FILL && /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("input", {
     type: "checkbox",
     name: "fill",
     id: "fill",
@@ -927,7 +921,7 @@ var Whiteboard = function Whiteboard(_ref10) {
     onChange: changeFill
   }), /*#__PURE__*/_react.default.createElement("label", {
     htmlFor: "fill"
-  }, "fill")), getControls(), !!enabledControls.delete && /*#__PURE__*/_react.default.createElement("button", {
+  }, "fill")), getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement("button", {
     type: "button",
     className: _indexModule.default.toolbarButton,
     onClick: function onClick() {
@@ -936,9 +930,7 @@ var Whiteboard = function Whiteboard(_ref10) {
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _delete.default,
     alt: "Delete"
-  })), !!enabledControls.files && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.uploadDropdown
-  }, /*#__PURE__*/_react.default.createElement("input", {
+  })), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("input", {
     ref: uploadPdfRef,
     hidden: true,
     accept: "image/*,.pdf",
@@ -952,24 +944,24 @@ var Whiteboard = function Whiteboard(_ref10) {
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _addPhoto.default,
     alt: "Delete"
-  }))), !!enabledControls.toJson && /*#__PURE__*/_react.default.createElement("button", {
+  }))), !!enabledControls.TO_JSON && /*#__PURE__*/_react.default.createElement("button", {
     className: _indexModule.default.toolbarButton,
     onClick: function onClick() {
       return canvasToJson(canvas);
     }
-  }, "To JSON"), !!enabledControls.saveAsImage && /*#__PURE__*/_react.default.createElement("button", {
+  }, "To JSON"), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement("button", {
     className: _indexModule.default.toolbarButton,
     onClick: onSaveCanvasAsImage
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _download.default,
     alt: "Download"
-  })), /*#__PURE__*/_react.default.createElement("button", {
+  })), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement("button", {
     className: _indexModule.default.toolbarButton,
     onClick: handleZoomIn
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _zoomIn.default,
     alt: "Zoom In"
-  })), /*#__PURE__*/_react.default.createElement("button", {
+  })), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement("button", {
     className: _indexModule.default.toolbarButton,
     onClick: handleZoomOut
   }, /*#__PURE__*/_react.default.createElement("img", {

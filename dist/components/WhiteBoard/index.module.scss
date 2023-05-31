@@ -32,10 +32,13 @@
   }
 }
 
+.toolbar > * {
+  margin: 0 8px;
+}
+
 .toolbarButton {
   padding: 12px;
-  margin: 1px;
-  border-radius: 3px;
+  border-radius: 5px;
   color: #333;
   border: none;
   background-color: transparent;
