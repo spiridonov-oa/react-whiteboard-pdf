@@ -4,6 +4,7 @@ import { fabric } from 'fabric';
 import PdfReader from '../PdfReader';
 import { saveAs } from 'file-saver';
 import getCursor from './cursors';
+import { ColorPicker } from './../ColorPicker';
 import SelectIcon from './../images/select.svg';
 import EraserIcon from './../images/eraser.svg';
 import TextIcon from './../images/text.svg';
@@ -835,26 +836,12 @@ const Whiteboard = ({
     <div ref={whiteboardRef} className={styles.whiteboard}>
       <div className={styles.wrapper}>
         <div className={styles.toolbar}>
-          <div className={styles.colorPicker}>
-            <div
-              style={{
-                borderRadius: canvasOptions.brushWidth + 'px',
-                height: canvasOptions.brushWidth + 'px',
-                width: canvasOptions.brushWidth + 'px',
-                background: canvasOptions.currentColor,
-              }}
-            ></div>
-          </div>
           {!!enabledControls.COLOR && (
-            <div className={styles.toolbarItem}>
-              <input
-                className={styles.currentColor}
-                type="color"
-                name="color"
-                id="color"
-                onChange={changeCurrentColor}
-              />
-            </div>
+            <ColorPicker
+              size={canvasOptions.brushWidth}
+              color={canvasOptions.currentColor}
+              onChange={changeCurrentColor}
+            ></ColorPicker>
           )}
           {!!enabledControls.BRUSH && (
             <div className={styles.toolbarItem}>
