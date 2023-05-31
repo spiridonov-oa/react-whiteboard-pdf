@@ -839,7 +839,6 @@ const Whiteboard = ({
         <div
           style={{
             borderRadius: canvasOptions.brushWidth + 'px',
-            width: canvasOptions.brushWidth + 'px',
             height: canvasOptions.brushWidth + 'px',
             background: canvasOptions.brushWidth.currentColor,
           }}
@@ -891,7 +890,7 @@ const Whiteboard = ({
         )}
 
         {!!enabledControls.files && (
-          <div className={styles.uploadDropdown}>
+          <div>
             <input
               ref={uploadPdfRef}
               hidden
