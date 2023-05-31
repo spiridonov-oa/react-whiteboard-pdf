@@ -1,18 +1,24 @@
 {
   "name": "react-whiteboard-pdf",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "React whiteboard with PDF and Images import",
-  "author": "Spiridonov",
+  "author": "Oleg Spiridonov <spiridonov.oa@gmail.com>",
   "private": false,
   "license": "MIT",
   "sideEffects": false,
   "main": "dist/index.js",
   "module": "dist/index.js",
   "keywords": [
+    "react",
     "react-whiteboard",
     "whiteboard",
     "fabricjs",
-    "pdf"
+    "pdf",
+    "images",
+    "draw",
+    "paint",
+    "JSON",
+    "sketch"
   ],
   "files": [
     "dist",

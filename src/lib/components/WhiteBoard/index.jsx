@@ -833,112 +833,117 @@ const Whiteboard = ({
 
   return (
     <div ref={whiteboardRef} className={styles.whiteboard}>
-      <div className={styles.toolbar}>
-        <div
-          style={{
-            borderRadius: canvasOptions.brushWidth + 'px',
-            height: canvasOptions.brushWidth + 'px',
-            background: canvasOptions.brushWidth.currentColor,
-          }}
-        ></div>
-        {!!enabledControls.COLOR && (
-          <div className={styles.toolbarItem}>
-            <input
-              className={styles.currentColor}
-              type="color"
-              name="color"
-              id="color"
-              onChange={changeCurrentColor}
-            />
+      <div className={styles.wrapper}>
+        <div className={styles.toolbar}>
+          <div className={styles.colorPicker}>
+            <div
+              style={{
+                borderRadius: canvasOptions.brushWidth + 'px',
+                height: canvasOptions.brushWidth + 'px',
+                width: canvasOptions.brushWidth + 'px',
+                background: canvasOptions.currentColor,
+              }}
+            ></div>
           </div>
-        )}
-        {!!enabledControls.BRUSH && (
-          <div className={styles.toolbarItem}>
-            <input
-              type="range"
-              min={1}
-              max={20}
-              step={1}
-              value={canvasOptions.brushWidth}
-              onChange={changeCurrentWidth}
-            />
-          </div>
-        )}
-        {!!enabledControls.FILL && (
-          <div className={styles.toolbarItem}>
-            <input
-              type="checkbox"
-              name="fill"
-              id="fill"
-              checked={canvasOptions.fill}
-              onChange={changeFill}
-            />
-            <label htmlFor="fill">fill</label>
-          </div>
-        )}
+          {!!enabledControls.COLOR && (
+            <div className={styles.toolbarItem}>
+              <input
+                className={styles.currentColor}
+                type="color"
+                name="color"
+                id="color"
+                onChange={changeCurrentColor}
+              />
+            </div>
+          )}
+          {!!enabledControls.BRUSH && (
+            <div className={styles.toolbarItem}>
+              <input
+                type="range"
+                min={1}
+                max={30}
+                step={1}
+                value={canvasOptions.brushWidth}
+                onChange={changeCurrentWidth}
+              />
+            </div>
+          )}
+          {!!enabledControls.FILL && (
+            <div className={styles.toolbarItem}>
+              <input
+                type="checkbox"
+                name="fill"
+                id="fill"
+                checked={canvasOptions.fill}
+                onChange={changeFill}
+              />
+              <label htmlFor="fill">fill</label>
+            </div>
+          )}
 
-        <div className={styles.separator}></div>
+          <div className={styles.separator}></div>
 
-        {getControls()}
+          {getControls()}
 
-        {!!enabledControls.CLEAR && (
-          <button
-            type="button"
-            className={styles.toolbarButton}
-            onClick={() => clearCanvas(canvas, canvasOptions)}
-          >
-            <img src={DeleteIcon} alt="Delete" />
-          </button>
-        )}
-
-        <div className={styles.separator}></div>
-
-        {!!enabledControls.FILES && (
-          <div className={styles.toolbarItem}>
-            <input
-              ref={uploadPdfRef}
-              hidden
-              accept="image/*,.pdf"
-              type="file"
-              onChange={onFileChange}
-            />
-            <button className={styles.toolbarButton} onClick={() => uploadPdfRef.current.click()}>
-              <img src={UploadIcon} alt="Delete" />
+          {!!enabledControls.CLEAR && (
+            <button
+              type="button"
+              className={styles.toolbarButton}
+              onClick={() => clearCanvas(canvas, canvasOptions)}
+            >
+              <img src={DeleteIcon} alt="Delete" />
             </button>
-          </div>
-        )}
-        {!!enabledControls.TO_JSON && (
-          <div className={styles.toolbarItem}>
-            <button className={styles.toolbarButton} onClick={() => canvasToJson(canvas)}>
-              To JSON
-            </button>
-          </div>
-        )}
-        {!!enabledControls.SAVE_AS_IMAGE && (
-          <div className={styles.toolbarItem}>
-            <button className={styles.toolbarButton} onClick={onSaveCanvasAsImage}>
-              <img src={DownloadIcon} alt="Download" />
-            </button>
-          </div>
-        )}
-        <div className={styles.separator}></div>
+          )}
 
-        {!!enabledControls.ZOOM && (
-          <div className={styles.toolbarItem}>
-            <button className={styles.toolbarButton} onClick={handleZoomIn}>
-              <img src={ZoomInIcon} alt="Zoom In" />
-            </button>
-          </div>
-        )}
-        {!!enabledControls.ZOOM && (
-          <div className={styles.toolbarItem}>
-            <button className={styles.toolbarButton} onClick={handleZoomOut}>
-              <img src={ZoomOutIcon} alt="Zoom Out" />
-            </button>
-          </div>
-        )}
+          <div className={styles.separator}></div>
+
+          {!!enabledControls.FILES && (
+            <div className={styles.toolbarItem}>
+              <input
+                ref={uploadPdfRef}
+                hidden
+                accept="image/*,.pdf"
+                type="file"
+                onChange={onFileChange}
+              />
+              <button className={styles.toolbarButton} onClick={() => uploadPdfRef.current.click()}>
+                <img src={UploadIcon} alt="Delete" />
+              </button>
+            </div>
+          )}
+          {!!enabledControls.TO_JSON && (
+            <div className={styles.toolbarItem}>
+              <button className={styles.toolbarButton} onClick={() => canvasToJson(canvas)}>
+                To JSON
+              </button>
+            </div>
+          )}
+          {!!enabledControls.SAVE_AS_IMAGE && (
+            <div className={styles.toolbarItem}>
+              <button className={styles.toolbarButton} onClick={onSaveCanvasAsImage}>
+                <img src={DownloadIcon} alt="Download" />
+              </button>
+            </div>
+          )}
+
+          <div className={styles.separator}></div>
+
+          {!!enabledControls.ZOOM && (
+            <div className={styles.toolbarItem}>
+              <button className={styles.toolbarButton} onClick={handleZoomIn} title="Zoom In">
+                <img src={ZoomInIcon} alt="Zoom In" />
+              </button>
+            </div>
+          )}
+          {!!enabledControls.ZOOM && (
+            <div className={styles.toolbarItem}>
+              <button className={styles.toolbarButton} onClick={handleZoomOut} title="Zoom Out">
+                <img src={ZoomOutIcon} alt="Zoom Out" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-
       <canvas ref={canvasRef} id="canvas" />
       <div className={styles.pdfWrapper}>
         <PdfReader fileReaderInfo={fileReaderInfo} updateFileReaderInfo={updateFileReaderInfo} />

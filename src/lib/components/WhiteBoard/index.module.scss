@@ -7,11 +7,19 @@
   min-height: 100%;
 }
 
-.toolbar {
+.wrapper {
   position: absolute;
   top: 0;
-  padding: 0 4px;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar {
+  margin-top: -8px;
+  padding: 8px 4px 0;
+  border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -49,6 +57,18 @@
   &.selected {
     background-color: #c6c7f9;
   }
+}
+
+.colorPicker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #666;
+  border-radius: 40px;
+  background: #eee;
+  padding: 2px;
+  height: 34px;
+  width: 34px;
 }
 
 .toolbarItem {
