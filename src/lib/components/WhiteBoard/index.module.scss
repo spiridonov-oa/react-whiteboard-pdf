@@ -18,7 +18,7 @@
 
 .toolbar {
   margin-top: -8px;
-  padding: 8px 4px 0;
+  padding: 12px 4px 4px;
   border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
@@ -47,6 +47,7 @@
 
   img {
     width: 18px;
+    height: 18px;
     vertical-align: middle;
   }
 
@@ -73,4 +74,7 @@
   position: absolute;
   bottom: 0;
   width: 100%;
+}
+
+.inputRange {
 }

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { RangeInputS } from './WhiteBoard.styled.jsx';
 import { fabric } from 'fabric';
 import PdfReader from '../PdfReader';
 import { saveAs } from 'file-saver';
@@ -18,6 +19,7 @@ import ZoomInIcon from './../images/zoom-in.svg';
 import ZoomOutIcon from './../images/zoom-out.svg';
 import DownloadIcon from './../images/download.svg';
 import UploadIcon from './../images/add-photo.svg';
+import FillIcon from './../images/color-fill.svg';
 
 import styles from './index.module.scss';
 
@@ -768,7 +770,7 @@ const Whiteboard = ({
   }
 
   function changeFill(e) {
-    setCanvasOptions({ ...canvasOptions, fill: e.target.checked });
+    setCanvasOptions({ ...canvasOptions, fill: !canvasOptions.fill });
   }
 
   function onSaveCanvasAsImage() {
@@ -844,28 +846,27 @@ const Whiteboard = ({
             ></ColorPicker>
           )}
           {!!enabledControls.BRUSH && (
-            <div className={styles.toolbarItem}>
-              <input
+            <div className={`${styles.toolbarItem} ${styles.inputRange}`}>
+              <RangeInputS
                 type="range"
                 min={1}
                 max={30}
                 step={1}
+                thumbColor={canvasOptions.currentColor}
                 value={canvasOptions.brushWidth}
                 onChange={changeCurrentWidth}
               />
             </div>
           )}
           {!!enabledControls.FILL && (
-            <div className={styles.toolbarItem}>
-              <input
-                type="checkbox"
-                name="fill"
-                id="fill"
-                checked={canvasOptions.fill}
-                onChange={changeFill}
-              />
-              <label htmlFor="fill">fill</label>
-            </div>
+            <button
+              type="button"
+              style={{ background: canvasOptions.fill ? '#bbb' : 'transparent' }}
+              className={styles.toolbarButton}
+              onClick={changeFill}
+            >
+              <img src={FillIcon} alt="Delete" />
+            </button>
           )}
 
           <div className={styles.separator}></div>
