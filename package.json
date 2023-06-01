@@ -55,7 +55,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "build-npm": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files",
-    "publish": "npm i && npm run build && npm run build-npm && npm version minor && npm publish",
+    "update-version": "npm i && npm run build && npm run build-npm && git add . && git commit 'Update build' && npm version ${npm_config_version:-patch}",
     "test": "react-scripts test"
   },
   "eslintConfig": {
