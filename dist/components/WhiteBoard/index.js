@@ -15,6 +15,8 @@ var _fileSaver = require("file-saver");
 
 var _cursors = _interopRequireDefault(require("./cursors"));
 
+var _ColorPicker = require("./../ColorPicker");
+
 var _select = _interopRequireDefault(require("./../images/select.svg"));
 
 var _eraser = _interopRequireDefault(require("./../images/eraser.svg"));
@@ -891,27 +893,19 @@ var Whiteboard = function Whiteboard(_ref10) {
     ref: whiteboardRef,
     className: _indexModule.default.whiteboard
   }, /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbar
+    className: _indexModule.default.wrapper
   }, /*#__PURE__*/_react.default.createElement("div", {
-    style: {
-      borderRadius: canvasOptions.brushWidth + 'px',
-      height: canvasOptions.brushWidth + 'px',
-      background: canvasOptions.brushWidth.currentColor
-    }
-  }), !!enabledControls.COLOR && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbarItem
-  }, /*#__PURE__*/_react.default.createElement("input", {
-    className: _indexModule.default.currentColor,
-    type: "color",
-    name: "color",
-    id: "color",
+    className: _indexModule.default.toolbar
+  }, !!enabledControls.COLOR && /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorPicker, {
+    size: canvasOptions.brushWidth,
+    color: canvasOptions.currentColor,
     onChange: changeCurrentColor
-  })), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement("div", {
+  }), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement("div", {
     className: _indexModule.default.toolbarItem
   }, /*#__PURE__*/_react.default.createElement("input", {
     type: "range",
     min: 1,
-    max: 20,
+    max: 30,
     step: 1,
     value: canvasOptions.brushWidth,
     onChange: changeCurrentWidth
@@ -975,7 +969,8 @@ var Whiteboard = function Whiteboard(_ref10) {
     className: _indexModule.default.toolbarItem
   }, /*#__PURE__*/_react.default.createElement("button", {
     className: _indexModule.default.toolbarButton,
-    onClick: handleZoomIn
+    onClick: handleZoomIn,
+    title: "Zoom In"
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _zoomIn.default,
     alt: "Zoom In"
@@ -983,11 +978,12 @@ var Whiteboard = function Whiteboard(_ref10) {
     className: _indexModule.default.toolbarItem
   }, /*#__PURE__*/_react.default.createElement("button", {
     className: _indexModule.default.toolbarButton,
-    onClick: handleZoomOut
+    onClick: handleZoomOut,
+    title: "Zoom Out"
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _zoomOut.default,
     alt: "Zoom Out"
-  })))), /*#__PURE__*/_react.default.createElement("canvas", {
+  }))))), /*#__PURE__*/_react.default.createElement("canvas", {
     ref: canvasRef,
     id: "canvas"
   }), /*#__PURE__*/_react.default.createElement("div", {
