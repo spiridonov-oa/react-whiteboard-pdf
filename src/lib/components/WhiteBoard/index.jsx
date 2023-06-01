@@ -501,6 +501,7 @@ function draw(canvas, options) {
   // canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
   canvas.freeDrawingBrush.width = parseInt(options.brushWidth, 10) || 1;
   canvas.isDrawingMode = true;
+  canvas.freeDrawingCursor = `url(${getCursor({ type: 'pencil' })}) 0 80, auto`;
 }
 
 function throttle(f, delay) {
