@@ -1,20 +1,12 @@
 import EraserIcon from './../images/eraser.svg';
 import PencilIcon from './../images/pencil.svg';
 
-const getCursor = ({ type }) => {
-  switch (type) {
-    case 'eraser': {
-      return EraserIcon;
-    }
-    case 'pencil': {
-      return PencilIcon;
-    }
-
-
-    default: {
-      return '';
-    }
-  }
+export const cursors = {
+  eraser: `url(${EraserIcon}) 0 30, auto`,
+  pencil: `url(${PencilIcon}) 0 80, auto`,
 };
 
-export default getCursor;
+export const getCursor = (type) => {
+  console.log(cursors[type]);
+  return cursors[type];
+};
