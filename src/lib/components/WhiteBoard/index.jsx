@@ -1,12 +1,22 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { RangeInputS, WhiteBoardS, ButtonS } from './WhiteBoard.styled.js';
+import {
+  RangeInputS,
+  WhiteBoardS,
+  ButtonS,
+  SeparatorS,
+  ToolbarS,
+  ToolbarHolderS,
+  ToolbarItemS,
+  PDFWrapperS,
+} from './WhiteBoard.styled.js';
 import { fabric } from 'fabric';
 import PdfReader from '../PdfReader';
 import { saveAs } from 'file-saver';
-import getCursor from './cursors';
+import { Board } from './Board.Class.js';
+import { getCursor } from './cursors';
 import { ColorPicker } from './../ColorPicker';
-import SelectIcon from './../images/select.svg';
+import SelectIcon from './../images/cross.svg';
 import EraserIcon from './../images/eraser.svg';
 import TextIcon from './../images/text.svg';
 import RectangleIcon from './../images/rectangle.svg';
@@ -21,12 +31,12 @@ import DownloadIcon from './../images/download.svg';
 import UploadIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
 
-import styles from './index.module.scss';
-
 let drawInstance = null;
 let origX;
 let origY;
 let mouseDown = false;
+
+const cursorPencil = getCursor('pencil');
 
 const modes = {
   PENCIL: 'PENCIL',
@@ -37,31 +47,6 @@ const modes = {
   ERASER: 'ERASER',
   SELECT: 'SELECT',
   TEXT: 'TEXT',
-};
-
-const initCanvas = (options) => {
-  fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
-    var object = null,
-      objects = this.getObjects();
-    for (var i = 0, len = this.size(); i < len; i++) {
-      if (objects[i][attr] && objects[i][attr] === name) {
-        object = objects[i];
-        break;
-      }
-    }
-    return object;
-  };
-
-  const canvas = new fabric.Canvas('canvas', { width: options.width, height: options.height });
-
-  // Todo: Ready to remove
-  fabric.Object.prototype.transparentCorners = false;
-  fabric.Object.prototype.cornerStyle = 'circle';
-  fabric.Object.prototype.cornerSize = 6;
-  fabric.Object.prototype.padding = 10;
-  fabric.Object.prototype.borderDashArray = [5, 5];
-
-  return canvas;
 };
 
 const setDrawingMode = (canvas, options) => {
@@ -100,6 +85,7 @@ const setDrawingMode = (canvas, options) => {
 function resetCanvas(canvas) {
   removeCanvasListener(canvas);
   canvas.isDrawingMode = false;
+  canvas.defaultCursor = 'auto';
   canvas.hoverCursor = 'auto';
 }
 
@@ -164,7 +150,8 @@ function createLine(canvas, options) {
   canvas.on('mouse:up', stopDrawing);
 
   canvas.selection = false;
-  canvas.hoverCursor = 'auto';
+  canvas.defaultCursor = cursorPencil;
+  canvas.hoverCursor = cursorPencil;
   canvas.isDrawingMode = false;
   canvas.getObjects().map((item) => item.set({ selectable: false }));
   canvas.discardActiveObject().requestRenderAll();
@@ -179,6 +166,7 @@ function startAddLine(canvas, options) {
       strokeWidth: options.brushWidth,
       stroke: options.currentColor,
       selectable: false,
+      perPixelTargetFind: true,
     });
 
     canvas.add(drawInstance);
@@ -210,7 +198,8 @@ function createRect(canvas, options) {
   canvas.on('mouse:up', stopDrawing);
 
   canvas.selection = false;
-  canvas.hoverCursor = 'auto';
+  canvas.defaultCursor = cursorPencil;
+  canvas.hoverCursor = cursorPencil;
   canvas.isDrawingMode = false;
   canvas.getObjects().map((item) => item.set({ selectable: false }));
   canvas.discardActiveObject().requestRenderAll();
@@ -233,6 +222,7 @@ function startAddRect(canvas, options) {
       width: 0,
       height: 0,
       selectable: false,
+      perPixelTargetFind: true,
     });
 
     canvas.add(drawInstance);
@@ -276,7 +266,8 @@ function createEllipse(canvas, options) {
   canvas.on('mouse:up', stopDrawing);
 
   canvas.selection = false;
-  canvas.hoverCursor = 'auto';
+  canvas.defaultCursor = cursorPencil;
+  canvas.hoverCursor = cursorPencil;
   canvas.isDrawingMode = false;
   canvas.getObjects().map((item) => item.set({ selectable: false }));
   canvas.discardActiveObject().requestRenderAll();
@@ -298,6 +289,7 @@ function startAddEllipse(canvas, options) {
       cornerSize: 7,
       objectCaching: false,
       selectable: false,
+      perPixelTargetFind: true,
     });
 
     canvas.add(drawInstance);
@@ -334,7 +326,8 @@ function createTriangle(canvas, options) {
   canvas.on('mouse:up', stopDrawing);
 
   canvas.selection = false;
-  canvas.hoverCursor = 'auto';
+  canvas.defaultCursor = cursorPencil;
+  canvas.hoverCursor = cursorPencil;
   canvas.isDrawingMode = false;
   canvas.getObjects().map((item) => item.set({ selectable: false }));
   canvas.discardActiveObject().requestRenderAll();
@@ -357,6 +350,7 @@ function startAddTriangle(canvas, options) {
       width: 0,
       height: 0,
       selectable: false,
+      perPixelTargetFind: true,
     });
 
     canvas.add(drawInstance);
@@ -472,10 +466,7 @@ function eraserOn(canvas) {
     const hoveredObject = event.target;
     if (hoveredObject) {
       hoveredObject.set({
-        shadow: {
-          color: 'red',
-          blur: 6,
-        },
+        opacity: 0.2,
       });
       canvas.requestRenderAll();
     }
@@ -485,13 +476,14 @@ function eraserOn(canvas) {
     const hoveredObject = event.target;
     if (hoveredObject) {
       hoveredObject.set({
-        shadow: null,
+        opacity: 1,
       });
       canvas.requestRenderAll();
     }
   });
 
-  canvas.hoverCursor = `url(${getCursor({ type: 'eraser' })}), default`;
+  canvas.defaultCursor = getCursor('eraser');
+  canvas.hoverCursor = getCursor('eraser');
 }
 
 function canvasToJson(canvas) {
@@ -502,10 +494,12 @@ function canvasToJson(canvas) {
 }
 
 function draw(canvas, options) {
-  // canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+  canvas.freeDrawingBrush = new fabric.PencilBrush(canvas, {
+    perPixelTargetFind: true,
+  });
   canvas.freeDrawingBrush.width = parseInt(options.brushWidth, 10) || 1;
   canvas.isDrawingMode = true;
-  canvas.freeDrawingCursor = `url(${getCursor({ type: 'pencil' })}) 0 80, auto`;
+  canvas.freeDrawingCursor = cursorPencil;
 }
 
 function throttle(f, delay) {
@@ -526,8 +520,6 @@ function resizeCanvas(canvas, whiteboard) {
   return () => {
     const width = whiteboard.clientWidth;
     const height = whiteboard.clientHeight;
-
-    console.log('resizeCanvas', width, height);
     // const scale = width / canvas.getWidth();
     // const zoom = canvas.getZoom() * scale;
     canvas.setDimensions({ width: width, height: height });
@@ -586,20 +578,20 @@ const Whiteboard = ({
   );
 
   useEffect(() => {
-    const newCanvas = initCanvas({
+    const board = new Board({
       width: whiteboardRef.current.clientWidth,
       height: whiteboardRef.current.clientHeight,
       ...canvasOptions,
     });
 
     if (canvasJSON) {
-      newCanvas.loadFromJSON(canvasJSON);
+      board.canvas.loadFromJSON(canvasJSON);
     }
 
-    setCanvas(newCanvas);
+    setCanvas(board.canvas);
 
     // init mode
-    setDrawingMode(newCanvas, canvasOptions);
+    setDrawingMode(board.canvas, canvasOptions);
   }, [canvasJSON]);
 
   useEffect(() => {
@@ -830,20 +822,20 @@ const Whiteboard = ({
   };
 
   return (
-    <WhiteBoardS ref={whiteboardRef} className={styles.whiteboard}>
-      <div className={styles.wrapper}>
-        <div className={styles.toolbar}>
+    <WhiteBoardS ref={whiteboardRef}>
+      <ToolbarHolderS>
+        <ToolbarS>
           {!!enabledControls.COLOR && (
-            <div className={styles.toolbarItem}>
+            <ToolbarItemS>
               <ColorPicker
                 size={28}
                 color={canvasOptions.currentColor}
                 onChange={changeCurrentColor}
               ></ColorPicker>
-            </div>
+            </ToolbarItemS>
           )}
           {!!enabledControls.BRUSH && (
-            <div className={`${styles.toolbarItem} ${styles.inputRange}`}>
+            <ToolbarItemS>
               <RangeInputS
                 type="range"
                 min={1}
@@ -853,7 +845,7 @@ const Whiteboard = ({
                 value={canvasOptions.brushWidth}
                 onChange={changeCurrentWidth}
               />
-            </div>
+            </ToolbarItemS>
           )}
           {!!enabledControls.FILL && (
             <ButtonS
@@ -865,7 +857,7 @@ const Whiteboard = ({
             </ButtonS>
           )}
 
-          <div className={styles.separator}></div>
+          <SeparatorS />
 
           {getControls()}
 
@@ -875,10 +867,10 @@ const Whiteboard = ({
             </ButtonS>
           )}
 
-          <div className={styles.separator}></div>
+          <SeparatorS />
 
           {!!enabledControls.FILES && (
-            <div className={styles.toolbarItem}>
+            <ToolbarItemS>
               <input
                 ref={uploadPdfRef}
                 hidden
@@ -889,39 +881,40 @@ const Whiteboard = ({
               <ButtonS onClick={() => uploadPdfRef.current.click()}>
                 <img src={UploadIcon} alt="Delete" />
               </ButtonS>
-            </div>
+            </ToolbarItemS>
           )}
 
           {!!enabledControls.SAVE_AS_IMAGE && (
-            <div className={styles.toolbarItem}>
+            <ToolbarItemS>
               <ButtonS onClick={onSaveCanvasAsImage}>
                 <img src={DownloadIcon} alt="Download" />
               </ButtonS>
-            </div>
+            </ToolbarItemS>
           )}
 
-          <div className={styles.separator}></div>
+          <SeparatorS />
 
           {!!enabledControls.ZOOM && (
-            <div className={styles.toolbarItem}>
+            <ToolbarItemS>
               <ButtonS onClick={handleZoomIn} title="Zoom In">
                 <img src={ZoomInIcon} alt="Zoom In" />
               </ButtonS>
-            </div>
+            </ToolbarItemS>
           )}
           {!!enabledControls.ZOOM && (
-            <div className={styles.toolbarItem}>
+            <ToolbarItemS>
               <ButtonS onClick={handleZoomOut} title="Zoom Out">
                 <img src={ZoomOutIcon} alt="Zoom Out" />
               </ButtonS>
-            </div>
+            </ToolbarItemS>
           )}
-        </div>
-      </div>
+        </ToolbarS>
+      </ToolbarHolderS>
+
       <canvas ref={canvasRef} id="canvas" />
-      <div className={styles.pdfWrapper}>
+      <PDFWrapperS>
         <PdfReader fileReaderInfo={fileReaderInfo} updateFileReaderInfo={updateFileReaderInfo} />
-      </div>
+      </PDFWrapperS>
     </WhiteBoardS>
   );
 };
