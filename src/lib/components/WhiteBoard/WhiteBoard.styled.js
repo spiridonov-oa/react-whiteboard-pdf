@@ -41,6 +41,44 @@ export const ButtonS = styled.div`
   }
 `;
 
+export const ToolbarItemS = styled.div`
+  margin: 0 2px;
+`;
+
+export const SeparatorS = styled.div`
+  margin: 0 4px;
+  width: 1px;
+  height: 30px;
+  background: #cbcbcb;
+`;
+
+export const ToolbarS = styled.div`
+  margin-top: -8px;
+  padding: 12px 8px 4px;
+  border-radius: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  background: white;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  z-index: 1;
+`;
+
+export const ToolbarHolderS = styled.div`
+  position: absolute;
+  top: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const PDFWrapperS = styled.div`
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+`;
+
 export const RangeInputS = styled.input`
   & {
     height: 25px;
