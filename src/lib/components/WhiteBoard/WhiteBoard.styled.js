@@ -54,7 +54,7 @@ export const RangeInputS = styled.input`
   &::-webkit-slider-runnable-track {
     position: relative;
     width: 100%;
-    height: 3px;
+    height: 4px;
     cursor: pointer;
     animate: 0.2s;
     display: flex;
@@ -63,16 +63,16 @@ export const RangeInputS = styled.input`
     /// -webkit-clip-path: polygon(100% 0, 100% 100%, 0 100%);
     // background: ${color};
     border-radius: 1px;
-    border: 0px solid #000000;
-    box-shadow: 0 1px 4px rgb(0 0 0 / 0.7);
+    border: 1px solid #555;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
     // height: ${({ max }) => max / 2 || 10}px;
   }
   &::-webkit-slider-thumb {
     // position: absolute;
     // bottom: 0;
     // left: ${({ value }) => (value * 100) / 150 || 20}px;
-    box-shadow: 1px 1px 3px #232323;
-    border: 1px solid transparent;
+    box-shadow: 0px 1px 4px rgb(0 0 0 / 0.5);
+    border: 1px solid #fff;
     border-radius: 45px;
     height: ${({ value }) => value + 2 || 20}px;
     width: ${({ value }) => value + 2 || 20}px;
