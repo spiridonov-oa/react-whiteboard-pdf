@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { RangeInputS } from './WhiteBoard.styled.jsx';
+import { RangeInputS, WhiteBoardS, ButtonS } from './WhiteBoard.styled.js';
 import { fabric } from 'fabric';
 import PdfReader from '../PdfReader';
 import { saveAs } from 'file-saver';
@@ -630,14 +630,6 @@ const Whiteboard = ({
   useEffect(() => {
     if (!canvas) return;
 
-    if (canvasJSON) {
-      canvas.loadFromJSON(canvasJSON);
-    }
-  }, [canvas, canvasJSON]);
-
-  useEffect(() => {
-    if (!canvas) return;
-
     canvas.on('mouse:wheel', (opt) => {
       const deltaY = opt.e.deltaY;
       const deltaX = opt.e.deltaX;
@@ -821,30 +813,30 @@ const Whiteboard = ({
       if (!enabledControls[buttonKey]) return;
       const btn = modeButtons[buttonKey];
       return (
-        <button
+        <ButtonS
           key={buttonKey}
           type="button"
-          className={`${styles.toolbarButton} ${
-            canvasOptions.currentMode === buttonKey ? styles.selected : ''
-          }`}
+          className={`${canvasOptions.currentMode === buttonKey ? 'selected' : ''}`}
           onClick={() => changeMode(buttonKey)}
         >
           <img src={btn.icon} alt={btn.name} />
-        </button>
+        </ButtonS>
       );
     });
   };
 
   return (
-    <div ref={whiteboardRef} className={styles.whiteboard}>
+    <WhiteBoardS ref={whiteboardRef} className={styles.whiteboard}>
       <div className={styles.wrapper}>
         <div className={styles.toolbar}>
           {!!enabledControls.COLOR && (
-            <ColorPicker
-              size={canvasOptions.brushWidth}
-              color={canvasOptions.currentColor}
-              onChange={changeCurrentColor}
-            ></ColorPicker>
+            <div className={styles.toolbarItem}>
+              <ColorPicker
+                size={28}
+                color={canvasOptions.currentColor}
+                onChange={changeCurrentColor}
+              ></ColorPicker>
+            </div>
           )}
           {!!enabledControls.BRUSH && (
             <div className={`${styles.toolbarItem} ${styles.inputRange}`}>
@@ -860,14 +852,13 @@ const Whiteboard = ({
             </div>
           )}
           {!!enabledControls.FILL && (
-            <button
+            <ButtonS
               type="button"
-              style={{ background: canvasOptions.fill ? '#bbb' : 'transparent' }}
-              className={styles.toolbarButton}
+              className={canvasOptions.fill ? 'selected' : ''}
               onClick={changeFill}
             >
               <img src={FillIcon} alt="Delete" />
-            </button>
+            </ButtonS>
           )}
 
           <div className={styles.separator}></div>
@@ -875,13 +866,9 @@ const Whiteboard = ({
           {getControls()}
 
           {!!enabledControls.CLEAR && (
-            <button
-              type="button"
-              className={styles.toolbarButton}
-              onClick={() => clearCanvas(canvas, canvasOptions)}
-            >
+            <ButtonS type="button" onClick={() => clearCanvas(canvas, canvasOptions)}>
               <img src={DeleteIcon} alt="Delete" />
-            </button>
+            </ButtonS>
           )}
 
           <div className={styles.separator}></div>
@@ -895,23 +882,17 @@ const Whiteboard = ({
                 type="file"
                 onChange={onFileChange}
               />
-              <button className={styles.toolbarButton} onClick={() => uploadPdfRef.current.click()}>
+              <ButtonS onClick={() => uploadPdfRef.current.click()}>
                 <img src={UploadIcon} alt="Delete" />
-              </button>
+              </ButtonS>
             </div>
           )}
-          {!!enabledControls.TO_JSON && (
-            <div className={styles.toolbarItem}>
-              <button className={styles.toolbarButton} onClick={() => canvasToJson(canvas)}>
-                To JSON
-              </button>
-            </div>
-          )}
+
           {!!enabledControls.SAVE_AS_IMAGE && (
             <div className={styles.toolbarItem}>
-              <button className={styles.toolbarButton} onClick={onSaveCanvasAsImage}>
+              <ButtonS onClick={onSaveCanvasAsImage}>
                 <img src={DownloadIcon} alt="Download" />
-              </button>
+              </ButtonS>
             </div>
           )}
 
@@ -919,16 +900,16 @@ const Whiteboard = ({
 
           {!!enabledControls.ZOOM && (
             <div className={styles.toolbarItem}>
-              <button className={styles.toolbarButton} onClick={handleZoomIn} title="Zoom In">
+              <ButtonS onClick={handleZoomIn} title="Zoom In">
                 <img src={ZoomInIcon} alt="Zoom In" />
-              </button>
+              </ButtonS>
             </div>
           )}
           {!!enabledControls.ZOOM && (
             <div className={styles.toolbarItem}>
-              <button className={styles.toolbarButton} onClick={handleZoomOut} title="Zoom Out">
+              <ButtonS onClick={handleZoomOut} title="Zoom Out">
                 <img src={ZoomOutIcon} alt="Zoom Out" />
-              </button>
+              </ButtonS>
             </div>
           )}
         </div>
@@ -937,7 +918,7 @@ const Whiteboard = ({
       <div className={styles.pdfWrapper}>
         <PdfReader fileReaderInfo={fileReaderInfo} updateFileReaderInfo={updateFileReaderInfo} />
       </div>
-    </div>
+    </WhiteBoardS>
   );
 };
 

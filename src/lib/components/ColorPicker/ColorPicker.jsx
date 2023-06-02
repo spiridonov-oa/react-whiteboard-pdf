@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import styles from './ColorPicker.module.scss';
+import { ColorPickerS, ColorLabelS } from './ColorPicker.styled.js';
 
-function ColorPicker({ size, color, onChange = (e) => {} }) {
+function ColorPicker({ size = 34, color, onChange = (e) => {} }) {
   const inputRef = useRef(null);
 
   const emitClick = () => {
@@ -11,25 +11,17 @@ function ColorPicker({ size, color, onChange = (e) => {} }) {
   };
 
   return (
-    <div className={styles.colorPicker} onClick={emitClick}>
-      <div
-        style={{
-          borderRadius: size + 'px',
-          height: size + 'px',
-          width: size + 'px',
-          background: color,
-        }}
-      ></div>
+    <ColorPickerS size={size} onClick={emitClick}>
+      <ColorLabelS size={size} color={color}></ColorLabelS>
       <input
         ref={inputRef}
-        hidden
-        className={styles.currentColor}
+        style={{ opacity: 0, position: 'absolute', bottom: '-1px', width: '1px', height: '1px' }}
         type="color"
         name="color"
         id="color"
         onChange={onChange}
       />
-    </div>
+    </ColorPickerS>
   );
 }
 
