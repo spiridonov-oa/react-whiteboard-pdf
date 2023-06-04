@@ -660,29 +660,37 @@ var Whiteboard = function Whiteboard(_ref10) {
     };
   }, [canvas, whiteboardRef.current]);
   (0, _react.useEffect)(function () {
-    if (!canvas) return;
+    if (!canvas) return; // {
+    //   const deltaY = opt.e.deltaY;
+    //   const deltaX = opt.e.deltaX;
+    //   const isVerticalScroll = Math.abs(deltaY) > Math.abs(deltaX);
+    //   const isCanvasLargerThanViewport =
+    //     canvas.width > canvas.viewportTransform[4] || canvas.height > canvas.viewportTransform[5];
+    //   if (isVerticalScroll && isCanvasLargerThanViewport) {
+    //     // Vertical scroll
+    //     const scrollDeltaY = canvas.height / 100;
+    //     const vertical = -scrollDeltaY * (deltaY > 0 ? 1 : -1);
+    //     console.log(vertical);
+    //     canvas.relativePan(new fabric.Point(0, vertical));
+    //   } else if (!isVerticalScroll && isCanvasLargerThanViewport) {
+    //     // Horizontal scroll
+    //     const scrollDeltaX = canvas.width / 300;
+    //     const horisontal = -scrollDeltaX * (deltaX > 0 ? 1 : -1);
+    //     console.log(horisontal);
+    //     canvas.relativePan(new fabric.Point(horisontal, 0));
+    //   }
+    //   opt.e.preventDefault();
+    //   opt.e.stopPropagation();
+    // }
+
     canvas.on('mouse:wheel', function (opt) {
-      var deltaY = opt.e.deltaY;
-      var deltaX = opt.e.deltaX;
-      var isVerticalScroll = Math.abs(deltaY) > Math.abs(deltaX);
-      var isCanvasLargerThanViewport = canvas.width > canvas.viewportTransform[4] || canvas.height > canvas.viewportTransform[5];
-
-      if (isVerticalScroll && isCanvasLargerThanViewport) {
-        // Vertical scroll
-        var scrollDeltaY = canvas.height / 100;
-        var vertical = -scrollDeltaY * (deltaY > 0 ? 1 : -1);
-        console.log(vertical);
-        canvas.relativePan(new _fabric.fabric.Point(0, vertical));
-      } else if (!isVerticalScroll && isCanvasLargerThanViewport) {
-        // Horizontal scroll
-        var scrollDeltaX = canvas.width / 300;
-        var horisontal = -scrollDeltaX * (deltaX > 0 ? 1 : -1);
-        console.log(horisontal);
-        canvas.relativePan(new _fabric.fabric.Point(horisontal, 0));
-      }
-
-      opt.e.preventDefault();
-      opt.e.stopPropagation();
+      var evt = window.event || opt.e;
+      var scale = (evt.wheelDelta / 240 < 0 ? 0.9 : 1.1) * canvas.getZoom();
+      canvas.zoomToPoint({
+        x: opt.e.offsetX,
+        y: opt.e.offsetY
+      }, scale);
+      if (opt.e != null) opt.e.preventDefault();
     });
     canvas.on('touch:gesture', function (event) {
       console.log('1 touch:gesture');
@@ -872,13 +880,20 @@ var Whiteboard = function Whiteboard(_ref10) {
 
   var handleZoomIn = function handleZoomIn() {
     console.log(canvas.getZoom());
-    var scale = canvas.getZoom() * 1.1;
-    canvas.setZoom(scale);
+    var scale = canvas.getZoom() * 1.1; // canvas.setZoom(scale);
+
+    canvas.zoomToPoint({
+      x: window.outerWidth / 2,
+      y: window.outerHeight / 2
+    }, scale);
   };
 
   var handleZoomOut = function handleZoomOut() {
     var scale = canvas.getZoom() / 1.1;
-    canvas.setZoom(scale);
+    canvas.zoomToPoint({
+      x: window.outerWidth / 2,
+      y: window.outerHeight / 2
+    }, scale);
   };
 
   var handleResetZoom = function handleResetZoom() {
