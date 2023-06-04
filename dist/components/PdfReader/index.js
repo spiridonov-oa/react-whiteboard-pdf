@@ -21,7 +21,8 @@ _reactPdf.pdfjs.GlobalWorkerOptions.workerSrc = "//cdnjs.cloudflare.com/ajax/lib
 
 var PDFReader = function PDFReader(_ref) {
   var fileReaderInfo = _ref.fileReaderInfo,
-      updateFileReaderInfo = _ref.updateFileReaderInfo;
+      updateFileReaderInfo = _ref.updateFileReaderInfo,
+      onPageChange = _ref.onPageChange;
 
   function onRenderSuccess() {
     var importPDFCanvas = document.querySelector('.import-pdf-page canvas');
@@ -33,15 +34,14 @@ var PDFReader = function PDFReader(_ref) {
 
   function onDocumentLoadSuccess(_ref2) {
     var numPages = _ref2.numPages;
+    console.log('onDocumentLoadSuccess', numPages);
     updateFileReaderInfo({
       totalPages: numPages
     });
   }
 
   function changePage(offset) {
-    updateFileReaderInfo({
-      currentPageNumber: fileReaderInfo.currentPageNumber + offset
-    });
+    onPageChange(fileReaderInfo.currentPageNumber + offset);
   }
 
   var nextPage = function nextPage() {
@@ -69,7 +69,7 @@ var PDFReader = function PDFReader(_ref) {
     className: "import-pdf-page",
     onRenderSuccess: onRenderSuccess,
     pageNumber: fileReaderInfo.currentPageNumber
-  }))), !!fileReaderInfo.totalPages && /*#__PURE__*/_react.default.createElement("div", {
+  }))), fileReaderInfo.totalPages > 1 && /*#__PURE__*/_react.default.createElement("div", {
     className: _indexModule.default.pageInfo
   }, /*#__PURE__*/_react.default.createElement("button", {
     type: "button",

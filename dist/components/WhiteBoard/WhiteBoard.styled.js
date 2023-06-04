@@ -41,30 +41,42 @@ var PDFWrapperS = _styledComponents.default.div(_templateObject7 || (_templateOb
 
 exports.PDFWrapperS = PDFWrapperS;
 
-var RangeInputS = _styledComponents.default.input(_templateObject8 || (_templateObject8 = _taggedTemplateLiteralLoose(["\n  & {\n    height: 25px;\n    -webkit-appearance: none;\n    margin: 10px 0;\n    width: 100px;\n  }\n  &:focus {\n    outline: none;\n  }\n  &::-webkit-slider-runnable-track {\n    position: relative;\n    width: 100%;\n    height: 4px;\n    cursor: pointer;\n    animate: 0.2s;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    /// -webkit-clip-path: polygon(100% 0, 100% 100%, 0 100%);\n    // background: ", ";\n    border-radius: 1px;\n    border: 1px solid #555;\n    box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);\n    // height: ", "px;\n  }\n  &::-webkit-slider-thumb {\n    // position: absolute;\n    // bottom: 0;\n    // left: ", "px;\n    box-shadow: 0px 1px 4px rgb(0 0 0 / 0.5);\n    border: 1px solid #fff;\n    border-radius: 45px;\n    height: ", "px;\n    width: ", "px;\n    background: ", ";\n    cursor: pointer;\n    margin-top: ", "px;\n    -webkit-appearance: none;\n  }\n  &:focus::-webkit-slider-runnable-track {\n    // background: ", ";\n  }\n  &::-moz-range-track {\n    width: 100%;\n    height: 5px;\n    cursor: pointer;\n    animate: 0.2s;\n    box-shadow: 0px 0px 0px #000000;\n    background: #232323;\n    border-radius: 1px;\n    border: 0px solid #000000;\n  }\n  &::-moz-range-thumb {\n    box-shadow: 0px 0px 0px #000000;\n    border: 1px solid #232323;\n    height: 18px;\n    width: 18px;\n    border-radius: 25px;\n    background: ", ";\n    cursor: pointer;\n  }\n  &::-ms-track {\n    width: 100%;\n    height: 5px;\n    cursor: pointer;\n    animate: 0.2s;\n    background: transparent;\n    border-color: transparent;\n    color: transparent;\n  }\n  &::-ms-fill-lower {\n    background: #232323;\n    border: 0px solid #000000;\n    border-radius: 2px;\n    box-shadow: 0px 0px 0px #000000;\n  }\n  &::-ms-fill-upper {\n    background: #232323;\n    border: 0px solid #000000;\n    border-radius: 2px;\n    box-shadow: 0px 0px 0px #000000;\n  }\n  &::-ms-thumb {\n    margin-top: 1px;\n    box-shadow: 0px 0px 0px #000000;\n    border: 1px solid #232323;\n    height: 18px;\n    width: 18px;\n    border-radius: 25px;\n    background: ", ";\n    cursor: pointer;\n  }\n  &:focus::-ms-fill-lower {\n    background: #232323;\n  }\n  &:focus::-ms-fill-upper {\n    background: #232323;\n  }\n"])), color, function (_ref) {
-  var max = _ref.max;
-  return max / 2 || 10;
+var RangeInputS = _styledComponents.default.input(_templateObject8 || (_templateObject8 = _taggedTemplateLiteralLoose(["\n  & {\n    height: 25px;\n    -webkit-appearance: none;\n    margin: 10px 0;\n    width: 100px;\n  }\n  &:focus {\n    outline: none;\n  }\n  &::-webkit-slider-runnable-track {\n    position: relative;\n    width: 100%;\n    height: 4px;\n    cursor: pointer;\n    animate: 0.2s;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    border-radius: 5px;\n    border: 1px solid #555;\n    // box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);\n  }\n  &::-webkit-slider-thumb {\n    box-shadow: 0px 1px 4px rgb(0 0 0 / 0.5);\n    border: 1px solid #fff;\n    border-radius: 45px;\n    height: ", "px;\n    width: ", "px;\n    background: ", ";\n    cursor: pointer;\n    margin-top: ", "px;\n    -webkit-appearance: none;\n  }\n  &:focus::-webkit-slider-runnable-track {\n    background: transparent;\n  }\n\n  &::-moz-range-track {\n    width: 100%;\n    height: 5px;\n    cursor: pointer;\n    animate: 0.2s;\n\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    border-radius: 5px;\n    border: 1px solid #555;\n  }\n  &::-moz-range-thumb {\n    box-shadow: 0px 1px 4px rgb(0 0 0 / 0.5);\n    border: 1px solid #fff;\n    border-radius: 45px;\n    height: ", "px;\n    width: ", "px;\n    background: ", ";\n    cursor: pointer;\n    margin-top: ", "px;\n  }\n\n  &::-ms-track {\n    width: 100%;\n    height: 5px;\n    cursor: pointer;\n    animate: 0.2s;\n    background: transparent;\n    border-color: transparent;\n    color: transparent;\n  }\n  &::-ms-fill-lower {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    border-radius: 5px;\n    border: 1px solid #555;\n  }\n  &::-ms-fill-upper {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    border-radius: 5px;\n    border: 1px solid #555;\n  }\n  &::-ms-thumb {\n    box-shadow: 0px 1px 4px rgb(0 0 0 / 0.5);\n    border: 1px solid #fff;\n    border-radius: 45px;\n    height: ", "px;\n    width: ", "px;\n    background: ", ";\n    cursor: pointer;\n    margin-top: ", "px;\n  }\n  &:focus::-ms-fill-lower {\n    background: transparent;\n  }\n  &:focus::-ms-fill-upper {\n    background: transparent;\n  }\n"])), function (_ref) {
+  var value = _ref.value;
+  return value + 2 || 20;
 }, function (_ref2) {
   var value = _ref2.value;
-  return value * 100 / 150 || 20;
-}, function (_ref3) {
-  var value = _ref3.value;
   return value + 2 || 20;
+}, function (_ref3) {
+  var thumbColor = _ref3.thumbColor;
+  return thumbColor || '#232323';
 }, function (_ref4) {
   var value = _ref4.value;
-  return value + 2 || 20;
+  return -value / 2 || -8;
 }, function (_ref5) {
-  var thumbColor = _ref5.thumbColor;
-  return thumbColor || '#232323';
+  var value = _ref5.value;
+  return value + 2 || 20;
 }, function (_ref6) {
   var value = _ref6.value;
-  return -value / 2 || -8;
-}, color, function (_ref7) {
+  return value + 2 || 20;
+}, function (_ref7) {
   var thumbColor = _ref7.thumbColor;
   return thumbColor || '#232323';
 }, function (_ref8) {
-  var thumbColor = _ref8.thumbColor;
+  var value = _ref8.value;
+  return -value / 2 || -8;
+}, function (_ref9) {
+  var value = _ref9.value;
+  return value + 2 || 20;
+}, function (_ref10) {
+  var value = _ref10.value;
+  return value + 2 || 20;
+}, function (_ref11) {
+  var thumbColor = _ref11.thumbColor;
   return thumbColor || '#232323';
+}, function (_ref12) {
+  var value = _ref12.value;
+  return -value / 2 || -8;
 });
 
 exports.RangeInputS = RangeInputS;

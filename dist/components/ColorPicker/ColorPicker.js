@@ -16,7 +16,8 @@ function ColorPicker(_ref) {
       size = _ref$size === void 0 ? 34 : _ref$size,
       color = _ref.color,
       _ref$onChange = _ref.onChange,
-      onChange = _ref$onChange === void 0 ? function (e) {} : _ref$onChange;
+      _onChange = _ref$onChange === void 0 ? function (e) {} : _ref$onChange;
+
   var inputRef = (0, _react.useRef)(null);
 
   var emitClick = function emitClick() {
@@ -43,7 +44,9 @@ function ColorPicker(_ref) {
     type: "color",
     name: "color",
     id: "color",
-    onChange: onChange
+    onChange: function onChange(e) {
+      return _onChange(e.target.value, e);
+    }
   }));
 }
 
