@@ -626,29 +626,36 @@ const Whiteboard = ({
   useEffect(() => {
     if (!canvas) return;
 
+    // {
+    //   const deltaY = opt.e.deltaY;
+    //   const deltaX = opt.e.deltaX;
+    //   const isVerticalScroll = Math.abs(deltaY) > Math.abs(deltaX);
+    //   const isCanvasLargerThanViewport =
+    //     canvas.width > canvas.viewportTransform[4] || canvas.height > canvas.viewportTransform[5];
+
+    //   if (isVerticalScroll && isCanvasLargerThanViewport) {
+    //     // Vertical scroll
+    //     const scrollDeltaY = canvas.height / 100;
+    //     const vertical = -scrollDeltaY * (deltaY > 0 ? 1 : -1);
+    //     console.log(vertical);
+    //     canvas.relativePan(new fabric.Point(0, vertical));
+    //   } else if (!isVerticalScroll && isCanvasLargerThanViewport) {
+    //     // Horizontal scroll
+    //     const scrollDeltaX = canvas.width / 300;
+    //     const horisontal = -scrollDeltaX * (deltaX > 0 ? 1 : -1);
+    //     console.log(horisontal);
+    //     canvas.relativePan(new fabric.Point(horisontal, 0));
+    //   }
+
+    //   opt.e.preventDefault();
+    //   opt.e.stopPropagation();
+    // }
+
     canvas.on('mouse:wheel', (opt) => {
-      const deltaY = opt.e.deltaY;
-      const deltaX = opt.e.deltaX;
-      const isVerticalScroll = Math.abs(deltaY) > Math.abs(deltaX);
-      const isCanvasLargerThanViewport =
-        canvas.width > canvas.viewportTransform[4] || canvas.height > canvas.viewportTransform[5];
-
-      if (isVerticalScroll && isCanvasLargerThanViewport) {
-        // Vertical scroll
-        const scrollDeltaY = canvas.height / 100;
-        const vertical = -scrollDeltaY * (deltaY > 0 ? 1 : -1);
-        console.log(vertical);
-        canvas.relativePan(new fabric.Point(0, vertical));
-      } else if (!isVerticalScroll && isCanvasLargerThanViewport) {
-        // Horizontal scroll
-        const scrollDeltaX = canvas.width / 300;
-        const horisontal = -scrollDeltaX * (deltaX > 0 ? 1 : -1);
-        console.log(horisontal);
-        canvas.relativePan(new fabric.Point(horisontal, 0));
-      }
-
-      opt.e.preventDefault();
-      opt.e.stopPropagation();
+      const evt = window.event || opt.e;
+      const scale = (((evt.wheelDelta / 240) < 0) ? 0.9 : 1.1) * canvas.getZoom();
+      canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, scale);
+      if(opt.e != null)opt.e.preventDefault();
     });
 
     canvas.on('touch:gesture', (event) => {
@@ -836,12 +843,13 @@ const Whiteboard = ({
   const handleZoomIn = () => {
     console.log(canvas.getZoom());
     const scale = canvas.getZoom() * 1.1;
-    canvas.setZoom(scale);
+    // canvas.setZoom(scale);
+    canvas.zoomToPoint({ x: window.outerWidth / 2, y: window.outerHeight / 2 }, scale);
   };
 
   const handleZoomOut = () => {
     const scale = canvas.getZoom() / 1.1;
-    canvas.setZoom(scale);
+    canvas.zoomToPoint({ x: window.outerWidth / 2, y: window.outerHeight / 2 }, scale);
   };
 
   const handleResetZoom = () => {
