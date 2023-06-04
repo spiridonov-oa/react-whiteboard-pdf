@@ -12,7 +12,7 @@ export const ColorPickerS = styled.div`
   cursor: pointer;
 
   > div {
-    box-shadow: 1px 1px 3px rgb(0 0 0 / 0.6);
+    //box-shadow: 1px 1px 3px rgb(0 0 0 / 0.6);
   }
 
   &:hover {
