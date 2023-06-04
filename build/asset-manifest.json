@@ -1,29 +1,30 @@
 {
   "files": {
-    "main.css": "/static/css/main.7bc301c7.css",
-    "main.js": "/static/js/main.ed14f7c1.js",
+    "main.css": "/static/css/main.209a1936.css",
+    "main.js": "/static/js/main.589adf74.js",
     "pdf.worker.js": "/e7e915313973ba1d49f9bb2a1998626e.js",
-    "static/media/select.svg": "/static/media/select.ad97be7339018abf84121f0d364cb3de.svg",
-    "static/media/pencil.svg": "/static/media/pencil.eda8d85bd538b8c005a7056b82d799bf.svg",
+    "static/media/pencil.svg": "/static/media/pencil.53eb38dddcea137813a131a420dc2445.svg",
     "static/media/add-photo.svg": "/static/media/add-photo.63fae1bb4e88ef09ac3e2acd9bf6fd82.svg",
     "static/media/zoom-in.svg": "/static/media/zoom-in.bf4c35253c17247bb24f69aa269de8ac.svg",
     "static/media/zoom-out.svg": "/static/media/zoom-out.58680f7b766344c4e977186f65b23599.svg",
-    "static/media/eraser.svg": "/static/media/eraser.bfeac919239aea5ccc20a592d34f3e22.svg",
-    "static/media/text.svg": "/static/media/text.abecf614d81f94be9799afa61fb52de2.svg",
+    "static/media/color-fill.svg": "/static/media/color-fill.71ba2057a8ab432f24fc8e30d90c18b2.svg",
     "static/media/download.svg": "/static/media/download.ec839c09ffe8059eb92a1f38b04a1bb6.svg",
     "index.html": "/index.html",
+    "static/media/cross.svg": "/static/media/cross.578359040b257f8f8981885ec05b6a64.svg",
+    "static/media/eraser.svg": "/static/media/eraser.3c54c40418ca7a768642076548c1d347.svg",
     "static/media/ellipse.svg": "/static/media/ellipse.1497c57e37df3faaa30ded0e0816e30f.svg",
     "static/media/line.svg": "/static/media/line.8231e0126dbf10eff51eabeaec9081cc.svg",
     "static/media/rectangle.svg": "/static/media/rectangle.719b60ff1eed7da548a8fb20f8d22e6c.svg",
+    "static/media/text.svg": "/static/media/text.228fca31a987ee08051e5e9b68b10743.svg",
     "static/media/delete.svg": "/static/media/delete.ee04eea3615f063a1b91b824e4df3473.svg",
     "static/media/back.svg": "/static/media/back.4858a318cdb360a89ab0aa94c7b681b3.svg",
     "static/media/next.svg": "/static/media/next.ae119a8c1344fcb0c22090f497f1e97c.svg",
     "static/media/triangle.svg": "/static/media/triangle.58a0a70e9ca69ed2ef79d4e13d65bffb.svg",
-    "main.7bc301c7.css.map": "/static/css/main.7bc301c7.css.map",
-    "main.ed14f7c1.js.map": "/static/js/main.ed14f7c1.js.map"
+    "main.209a1936.css.map": "/static/css/main.209a1936.css.map",
+    "main.589adf74.js.map": "/static/js/main.589adf74.js.map"
   },
   "entrypoints": [
-    "static/css/main.7bc301c7.css",
-    "static/js/main.ed14f7c1.js"
+    "static/css/main.209a1936.css",
+    "static/js/main.589adf74.js"
   ]
 }
