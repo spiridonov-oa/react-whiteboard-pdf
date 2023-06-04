@@ -176,7 +176,6 @@ function startAddLine(canvas, options) {
 
 function startDrawingLine(canvas) {
   return ({ e }) => {
-    canvas.setCursor(`url(${getCursor({ type: 'pencil' })}) 0 80, auto`);
     if (mouseDown) {
       const pointer = canvas.getPointer(e);
       drawInstance.set({
@@ -237,7 +236,6 @@ function startAddRect(canvas, options) {
 
 function startDrawingRect(canvas) {
   return ({ e }) => {
-    canvas.setCursor(`url(${getCursor({ type: 'pencil' })}) 0 80, auto`);
     if (mouseDown) {
       const pointer = canvas.getPointer(e);
 
@@ -298,7 +296,6 @@ function startAddEllipse(canvas, options) {
 
 function startDrawingEllipse(canvas) {
   return ({ e }) => {
-    canvas.setCursor(`url(${getCursor({ type: 'pencil' })}) 0 80, auto`);
     if (mouseDown) {
       const pointer = canvas.getPointer(e);
       if (pointer.x < origX) {
@@ -359,7 +356,6 @@ function startAddTriangle(canvas, options) {
 
 function startDrawingTriangle(canvas) {
   return ({ e }) => {
-    canvas.setCursor(`url(${getCursor({ type: 'pencil' })}) 0 80, auto`);
     if (mouseDown) {
       const pointer = canvas.getPointer(e);
       if (pointer.x < origX) {
