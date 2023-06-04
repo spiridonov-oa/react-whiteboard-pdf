@@ -51,13 +51,12 @@ const App = () => {
       // default options
       options={{
         brushWidth: 5, // :number (optional) (default: 5) - brush size for drawing
-        background: false, // :boolean (optional) (default: false) - polkadot as background picture
-        currentMode: modes.PENCIL, //
+        currentMode: 'PENCIL', // :string (PENCIL, LINE, RECTANGLE, TRIANGLE, ELLIPSE, ERASER, SELECT, TEXT)
         currentColor: '#000000',
-        brushWidth: 5,
-        fill: false,
+        fill: false, // The "fill" option allows you to apply a solid color or pattern inside a shape such as a circle, square, or any other closed figure while you are drawing it
       }}
       // default controls
+      // You can turn on/off controls using this options
       controls={{
         PENCIL: true,
         LINE: true,
@@ -76,9 +75,9 @@ const App = () => {
         SAVE_AS_IMAGE: true,
         ZOOM: true,
       }}
-      canvasJSON={null} // JSON to render in canvas
-      onObjectAdded={(addedObject) => {}}
-      onObjectRemoved={(removedObject) => {}}
+      canvasJSON={null} // initial JSON to render in canvas on load
+      onObjectAdded={(addedObject) => {}} //callback on added object to canvas
+      onObjectRemoved={(removedObject) => {}} //callback on removed object from canvas
     />
   );
 };
