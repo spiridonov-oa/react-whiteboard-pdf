@@ -7,7 +7,7 @@ import NextIcon from './../images/next.svg';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-const PDFReader = ({ fileReaderInfo, updateFileReaderInfo }) => {
+const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange }) => {
   function onRenderSuccess() {
     const importPDFCanvas = document.querySelector('.import-pdf-page canvas');
     const pdfAsImageSrc = importPDFCanvas.toDataURL();
@@ -16,11 +16,12 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo }) => {
   }
 
   function onDocumentLoadSuccess({ numPages }) {
+    console.log('onDocumentLoadSuccess', numPages);
     updateFileReaderInfo({ totalPages: numPages });
   }
 
   function changePage(offset) {
-    updateFileReaderInfo({ currentPageNumber: fileReaderInfo.currentPageNumber + offset });
+    onPageChange(fileReaderInfo.currentPageNumber + offset);
   }
 
   const nextPage = () => changePage(1);
@@ -44,7 +45,7 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo }) => {
           />
         </Document>
       </div>
-      {!!fileReaderInfo.totalPages && (
+      {fileReaderInfo.totalPages > 1 && (
         <div className={styles.pageInfo}>
           <button
             type="button"
