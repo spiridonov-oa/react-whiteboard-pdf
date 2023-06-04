@@ -19,7 +19,7 @@ function ColorPicker({ size = 34, color, onChange = (e) => {} }) {
         type="color"
         name="color"
         id="color"
-        onChange={onChange}
+        onChange={(e) => onChange(e.target.value, e)}
       />
     </ColorPickerS>
   );

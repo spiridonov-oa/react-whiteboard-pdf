@@ -7,17 +7,21 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
+var _WhiteBoardStyled = require("./WhiteBoard.styled.js");
+
 var _fabric = require("fabric");
 
 var _PdfReader = _interopRequireDefault(require("../PdfReader"));
 
 var _fileSaver = require("file-saver");
 
-var _cursors = _interopRequireDefault(require("./cursors"));
+var _BoardClass = require("./Board.Class.js");
+
+var _cursors = require("./cursors");
 
 var _ColorPicker = require("./../ColorPicker");
 
-var _select = _interopRequireDefault(require("./../images/select.svg"));
+var _cross = _interopRequireDefault(require("./../images/cross.svg"));
 
 var _eraser = _interopRequireDefault(require("./../images/eraser.svg"));
 
@@ -43,7 +47,7 @@ var _download = _interopRequireDefault(require("./../images/download.svg"));
 
 var _addPhoto = _interopRequireDefault(require("./../images/add-photo.svg"));
 
-var _indexModule = _interopRequireDefault(require("./index.module.scss"));
+var _colorFill = _interopRequireDefault(require("./../images/color-fill.svg"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -59,6 +63,7 @@ var drawInstance = null;
 var origX;
 var origY;
 var mouseDown = false;
+var cursorPencil = (0, _cursors.getCursor)('pencil');
 var modes = {
   PENCIL: 'PENCIL',
   LINE: 'LINE',
@@ -68,34 +73,6 @@ var modes = {
   ERASER: 'ERASER',
   SELECT: 'SELECT',
   TEXT: 'TEXT'
-};
-
-var initCanvas = function initCanvas(options) {
-  _fabric.fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
-    var object = null,
-        objects = this.getObjects();
-
-    for (var i = 0, len = this.size(); i < len; i++) {
-      if (objects[i][attr] && objects[i][attr] === name) {
-        object = objects[i];
-        break;
-      }
-    }
-
-    return object;
-  };
-
-  var canvas = new _fabric.fabric.Canvas('canvas', {
-    width: options.width,
-    height: options.height
-  }); // Todo: Ready to remove
-
-  _fabric.fabric.Object.prototype.transparentCorners = false;
-  _fabric.fabric.Object.prototype.cornerStyle = 'circle';
-  _fabric.fabric.Object.prototype.cornerSize = 6;
-  _fabric.fabric.Object.prototype.padding = 10;
-  _fabric.fabric.Object.prototype.borderDashArray = [5, 5];
-  return canvas;
 };
 
 var setDrawingMode = function setDrawingMode(canvas, options) {
@@ -142,6 +119,7 @@ var setDrawingMode = function setDrawingMode(canvas, options) {
 function resetCanvas(canvas) {
   removeCanvasListener(canvas);
   canvas.isDrawingMode = false;
+  canvas.defaultCursor = 'auto';
   canvas.hoverCursor = 'auto';
 } // function drawBackground(canvas) {
 //   const dotSize = 4; // Adjust the size of the dots as needed
@@ -199,7 +177,8 @@ function createLine(canvas, options) {
   canvas.on('mouse:move', startDrawingLine(canvas));
   canvas.on('mouse:up', stopDrawing);
   canvas.selection = false;
-  canvas.hoverCursor = 'auto';
+  canvas.defaultCursor = cursorPencil;
+  canvas.hoverCursor = cursorPencil;
   canvas.isDrawingMode = false;
   canvas.getObjects().map(function (item) {
     return item.set({
@@ -217,7 +196,8 @@ function startAddLine(canvas, options) {
     drawInstance = new _fabric.fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
       strokeWidth: options.brushWidth,
       stroke: options.currentColor,
-      selectable: false
+      selectable: false,
+      perPixelTargetFind: true
     });
     canvas.add(drawInstance);
     canvas.requestRenderAll();
@@ -248,7 +228,8 @@ function createRect(canvas, options) {
   canvas.on('mouse:move', startDrawingRect(canvas));
   canvas.on('mouse:up', stopDrawing);
   canvas.selection = false;
-  canvas.hoverCursor = 'auto';
+  canvas.defaultCursor = cursorPencil;
+  canvas.hoverCursor = cursorPencil;
   canvas.isDrawingMode = false;
   canvas.getObjects().map(function (item) {
     return item.set({
@@ -273,7 +254,8 @@ function startAddRect(canvas, options) {
       top: origY,
       width: 0,
       height: 0,
-      selectable: false
+      selectable: false,
+      perPixelTargetFind: true
     });
     canvas.add(drawInstance);
     drawInstance.on('mousedown', function (e) {
@@ -317,7 +299,8 @@ function createEllipse(canvas, options) {
   canvas.on('mouse:move', startDrawingEllipse(canvas));
   canvas.on('mouse:up', stopDrawing);
   canvas.selection = false;
-  canvas.hoverCursor = 'auto';
+  canvas.defaultCursor = cursorPencil;
+  canvas.hoverCursor = cursorPencil;
   canvas.isDrawingMode = false;
   canvas.getObjects().map(function (item) {
     return item.set({
@@ -342,7 +325,8 @@ function startAddEllipse(canvas, options) {
       top: origY,
       cornerSize: 7,
       objectCaching: false,
-      selectable: false
+      selectable: false,
+      perPixelTargetFind: true
     });
     canvas.add(drawInstance);
   };
@@ -381,7 +365,8 @@ function createTriangle(canvas, options) {
   canvas.on('mouse:move', startDrawingTriangle(canvas));
   canvas.on('mouse:up', stopDrawing);
   canvas.selection = false;
-  canvas.hoverCursor = 'auto';
+  canvas.defaultCursor = cursorPencil;
+  canvas.hoverCursor = cursorPencil;
   canvas.isDrawingMode = false;
   canvas.getObjects().map(function (item) {
     return item.set({
@@ -407,7 +392,8 @@ function startAddTriangle(canvas, options) {
       top: origY,
       width: 0,
       height: 0,
-      selectable: false
+      selectable: false,
+      perPixelTargetFind: true
     });
     canvas.add(drawInstance);
   };
@@ -519,10 +505,7 @@ function eraserOn(canvas) {
 
     if (hoveredObject) {
       hoveredObject.set({
-        shadow: {
-          color: 'red',
-          blur: 6
-        }
+        opacity: 0.2
       });
       canvas.requestRenderAll();
     }
@@ -532,14 +515,13 @@ function eraserOn(canvas) {
 
     if (hoveredObject) {
       hoveredObject.set({
-        shadow: null
+        opacity: 1
       });
       canvas.requestRenderAll();
     }
   });
-  canvas.hoverCursor = "url(" + (0, _cursors.default)({
-    type: 'eraser'
-  }) + "), default";
+  canvas.defaultCursor = (0, _cursors.getCursor)('eraser');
+  canvas.hoverCursor = (0, _cursors.getCursor)('eraser');
 }
 
 function canvasToJson(canvas) {
@@ -550,9 +532,12 @@ function canvasToJson(canvas) {
 }
 
 function draw(canvas, options) {
-  // canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+  canvas.freeDrawingBrush = new _fabric.fabric.PencilBrush(canvas, {
+    perPixelTargetFind: true
+  });
   canvas.freeDrawingBrush.width = parseInt(options.brushWidth, 10) || 1;
   canvas.isDrawingMode = true;
+  canvas.freeDrawingCursor = cursorPencil;
 }
 
 function throttle(f, delay) {
@@ -579,8 +564,7 @@ function handleResize(callback) {
 function resizeCanvas(canvas, whiteboard) {
   return function () {
     var width = whiteboard.clientWidth;
-    var height = whiteboard.clientHeight;
-    console.log('resizeCanvas', width, height); // const scale = width / canvas.getWidth();
+    var height = whiteboard.clientHeight; // const scale = width / canvas.getWidth();
     // const zoom = canvas.getZoom() * scale;
 
     canvas.setDimensions({
@@ -634,18 +618,18 @@ var Whiteboard = function Whiteboard(_ref10) {
     return _extends((_extends2 = {}, _extends2[modes.PENCIL] = true, _extends2[modes.LINE] = true, _extends2[modes.RECTANGLE] = true, _extends2[modes.ELLIPSE] = true, _extends2[modes.TRIANGLE] = true, _extends2[modes.TEXT] = true, _extends2[modes.SELECT] = true, _extends2[modes.ERASER] = true, _extends2.CLEAR = true, _extends2.FILL = true, _extends2.BRUSH = true, _extends2.COLOR = true, _extends2.FILES = true, _extends2.TO_JSON = true, _extends2.SAVE_AS_IMAGE = true, _extends2.ZOOM = true, _extends2), controls);
   }, [controls]);
   (0, _react.useEffect)(function () {
-    var newCanvas = initCanvas(_extends({
+    var board = new _BoardClass.Board(_extends({
       width: whiteboardRef.current.clientWidth,
       height: whiteboardRef.current.clientHeight
     }, canvasOptions));
 
     if (canvasJSON) {
-      newCanvas.loadFromJSON(canvasJSON);
+      board.canvas.loadFromJSON(canvasJSON);
     }
 
-    setCanvas(newCanvas); // init mode
+    setCanvas(board.canvas); // init mode
 
-    setDrawingMode(newCanvas, canvasOptions);
+    setDrawingMode(board.canvas, canvasOptions);
   }, [canvasJSON]);
   (0, _react.useEffect)(function () {
     if (!canvas || !canvasJSON) return;
@@ -668,13 +652,6 @@ var Whiteboard = function Whiteboard(_ref10) {
       element.disconnect();
     };
   }, [canvas, whiteboardRef.current]);
-  (0, _react.useEffect)(function () {
-    if (!canvas) return;
-
-    if (canvasJSON) {
-      canvas.loadFromJSON(canvasJSON);
-    }
-  }, [canvas, canvasJSON]);
   (0, _react.useEffect)(function () {
     if (!canvas) return;
     canvas.on('mouse:wheel', function (opt) {
@@ -806,7 +783,7 @@ var Whiteboard = function Whiteboard(_ref10) {
 
   function changeFill(e) {
     setCanvasOptions(_extends({}, canvasOptions, {
-      fill: e.target.checked
+      fill: !canvasOptions.fill
     }));
   }
 
@@ -866,7 +843,7 @@ var Whiteboard = function Whiteboard(_ref10) {
       icon: _text.default,
       name: 'Text'
     }, _modeButtons[modes.SELECT] = {
-      icon: _select.default,
+      icon: _cross.default,
       name: 'Select'
     }, _modeButtons[modes.ERASER] = {
       icon: _eraser.default,
@@ -875,10 +852,10 @@ var Whiteboard = function Whiteboard(_ref10) {
     return Object.keys(modeButtons).map(function (buttonKey) {
       if (!enabledControls[buttonKey]) return;
       var btn = modeButtons[buttonKey];
-      return /*#__PURE__*/_react.default.createElement("button", {
+      return /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ButtonS, {
         key: buttonKey,
         type: "button",
-        className: _indexModule.default.toolbarButton + " " + (canvasOptions.currentMode === buttonKey ? _indexModule.default.selected : ''),
+        className: "" + (canvasOptions.currentMode === buttonKey ? 'selected' : ''),
         onClick: function onClick() {
           return changeMode(buttonKey);
         }
@@ -889,95 +866,60 @@ var Whiteboard = function Whiteboard(_ref10) {
     });
   };
 
-  return /*#__PURE__*/_react.default.createElement("div", {
-    ref: whiteboardRef,
-    className: _indexModule.default.whiteboard
-  }, /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.wrapper
-  }, /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbar
-  }, !!enabledControls.COLOR && /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorPicker, {
-    size: canvasOptions.brushWidth,
+  return /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.WhiteBoardS, {
+    ref: whiteboardRef
+  }, /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ToolbarHolderS, null, /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ToolbarS, null, !!enabledControls.COLOR && /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorPicker, {
+    size: 28,
     color: canvasOptions.currentColor,
     onChange: changeCurrentColor
-  }), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbarItem
-  }, /*#__PURE__*/_react.default.createElement("input", {
+  })), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.RangeInputS, {
     type: "range",
     min: 1,
     max: 30,
     step: 1,
+    thumbColor: canvasOptions.currentColor,
     value: canvasOptions.brushWidth,
     onChange: changeCurrentWidth
-  })), !!enabledControls.FILL && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbarItem
-  }, /*#__PURE__*/_react.default.createElement("input", {
-    type: "checkbox",
-    name: "fill",
-    id: "fill",
-    checked: canvasOptions.fill,
-    onChange: changeFill
-  }), /*#__PURE__*/_react.default.createElement("label", {
-    htmlFor: "fill"
-  }, "fill")), /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.separator
-  }), getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement("button", {
+  })), !!enabledControls.FILL && /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ButtonS, {
     type: "button",
-    className: _indexModule.default.toolbarButton,
+    className: canvasOptions.fill ? 'selected' : '',
+    onClick: changeFill
+  }, /*#__PURE__*/_react.default.createElement("img", {
+    src: _colorFill.default,
+    alt: "Delete"
+  })), /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.SeparatorS, null), getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ButtonS, {
+    type: "button",
     onClick: function onClick() {
       return clearCanvas(canvas, canvasOptions);
     }
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _delete.default,
     alt: "Delete"
-  })), /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.separator
-  }), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbarItem
-  }, /*#__PURE__*/_react.default.createElement("input", {
+  })), /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.SeparatorS, null), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement("input", {
     ref: uploadPdfRef,
     hidden: true,
     accept: "image/*,.pdf",
     type: "file",
     onChange: onFileChange
-  }), /*#__PURE__*/_react.default.createElement("button", {
-    className: _indexModule.default.toolbarButton,
+  }), /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ButtonS, {
     onClick: function onClick() {
       return uploadPdfRef.current.click();
     }
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _addPhoto.default,
     alt: "Delete"
-  }))), !!enabledControls.TO_JSON && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbarItem
-  }, /*#__PURE__*/_react.default.createElement("button", {
-    className: _indexModule.default.toolbarButton,
-    onClick: function onClick() {
-      return canvasToJson(canvas);
-    }
-  }, "To JSON")), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbarItem
-  }, /*#__PURE__*/_react.default.createElement("button", {
-    className: _indexModule.default.toolbarButton,
+  }))), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ButtonS, {
     onClick: onSaveCanvasAsImage
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _download.default,
     alt: "Download"
-  }))), /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.separator
-  }), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbarItem
-  }, /*#__PURE__*/_react.default.createElement("button", {
-    className: _indexModule.default.toolbarButton,
+  }))), /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.SeparatorS, null), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ButtonS, {
     onClick: handleZoomIn,
     title: "Zoom In"
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _zoomIn.default,
     alt: "Zoom In"
-  }))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.toolbarItem
-  }, /*#__PURE__*/_react.default.createElement("button", {
-    className: _indexModule.default.toolbarButton,
+  }))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.ButtonS, {
     onClick: handleZoomOut,
     title: "Zoom Out"
   }, /*#__PURE__*/_react.default.createElement("img", {
@@ -986,9 +928,7 @@ var Whiteboard = function Whiteboard(_ref10) {
   }))))), /*#__PURE__*/_react.default.createElement("canvas", {
     ref: canvasRef,
     id: "canvas"
-  }), /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.pdfWrapper
-  }, /*#__PURE__*/_react.default.createElement(_PdfReader.default, {
+  }), /*#__PURE__*/_react.default.createElement(_WhiteBoardStyled.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.default, {
     fileReaderInfo: fileReaderInfo,
     updateFileReaderInfo: updateFileReaderInfo
   })));
