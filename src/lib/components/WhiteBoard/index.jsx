@@ -31,12 +31,12 @@ import DownloadIcon from './../images/download.svg';
 import UploadIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
 
-let drawInstance = null;
-let origX;
-let origY;
-let mouseDown = false;
+// let drawInstance = null;
+// let origX;
+// let origY;
 
-const cursorPencil = getCursor('pencil');
+
+// const cursorPencil = getCursor('pencil');
 
 const modes = {
   PENCIL: 'PENCIL',
@@ -49,45 +49,45 @@ const modes = {
   TEXT: 'TEXT',
 };
 
-const setDrawingMode = (canvas, options) => {
-  resetCanvas(canvas);
+// const setDrawingMode = (canvas, options) => {
+//   resetCanvas(canvas);
 
-  switch (options.currentMode) {
-    case modes.PENCIL:
-      draw(canvas, options);
-      break;
-    case modes.LINE:
-      createLine(canvas, options);
-      break;
-    case modes.RECTANGLE:
-      createRect(canvas, options);
-      break;
-    case modes.ELLIPSE:
-      createEllipse(canvas, options);
-      break;
-    case modes.TRIANGLE:
-      createTriangle(canvas, options);
-      break;
-    case modes.ERASER:
-      eraserOn(canvas, options);
-      break;
-    case modes.SELECT:
-      onSelectMode(canvas, options);
-      break;
-    case modes.TEXT:
-      createText(canvas, options);
-      break;
-    default:
-      draw(canvas, options);
-  }
-};
+//   switch (options.currentMode) {
+//     case modes.PENCIL:
+//       draw(canvas, options);
+//       break;
+//     case modes.LINE:
+//       createLine(canvas, options);
+//       break;
+//     case modes.RECTANGLE:
+//       createRect(canvas, options);
+//       break;
+//     case modes.ELLIPSE:
+//       createEllipse(canvas, options);
+//       break;
+//     case modes.TRIANGLE:
+//       createTriangle(canvas, options);
+//       break;
+//     case modes.ERASER:
+//       eraserOn(canvas, options);
+//       break;
+//     case modes.SELECT:
+//       onSelectMode(canvas, options);
+//       break;
+//     case modes.TEXT:
+//       createText(canvas, options);
+//       break;
+//     default:
+//       draw(canvas, options);
+//   }
+// };
 
-function resetCanvas(canvas) {
-  removeCanvasListener(canvas);
-  canvas.isDrawingMode = false;
-  canvas.defaultCursor = 'auto';
-  canvas.hoverCursor = 'auto';
-}
+// function resetCanvas(canvas) {
+//   removeCanvasListener(canvas);
+//   canvas.isDrawingMode = false;
+//   canvas.defaultCursor = 'auto';
+//   canvas.hoverCursor = 'auto';
+// }
 
 // function drawBackground(canvas) {
 //   const dotSize = 4; // Adjust the size of the dots as needed
@@ -130,288 +130,289 @@ function resetCanvas(canvas) {
 //   });
 // }
 
-function stopDrawing() {
-  mouseDown = false;
-}
+// function stopDrawing() {
+//   mouseDown = false;
+// }
 
-function removeCanvasListener(canvas) {
-  canvas.off('mouse:down');
-  canvas.off('mouse:move');
-  canvas.off('mouse:up');
-  canvas.off('mouse:over');
-}
+// function removeCanvasListener(canvas) {
+//   canvas.off('mouse:down');
+//   canvas.off('mouse:move');
+//   canvas.off('mouse:up');
+//   canvas.off('mouse:over');
+// }
 
 /*  ==== line  ==== */
-function createLine(canvas, options) {
-  canvas.isDrawingMode = true;
+// function createLine(canvas, options) {
+//   canvas.isDrawingMode = true;
 
-  canvas.on('mouse:down', startAddLine(canvas, options));
-  canvas.on('mouse:move', startDrawingLine(canvas));
-  canvas.on('mouse:up', stopDrawing);
+//   canvas.on('mouse:down', startAddLine(canvas, options));
+//   canvas.on('mouse:move', startDrawingLine(canvas));
+//   canvas.on('mouse:up', stopDrawing);
 
-  canvas.selection = false;
-  canvas.defaultCursor = cursorPencil;
-  canvas.hoverCursor = cursorPencil;
-  canvas.isDrawingMode = false;
-  canvas.getObjects().map((item) => item.set({ selectable: false }));
-  canvas.discardActiveObject().requestRenderAll();
-}
+//   canvas.selection = false;
+//   canvas.defaultCursor = cursorPencil;
+//   canvas.hoverCursor = cursorPencil;
+//   canvas.isDrawingMode = false;
+//   canvas.getObjects().map((item) => item.set({ selectable: false }));
+//   canvas.discardActiveObject().requestRenderAll();
+// }
 
-function startAddLine(canvas, options) {
-  return ({ e }) => {
-    mouseDown = true;
+// function startAddLine(canvas, options) {
+//   return ({ e }) => {
+//     mouseDown = true;
 
-    let pointer = canvas.getPointer(e);
-    drawInstance = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-      strokeWidth: options.brushWidth,
-      stroke: options.currentColor,
-      selectable: false,
-      perPixelTargetFind: true,
-    });
+//     let pointer = canvas.getPointer(e);
+//     drawInstance = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+//       strokeWidth: options.brushWidth,
+//       stroke: options.currentColor,
+//       selectable: false,
+//       perPixelTargetFind: true,
+//     });
 
-    canvas.add(drawInstance);
-    canvas.requestRenderAll();
-  };
-}
+//     canvas.add(drawInstance);
+//     canvas.requestRenderAll();
+//   };
+// }
 
-function startDrawingLine(canvas) {
-  return ({ e }) => {
-    if (mouseDown) {
-      const pointer = canvas.getPointer(e);
-      drawInstance.set({
-        x2: pointer.x,
-        y2: pointer.y,
-      });
-      drawInstance.setCoords();
-      canvas.requestRenderAll();
-    }
-  };
-}
+// function startDrawingLine(canvas) {
+//   return ({ e }) => {
+//     if (mouseDown) {
+//       const pointer = canvas.getPointer(e);
+//       drawInstance.set({
+//         x2: pointer.x,
+//         y2: pointer.y,
+//       });
+//       drawInstance.setCoords();
+//       canvas.requestRenderAll();
+//     }
+//   };
+// }
 
 /* ==== rectangle ==== */
-function createRect(canvas, options) {
-  canvas.isDrawingMode = true;
+// function createRect(canvas, options) {
+//   canvas.isDrawingMode = true;
 
-  canvas.on('mouse:down', startAddRect(canvas, options));
-  canvas.on('mouse:move', startDrawingRect(canvas));
-  canvas.on('mouse:up', stopDrawing);
+//   canvas.on('mouse:down', startAddRect(canvas, options));
+//   canvas.on('mouse:move', startDrawingRect(canvas));
+//   canvas.on('mouse:up', stopDrawing);
 
-  canvas.selection = false;
-  canvas.defaultCursor = cursorPencil;
-  canvas.hoverCursor = cursorPencil;
-  canvas.isDrawingMode = false;
-  canvas.getObjects().map((item) => item.set({ selectable: false }));
-  canvas.discardActiveObject().requestRenderAll();
-}
+//   canvas.selection = false;
+//   canvas.defaultCursor = cursorPencil;
+//   canvas.hoverCursor = cursorPencil;
+//   canvas.isDrawingMode = false;
+//   canvas.getObjects().map((item) => item.set({ selectable: false }));
+//   canvas.discardActiveObject().requestRenderAll();
+// }
 
-function startAddRect(canvas, options) {
-  return ({ e }) => {
-    mouseDown = true;
+// function startAddRect(canvas, options) {
+//   return ({ e }) => {
+//     mouseDown = true;
 
-    const pointer = canvas.getPointer(e);
-    origX = pointer.x;
-    origY = pointer.y;
+//     const pointer = canvas.getPointer(e);
+//     origX = pointer.x;
+//     origY = pointer.y;
 
-    drawInstance = new fabric.Rect({
-      stroke: options.currentColor,
-      strokeWidth: options.brushWidth,
-      fill: options.fill ? options.currentColor : 'transparent',
-      left: origX,
-      top: origY,
-      width: 0,
-      height: 0,
-      selectable: false,
-      perPixelTargetFind: true,
-    });
+//     drawInstance = new fabric.Rect({
+//       stroke: options.currentColor,
+//       strokeWidth: options.brushWidth,
+//       fill: options.fill ? options.currentColor : 'transparent',
+//       left: origX,
+//       top: origY,
+//       width: 0,
+//       height: 0,
+//       selectable: false,
+//       perPixelTargetFind: true,
+//     });
 
-    canvas.add(drawInstance);
+//     canvas.add(drawInstance);
 
-    drawInstance.on('mousedown', (e) => {
-      if (options.currentMode === modes.ERASER) {
-        canvas.remove(e.target);
-      }
-    });
-  };
-}
+//     drawInstance.on('mousedown', (e) => {
+//       if (options.currentMode === modes.ERASER) {
+//         canvas.remove(e.target);
+//       }
+//     });
+//   };
+// }
 
-function startDrawingRect(canvas) {
-  return ({ e }) => {
-    if (mouseDown) {
-      const pointer = canvas.getPointer(e);
+// function startDrawingRect(canvas) {
+//   return ({ e }) => {
+//     if (mouseDown) {
+//       const pointer = canvas.getPointer(e);
 
-      if (pointer.x < origX) {
-        drawInstance.set('left', pointer.x);
-      }
-      if (pointer.y < origY) {
-        drawInstance.set('top', pointer.y);
-      }
-      drawInstance.set({
-        width: Math.abs(pointer.x - origX),
-        height: Math.abs(pointer.y - origY),
-      });
-      drawInstance.setCoords();
-      canvas.renderAll();
-    }
-  };
-}
+//       if (pointer.x < origX) {
+//         drawInstance.set('left', pointer.x);
+//       }
+//       if (pointer.y < origY) {
+//         drawInstance.set('top', pointer.y);
+//       }
+//       drawInstance.set({
+//         width: Math.abs(pointer.x - origX),
+//         height: Math.abs(pointer.y - origY),
+//       });
+//       drawInstance.setCoords();
+//       canvas.renderAll();
+//     }
+//   };
+// }
 
 /* ==== Ellipse ==== */
-function createEllipse(canvas, options) {
-  canvas.isDrawingMode = true;
+// function createEllipse(canvas, options) {
+//   canvas.isDrawingMode = true;
 
-  canvas.on('mouse:down', startAddEllipse(canvas, options));
-  canvas.on('mouse:move', startDrawingEllipse(canvas));
-  canvas.on('mouse:up', stopDrawing);
+//   canvas.on('mouse:down', startAddEllipse(canvas, options));
+//   canvas.on('mouse:move', startDrawingEllipse(canvas));
+//   canvas.on('mouse:up', stopDrawing);
 
-  canvas.selection = false;
-  canvas.defaultCursor = cursorPencil;
-  canvas.hoverCursor = cursorPencil;
-  canvas.isDrawingMode = false;
-  canvas.getObjects().map((item) => item.set({ selectable: false }));
-  canvas.discardActiveObject().requestRenderAll();
-}
+//   canvas.selection = false;
+//   canvas.defaultCursor = cursorPencil;
+//   canvas.hoverCursor = cursorPencil;
+//   canvas.isDrawingMode = false;
+//   canvas.getObjects().map((item) => item.set({ selectable: false }));
+//   canvas.discardActiveObject().requestRenderAll();
+// }
 
-function startAddEllipse(canvas, options) {
-  return ({ e }) => {
-    mouseDown = true;
+// function startAddEllipse(canvas, options) {
+//   return ({ e }) => {
+//     mouseDown = true;
 
-    const pointer = canvas.getPointer(e);
-    origX = pointer.x;
-    origY = pointer.y;
-    drawInstance = new fabric.Ellipse({
-      stroke: options.currentColor,
-      strokeWidth: options.brushWidth,
-      fill: options.fill ? options.currentColor : 'transparent',
-      left: origX,
-      top: origY,
-      cornerSize: 7,
-      objectCaching: false,
-      selectable: false,
-      perPixelTargetFind: true,
-    });
+//     const pointer = canvas.getPointer(e);
+//     origX = pointer.x;
+//     origY = pointer.y;
+//     drawInstance = new fabric.Ellipse({
+//       stroke: options.currentColor,
+//       strokeWidth: options.brushWidth,
+//       fill: options.fill ? options.currentColor : 'transparent',
+//       left: origX,
+//       top: origY,
+//       cornerSize: 7,
+//       objectCaching: false,
+//       selectable: false,
+//       perPixelTargetFind: true,
+//     });
 
-    canvas.add(drawInstance);
-  };
-}
+//     canvas.add(drawInstance);
+//   };
+// }
 
-function startDrawingEllipse(canvas) {
-  return ({ e }) => {
-    if (mouseDown) {
-      const pointer = canvas.getPointer(e);
-      if (pointer.x < origX) {
-        drawInstance.set('left', pointer.x);
-      }
-      if (pointer.y < origY) {
-        drawInstance.set('top', pointer.y);
-      }
-      drawInstance.set({
-        rx: Math.abs(pointer.x - origX) / 2,
-        ry: Math.abs(pointer.y - origY) / 2,
-      });
-      drawInstance.setCoords();
-      canvas.renderAll();
-    }
-  };
-}
+// function startDrawingEllipse() {
+  
+//   return ({ e }) => {
+//     if (mouseDown) {
+//       const pointer = canvas.getPointer(e);
+//       if (pointer.x < origX) {
+//         drawInstance.set('left', pointer.x);
+//       }
+//       if (pointer.y < origY) {
+//         drawInstance.set('top', pointer.y);
+//       }
+//       drawInstance.set({
+//         rx: Math.abs(pointer.x - origX) / 2,
+//         ry: Math.abs(pointer.y - origY) / 2,
+//       });
+//       drawInstance.setCoords();
+//       canvas.renderAll();
+//     }
+//   };
+// }
 
 /* === triangle === */
-function createTriangle(canvas, options) {
-  canvas.isDrawingMode = true;
+// function createTriangle(canvas, options) {
+//   canvas.isDrawingMode = true;
 
-  canvas.on('mouse:down', startAddTriangle(canvas, options));
-  canvas.on('mouse:move', startDrawingTriangle(canvas));
-  canvas.on('mouse:up', stopDrawing);
+//   canvas.on('mouse:down', startAddTriangle(canvas, options));
+//   canvas.on('mouse:move', startDrawingTriangle(canvas));
+//   canvas.on('mouse:up', stopDrawing);
 
-  canvas.selection = false;
-  canvas.defaultCursor = cursorPencil;
-  canvas.hoverCursor = cursorPencil;
-  canvas.isDrawingMode = false;
-  canvas.getObjects().map((item) => item.set({ selectable: false }));
-  canvas.discardActiveObject().requestRenderAll();
-}
+//   canvas.selection = false;
+//   canvas.defaultCursor = cursorPencil;
+//   canvas.hoverCursor = cursorPencil;
+//   canvas.isDrawingMode = false;
+//   canvas.getObjects().map((item) => item.set({ selectable: false }));
+//   canvas.discardActiveObject().requestRenderAll();
+// }
 
-function startAddTriangle(canvas, options) {
-  return ({ e }) => {
-    mouseDown = true;
-    options.currentMode = modes.TRIANGLE;
+// function startAddTriangle(canvas, options) {
+//   return ({ e }) => {
+//     mouseDown = true;
+//     options.currentMode = modes.TRIANGLE;
 
-    const pointer = canvas.getPointer(e);
-    origX = pointer.x;
-    origY = pointer.y;
-    drawInstance = new fabric.Triangle({
-      stroke: options.currentColor,
-      strokeWidth: options.brushWidth,
-      fill: options.fill ? options.currentColor : 'transparent',
-      left: origX,
-      top: origY,
-      width: 0,
-      height: 0,
-      selectable: false,
-      perPixelTargetFind: true,
-    });
+//     const pointer = canvas.getPointer(e);
+//     origX = pointer.x;
+//     origY = pointer.y;
+//     drawInstance = new fabric.Triangle({
+//       stroke: options.currentColor,
+//       strokeWidth: options.brushWidth,
+//       fill: options.fill ? options.currentColor : 'transparent',
+//       left: origX,
+//       top: origY,
+//       width: 0,
+//       height: 0,
+//       selectable: false,
+//       perPixelTargetFind: true,
+//     });
 
-    canvas.add(drawInstance);
-  };
-}
+//     canvas.add(drawInstance);
+//   };
+// }
 
-function startDrawingTriangle(canvas) {
-  return ({ e }) => {
-    if (mouseDown) {
-      const pointer = canvas.getPointer(e);
-      if (pointer.x < origX) {
-        drawInstance.set('left', pointer.x);
-      }
-      if (pointer.y < origY) {
-        drawInstance.set('top', pointer.y);
-      }
-      drawInstance.set({
-        width: Math.abs(pointer.x - origX),
-        height: Math.abs(pointer.y - origY),
-      });
+// function startDrawingTriangle(canvas) {
+//   return ({ e }) => {
+//     if (mouseDown) {
+//       const pointer = canvas.getPointer(e);
+//       if (pointer.x < origX) {
+//         drawInstance.set('left', pointer.x);
+//       }
+//       if (pointer.y < origY) {
+//         drawInstance.set('top', pointer.y);
+//       }
+//       drawInstance.set({
+//         width: Math.abs(pointer.x - origX),
+//         height: Math.abs(pointer.y - origY),
+//       });
 
-      drawInstance.setCoords();
-      canvas.renderAll();
-    }
-  };
-}
+//       drawInstance.setCoords();
+//       canvas.renderAll();
+//     }
+//   };
+// }
 
-function createText(canvas, options) {
-  canvas.isDrawingMode = true;
+// function createText(canvas, options) {
+//   canvas.isDrawingMode = true;
 
-  canvas.on('mouse:down', addText(canvas, options));
+//   canvas.on('mouse:down', addText(canvas, options));
 
-  canvas.isDrawingMode = false;
-}
+//   canvas.isDrawingMode = false;
+// }
 
-function addText(canvas, options) {
-  return ({ e }) => {
-    const pointer = canvas.getPointer(e);
-    origX = pointer.x;
-    origY = pointer.y;
-    const text = new fabric.Textbox('', {
-      left: origX - 10,
-      top: origY - 10,
-      fontSize: options.brushWidth * 5,
-      fill: options.currentColor,
-      editable: true,
-      keysMap: {
-        13: 'exitEditing',
-      },
-    });
+// function addText(canvas, options) {
+//   return ({ e }) => {
+//     const pointer = canvas.getPointer(e);
+//     origX = pointer.x;
+//     origY = pointer.y;
+//     const text = new fabric.Textbox('', {
+//       left: origX - 10,
+//       top: origY - 10,
+//       fontSize: options.brushWidth * 5,
+//       fill: options.currentColor,
+//       editable: true,
+//       keysMap: {
+//         13: 'exitEditing',
+//       },
+//     });
 
-    canvas.add(text);
-    canvas.renderAll();
+//     canvas.add(text);
+//     canvas.renderAll();
 
-    text.enterEditing();
+//     text.enterEditing();
 
-    canvas.off('mouse:down');
-    canvas.on('mouse:down', function () {
-      text.exitEditing();
-      canvas.off('mouse:down');
-      canvas.on('mouse:down', addText(canvas, options));
-    });
-  };
-}
+//     canvas.off('mouse:down');
+//     canvas.on('mouse:down', function () {
+//       text.exitEditing();
+//       canvas.off('mouse:down');
+//       canvas.on('mouse:down', addText(canvas, options));
+//     });
+//   };
+// }
 
 // function changeToErasingMode(canvas, options) {
 //   if (options.currentMode !== modes.ERASER) {
@@ -422,65 +423,65 @@ function addText(canvas, options) {
 //   }
 // }
 
-function onSelectMode(canvas, options) {
-  options.currentMode = '';
-  canvas.isDrawingMode = false;
+// function onSelectMode(canvas, options) {
+//   options.currentMode = '';
+//   canvas.isDrawingMode = false;
 
-  canvas.getObjects().map((item) => item.set({ selectable: true }));
-  canvas.hoverCursor = 'all-scroll';
-}
+//   canvas.getObjects().map((item) => item.set({ selectable: true }));
+//   canvas.hoverCursor = 'all-scroll';
+// }
 
-function clearCanvas(canvas, options) {
-  canvas.getObjects().forEach((item) => {
-    if (item !== canvas.backgroundImage) {
-      canvas.remove(item);
-    }
-    // if (options.background) {
-    //   drawBackground(canvas);
-    // }
-  });
-}
+// function clearCanvas(canvas, options) {
+//   canvas.getObjects().forEach((item) => {
+//     if (item !== canvas.backgroundImage) {
+//       canvas.remove(item);
+//     }
+//     // if (options.background) {
+//     //   drawBackground(canvas);
+//     // }
+//   });
+// }
 
-function eraserOn(canvas) {
-  canvas.isDrawingMode = false;
+// function eraserOn(canvas) {
+//   canvas.isDrawingMode = false;
 
-  canvas.on('mouse:down', function (event) {
-    canvas.remove(event.target);
+//   canvas.on('mouse:down', function (event) {
+//     canvas.remove(event.target);
 
-    console.log('mouse:down');
-    canvas.on('mouse:move', function (e) {
-      console.log('mouse:move');
-      canvas.remove(e.target);
-    });
-  });
+//     console.log('mouse:down');
+//     canvas.on('mouse:move', function (e) {
+//       console.log('mouse:move');
+//       canvas.remove(e.target);
+//     });
+//   });
 
-  canvas.on('mouse:up', function () {
-    canvas.off('mouse:move');
-  });
+//   canvas.on('mouse:up', function () {
+//     canvas.off('mouse:move');
+//   });
 
-  canvas.on('mouse:over', function (event) {
-    const hoveredObject = event.target;
-    if (hoveredObject) {
-      hoveredObject.set({
-        opacity: 0.2,
-      });
-      canvas.requestRenderAll();
-    }
-  });
+//   canvas.on('mouse:over', function (event) {
+//     const hoveredObject = event.target;
+//     if (hoveredObject) {
+//       hoveredObject.set({
+//         opacity: 0.2,
+//       });
+//       canvas.requestRenderAll();
+//     }
+//   });
 
-  canvas.on('mouse:out', function (event) {
-    const hoveredObject = event.target;
-    if (hoveredObject) {
-      hoveredObject.set({
-        opacity: 1,
-      });
-      canvas.requestRenderAll();
-    }
-  });
+//   canvas.on('mouse:out', function (event) {
+//     const hoveredObject = event.target;
+//     if (hoveredObject) {
+//       hoveredObject.set({
+//         opacity: 1,
+//       });
+//       canvas.requestRenderAll();
+//     }
+//   });
 
-  canvas.defaultCursor = getCursor('eraser');
-  canvas.hoverCursor = getCursor('eraser');
-}
+//   canvas.defaultCursor = getCursor('eraser');
+//   canvas.hoverCursor = getCursor('eraser');
+// }
 
 function canvasToJson(canvas) {
   const obj = canvas.toJSON();
@@ -489,15 +490,15 @@ function canvasToJson(canvas) {
   alert(JSON.stringify(obj));
 }
 
-function draw(canvas, options) {
-  canvas.freeDrawingBrush = new fabric.PencilBrush(canvas, {
-    perPixelTargetFind: true,
-  });
-  canvas.freeDrawingBrush.width = options.brushWidth;
-  canvas.freeDrawingBrush.color = options.currentColor;
-  canvas.isDrawingMode = true;
-  canvas.freeDrawingCursor = cursorPencil;
-}
+// function draw(canvas, options) {
+//   canvas.freeDrawingBrush = new fabric.PencilBrush(canvas, {
+//     perPixelTargetFind: true,
+//   });
+//   canvas.freeDrawingBrush.width = options.brushWidth;
+//   canvas.freeDrawingBrush.color = options.currentColor;
+//   canvas.isDrawingMode = true;
+//   canvas.freeDrawingCursor = cursorPencil;
+// }
 
 function throttle(f, delay) {
   let timer = 0;
@@ -527,7 +528,7 @@ function resizeCanvas(canvas, whiteboard) {
 const Whiteboard = ({
   options = {
     brushWidth: 5,
-    currentMode: modes.PENCIL,
+    currentMode: 'PENCIL',
     currentColor: '#000000',
     brushWidth: 5,
     fill: false,
@@ -539,6 +540,7 @@ const Whiteboard = ({
   onObjectRemoved = () => {},
 }) => {
   const [canvas, setCanvas] = useState(null);
+  const [board, setBoard] = useState();
   const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
   const [canvasOptions, setCanvasOptions] = useState(options);
   const [fileReaderInfo, setFileReaderInfo] = useState({
@@ -552,7 +554,11 @@ const Whiteboard = ({
   const uploadPdfRef = useRef(null);
 
   const enabledControls = useMemo(
-    () => ({
+    function() {
+      if (!board) {
+        return {};
+      }
+      return {
       [modes.PENCIL]: true,
       [modes.LINE]: true,
       [modes.RECTANGLE]: true,
@@ -570,9 +576,9 @@ const Whiteboard = ({
       SAVE_AS_IMAGE: true,
       ZOOM: true,
 
-      ...controls,
-    }),
-    [controls],
+      ...controls
+    }},
+    [controls, board],
   );
 
   useEffect(() => {
@@ -583,9 +589,7 @@ const Whiteboard = ({
     });
 
     setCanvas(board.canvas);
-
-    // init mode
-    setDrawingMode(board.canvas, canvasOptions);
+    setBoard(board);
 
     return () => {
       if (board.canvas) {
@@ -741,8 +745,8 @@ const Whiteboard = ({
   }, [fileReaderInfo.currentPage]);
 
   useEffect(() => {
-    if (!canvas) return;
-    setDrawingMode(canvas, canvasOptions);
+    if (!board) return;
+    board.setDrawingMode(canvasOptions.currentMode);
   }, [canvasOptions]);
 
   function uploadImage(e) {
@@ -806,7 +810,7 @@ const Whiteboard = ({
       uploadImage(event);
     } else if (event.target.files[0].type.includes('pdf')) {
       saveCanvas();
-      clearCanvas(canvas);
+      board.clearCanvas();
       updateFileReaderInfo({ file: event.target.files[0], currentPageNumber: 1 });
     }
   }
@@ -836,7 +840,7 @@ const Whiteboard = ({
 
   const handlePageChange = (page) => {
     saveCanvas();
-    clearCanvas(canvas);
+    board.clearCanvas(canvas);
     setFileReaderInfo({ ...fileReaderInfo, currentPageNumber: page });
   };
 
@@ -925,7 +929,7 @@ const Whiteboard = ({
           {getControls()}
 
           {!!enabledControls.CLEAR && (
-            <ButtonS type="button" onClick={() => clearCanvas(canvas, canvasOptions)}>
+            <ButtonS type="button" onClick={() => board.clearCanvas(canvas, canvasOptions)}>
               <img src={DeleteIcon} alt="Delete" />
             </ButtonS>
           )}
