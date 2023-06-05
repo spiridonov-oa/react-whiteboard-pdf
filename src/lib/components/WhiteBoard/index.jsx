@@ -35,7 +35,6 @@ import FillIcon from './../images/color-fill.svg';
 // let origX;
 // let origY;
 
-
 // const cursorPencil = getCursor('pencil');
 
 const modes = {
@@ -295,7 +294,7 @@ const modes = {
 // }
 
 // function startDrawingEllipse() {
-  
+
 //   return ({ e }) => {
 //     if (mouseDown) {
 //       const pointer = canvas.getPointer(e);
@@ -525,15 +524,17 @@ function resizeCanvas(canvas, whiteboard) {
   };
 }
 
+const initOptions = {
+  brushWidth: 5,
+  currentMode: 'PENCIL',
+  currentColor: '#000000',
+  brushWidth: 5,
+  fill: false,
+  // background: true,
+};
+
 const Whiteboard = ({
-  options = {
-    brushWidth: 5,
-    currentMode: 'PENCIL',
-    currentColor: '#000000',
-    brushWidth: 5,
-    fill: false,
-    // background: true,
-  },
+  options = {},
   controls = {},
   canvasJSON = null,
   onObjectAdded = () => {},
@@ -542,7 +543,7 @@ const Whiteboard = ({
   const [canvas, setCanvas] = useState(null);
   const [board, setBoard] = useState();
   const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
-  const [canvasOptions, setCanvasOptions] = useState(options);
+  const [canvasOptions, setCanvasOptions] = useState({ ...initOptions, ...options });
   const [fileReaderInfo, setFileReaderInfo] = useState({
     file: { name: 'Desk 1' },
     totalPages: 1,
@@ -554,30 +555,31 @@ const Whiteboard = ({
   const uploadPdfRef = useRef(null);
 
   const enabledControls = useMemo(
-    function() {
+    function () {
       if (!board) {
         return {};
       }
       return {
-      [modes.PENCIL]: true,
-      [modes.LINE]: true,
-      [modes.RECTANGLE]: true,
-      [modes.ELLIPSE]: true,
-      [modes.TRIANGLE]: true,
-      [modes.TEXT]: true,
-      [modes.SELECT]: true,
-      [modes.ERASER]: true,
-      CLEAR: true,
-      FILL: true,
-      BRUSH: true,
-      COLOR: true,
-      FILES: true,
-      TO_JSON: true,
-      SAVE_AS_IMAGE: true,
-      ZOOM: true,
+        [modes.PENCIL]: true,
+        [modes.LINE]: true,
+        [modes.RECTANGLE]: true,
+        [modes.ELLIPSE]: true,
+        [modes.TRIANGLE]: true,
+        [modes.TEXT]: true,
+        [modes.SELECT]: true,
+        [modes.ERASER]: true,
+        CLEAR: true,
+        FILL: true,
+        BRUSH: true,
+        COLOR: true,
+        FILES: true,
+        TO_JSON: true,
+        SAVE_AS_IMAGE: true,
+        ZOOM: true,
 
-      ...controls
-    }},
+        ...controls,
+      };
+    },
     [controls, board],
   );
 
@@ -657,9 +659,9 @@ const Whiteboard = ({
 
     canvas.on('mouse:wheel', (opt) => {
       const evt = window.event || opt.e;
-      const scale = (((evt.wheelDelta / 240) < 0) ? 0.9 : 1.1) * canvas.getZoom();
+      const scale = (evt.wheelDelta / 240 < 0 ? 0.9 : 1.1) * canvas.getZoom();
       canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, scale);
-      if(opt.e != null)opt.e.preventDefault();
+      if (opt.e != null) opt.e.preventDefault();
     });
 
     canvas.on('touch:gesture', (event) => {
