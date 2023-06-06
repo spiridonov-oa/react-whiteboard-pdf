@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
-  RangeInputS,
   WhiteBoardS,
   ButtonS,
-  SeparatorS,
   ToolbarS,
-  ToolbarHolderS,
+  ZoomBarS,
+  ColorBarS,
   ToolbarItemS,
+  RangeInputS,
+  ColorButtonS,
+  SeparatorS,
+  ToolbarHolderS,
   PDFWrapperS,
 } from './WhiteBoard.styled.js';
 import { fabric } from 'fabric';
@@ -54,25 +57,38 @@ function resizeCanvas(canvas, whiteboard) {
   };
 }
 
-const initOptions = {
+const initFileInfo = {
+  file: { name: 'Desk 1' },
+  totalPages: 1,
+  currentPageNumber: 0,
+  currentPage: '',
+};
+
+const initDrawingSettings = {
   brushWidth: 5,
   currentMode: 'PENCIL',
   currentColor: '#000000',
   brushWidth: 5,
   fill: false,
-  zoom: 1,
   // background: true,
 };
 
+const initSettings = {
+  zoom: 1,
+  contentJSON: null,
+};
+
 const Whiteboard = ({
-  options = {},
   controls = {},
-  initialJSON = null,
+  settings = {},
+  drawingSettings = {},
+  fileInfo = {},
   onObjectAdded = (data, event, canvas) => {},
   onObjectRemoved = (data, event, canvas) => {},
   onZoom = (data, event, canvas) => {},
   onImageUploaded = (data, event, canvas) => {},
   onPDFUploaded = (data, event, canvas) => {},
+  onPDFUpdated = (data, event, canvas) => {},
   onPageChange = (data, event, canvas) => {},
   onOptionsChange = (data, event, canvas) => {},
   onSaveCanvasAsImage = (data, event, canvas) => {},
@@ -82,13 +98,12 @@ const Whiteboard = ({
   const [canvas, setCanvas] = useState(null);
   const [board, setBoard] = useState();
   const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
-  const [canvasOptions, setCanvasOptions] = useState({ ...initOptions, ...options });
-  const [fileReaderInfo, setFileReaderInfo] = useState({
-    file: { name: 'Desk 1' },
-    totalPages: 1,
-    currentPageNumber: 0,
-    currentPage: '',
+  const [canvasDrawingSettings, setCanvasDrawingSettings] = useState({
+    ...initDrawingSettings,
+    ...drawingSettings,
   });
+  const [canvasSettings, setCanvasSettings] = useState({ ...initSettings, ...settings });
+  const [fileReaderInfo, setFileReaderInfo] = useState({ ...initFileInfo, ...fileInfo });
   const canvasRef = useRef(null);
   const whiteboardRef = useRef(null);
   const uploadPdfRef = useRef(null);
@@ -123,7 +138,8 @@ const Whiteboard = ({
     const board = new Board({
       width: whiteboardRef.current.clientWidth,
       height: whiteboardRef.current.clientHeight,
-      ...canvasOptions,
+      drawingSettings: canvasDrawingSettings,
+      canvasSettings: canvasSettings,
     });
 
     setCanvas(board.canvas);
@@ -137,11 +153,11 @@ const Whiteboard = ({
   }, []);
 
   useEffect(() => {
-    if (!canvas || !initialJSON) return;
+    if (!canvas || !canvasSettings.contentJSON) return;
 
-    canvas.loadFromJSON(initialJSON);
-    onLoadFromJSON(initialJSON, null, canvas);
-  }, [canvas, initialJSON]);
+    canvas.loadFromJSON(canvasSettings.contentJSON);
+    onLoadFromJSON(canvasSettings.contentJSON, null, canvas);
+  }, [canvas, canvasSettings.contentJSON]);
 
   useEffect(() => {
     if (!canvas || !whiteboardRef.current) return;
@@ -157,44 +173,9 @@ const Whiteboard = ({
   useEffect(() => {
     if (!canvas) return;
 
-    canvas.on('mouse:wheel', (opt) => {
-      const evt = window.event || opt.e;
-      const scale = (evt.wheelDelta / 240 < 0 ? 0.9 : 1.1) * canvas.getZoom();
-      canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, scale);
-      onZoom(scale, opt, canvas);
-      if (opt.e != null) opt.e.preventDefault();
-    });
-
-    canvas.on('touch:gesture', (event) => {
-      console.log('1 touch:gesture');
-      if (event.e.touches && event.e.touches.length === 2) {
-        const point1 = {
-          x: event.e.touches[0].clientX,
-          y: event.e.touches[0].clientY,
-        };
-        const point2 = {
-          x: event.e.touches[1].clientX,
-          y: event.e.touches[1].clientY,
-        };
-
-        const prevDistance = canvas.getPointerDistance(point1, point2);
-
-        canvas.on('touch:gesture', (event) => {
-          console.log('2 touch:gesture');
-          const newDistance = canvas.getPointerDistance(point1, point2);
-          const zoom = newDistance / prevDistance;
-
-          const zoomPoint = {
-            x: (point1.x + point2.x) / 2,
-            y: (point1.y + point2.y) / 2,
-          };
-
-          canvas.zoomToPoint(zoomPoint, canvas.getZoom() * zoom);
-          canvas.renderAll();
-
-          prevDistance = newDistance;
-        });
-      }
+    canvas.on('zoom', function (data) {
+      onZoom(data, null, canvas);
+      setCanvasSettings({ ...canvasSettings, zoom: data.scale });
     });
 
     canvas.on('object:added', (event) => {
@@ -247,8 +228,8 @@ const Whiteboard = ({
   useEffect(() => {
     if (!board) return;
 
-    board.setOptions(canvasOptions);
-  }, [canvasOptions, board]);
+    board.setDrawingSettings(canvasDrawingSettings);
+  }, [canvasDrawingSettings, board]);
 
   function uploadImage(e) {
     const reader = new FileReader();
@@ -279,34 +260,34 @@ const Whiteboard = ({
   function changeBrushWidth(e) {
     const intValue = parseInt(e.target.value);
     canvas.freeDrawingBrush.width = intValue;
-    const newOptions = { ...canvasOptions, brushWidth: intValue };
-    setCanvasOptions(newOptions);
+    const newOptions = { ...canvasDrawingSettings, brushWidth: intValue };
+    setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, canvas);
   }
 
   function changeMode(mode, e) {
-    if (canvasOptions.currentMode === mode) return;
-    const newOptions = { ...canvasOptions, currentMode: mode };
-    setCanvasOptions(newOptions);
+    if (canvasDrawingSettings.currentMode === mode) return;
+    const newOptions = { ...canvasDrawingSettings, currentMode: mode };
+    setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, canvas);
   }
 
   function changeCurrentColor(color, e) {
     canvas.freeDrawingBrush.color = color;
-    const newOptions = { ...canvasOptions, currentColor: color };
-    setCanvasOptions(newOptions);
+    const newOptions = { ...canvasDrawingSettings, currentColor: color };
+    setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, canvas);
   }
 
   function changeFill(e) {
-    const newOptions = { ...canvasOptions, fill: !canvasOptions.fill };
-    setCanvasOptions(newOptions);
+    const newOptions = { ...canvasDrawingSettings, fill: !canvasDrawingSettings.fill };
+    setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, canvas);
   }
 
   function onSaveCanvasAsImage() {
     canvasRef.current.toBlob(function (blob) {
-      saveAs(blob, 'image.png');
+      saveAs(blob, `${fileReaderInfo.file.name}_page-${fileReaderInfo.currentPage}.png`);
       onSaveCanvasAsImage(blob, null, canvas);
     });
   }
@@ -346,35 +327,24 @@ const Whiteboard = ({
     onPageChange({ ...fileReaderInfo, currentPageNumber: page }, null, canvas);
   };
 
-  const handleZoomIn = (e) => {
-    const scale = canvas.getZoom() * 1.1;
-
-    const width = whiteboardRef.current.clientWidth;
-    const height = whiteboardRef.current.clientHeight;
-    const center = { x: width / 2, y: height / 2 };
-
-    canvas.zoomToPoint(center, scale);
-    onZoom({ center, scale }, e, canvas);
+  const handleZoomIn = () => {
+    board.changeZoom({ scale: 1.1 });
   };
 
-  const handleZoomOut = (e) => {
-    const scale = canvas.getZoom() * 0.9;
-
-    const width = whiteboardRef.current.clientWidth;
-    const height = whiteboardRef.current.clientHeight;
-    const center = { x: width / 2, y: height / 2 };
-
-    canvas.zoomToPoint(center, scale);
-    onZoom({ center, scale }, e, canvas);
+  const handleZoomOut = () => {
+    board.changeZoom({ scale: 0.9 });
   };
 
   const handleResetZoom = () => {
-    const width = whiteboardRef.current.clientWidth;
-    const height = whiteboardRef.current.clientHeight;
-    const center = { x: width / 2, y: height / 2 };
+    board.resetZoom(1);
+  };
 
-    canvas.zoomToPoint(center, 1);
-    onZoom({ center, scale: 1 }, e, canvas);
+  const getColorButtons = (colors) => {
+    return colors.map((color) => (
+      <ToolbarItemS key={color}>
+        <ColorButtonS color={color} onClick={(e) => changeCurrentColor(color, e)} />
+      </ToolbarItemS>
+    ));
   };
 
   const getControls = () => {
@@ -396,7 +366,7 @@ const Whiteboard = ({
         <ButtonS
           key={buttonKey}
           type="button"
-          className={`${canvasOptions.currentMode === buttonKey ? 'selected' : ''}`}
+          className={`${canvasDrawingSettings.currentMode === buttonKey ? 'selected' : ''}`}
           onClick={(e) => changeMode(buttonKey, e)}
         >
           <img src={btn.icon} alt={btn.name} />
@@ -408,16 +378,14 @@ const Whiteboard = ({
   return (
     <WhiteBoardS ref={whiteboardRef}>
       <ToolbarHolderS>
-        <ToolbarS>
-          {!!enabledControls.COLOR && (
-            <ToolbarItemS>
-              <ColorPicker
-                size={28}
-                color={canvasOptions.currentColor}
-                onChange={changeCurrentColor}
-              ></ColorPicker>
-            </ToolbarItemS>
-          )}
+        <ColorBarS>
+          <ToolbarItemS>
+            <ColorPicker
+              size={28}
+              color={canvasDrawingSettings.currentColor}
+              onChange={changeCurrentColor}
+            ></ColorPicker>
+          </ToolbarItemS>
           {!!enabledControls.BRUSH && (
             <ToolbarItemS>
               <RangeInputS
@@ -425,28 +393,30 @@ const Whiteboard = ({
                 min={1}
                 max={30}
                 step={1}
-                thumbColor={canvasOptions.currentColor}
-                value={canvasOptions.brushWidth}
+                thumbColor={canvasDrawingSettings.currentColor}
+                value={canvasDrawingSettings.brushWidth}
                 onChange={changeBrushWidth}
               />
             </ToolbarItemS>
           )}
+          {!!enabledControls.COLOR && (
+            <>{getColorButtons(['#6161ff', '#ff4f4f', '#3fd18d', '#ec70ff', '#000000'])}</>
+          )}
           {!!enabledControls.FILL && (
             <ButtonS
               type="button"
-              className={canvasOptions.fill ? 'selected' : ''}
+              className={canvasDrawingSettings.fill ? 'selected' : ''}
               onClick={changeFill}
             >
               <img src={FillIcon} alt="Delete" />
             </ButtonS>
           )}
-
-          <SeparatorS />
-
+        </ColorBarS>
+        <ToolbarS>
           {getControls()}
 
           {!!enabledControls.CLEAR && (
-            <ButtonS type="button" onClick={() => board.clearCanvas(canvas, canvasOptions)}>
+            <ButtonS type="button" onClick={() => board.clearCanvas()}>
               <img src={DeleteIcon} alt="Delete" />
             </ButtonS>
           )}
@@ -475,9 +445,8 @@ const Whiteboard = ({
               </ButtonS>
             </ToolbarItemS>
           )}
-
-          <SeparatorS />
-
+        </ToolbarS>
+        <ZoomBarS>
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
               <ButtonS onClick={handleZoomIn} title="Zoom In">
@@ -489,7 +458,7 @@ const Whiteboard = ({
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
               <ButtonS onClick={handleResetZoom} title="Reset Zoom">
-                100%
+                {Math.floor(canvasSettings.zoom * 100)}%
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -501,7 +470,7 @@ const Whiteboard = ({
               </ButtonS>
             </ToolbarItemS>
           )}
-        </ToolbarS>
+        </ZoomBarS>
       </ToolbarHolderS>
 
       <canvas ref={canvasRef} id="canvas" />
