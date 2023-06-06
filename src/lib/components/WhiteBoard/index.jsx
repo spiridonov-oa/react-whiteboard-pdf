@@ -13,8 +13,7 @@ import {
 import { fabric } from 'fabric';
 import PdfReader from '../PdfReader';
 import { saveAs } from 'file-saver';
-import { Board } from './Board.Class.js';
-import { getCursor } from './cursors';
+import { Board, modes } from './Board.Class.js';
 import { ColorPicker } from './../ColorPicker';
 import SelectIcon from './../images/cross.svg';
 import EraserIcon from './../images/eraser.svg';
@@ -31,474 +30,6 @@ import DownloadIcon from './../images/download.svg';
 import UploadIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
 
-// let drawInstance = null;
-// let origX;
-// let origY;
-
-// const cursorPencil = getCursor('pencil');
-
-const modes = {
-  PENCIL: 'PENCIL',
-  LINE: 'LINE',
-  RECTANGLE: 'RECTANGLE',
-  TRIANGLE: 'TRIANGLE',
-  ELLIPSE: 'ELLIPSE',
-  ERASER: 'ERASER',
-  SELECT: 'SELECT',
-  TEXT: 'TEXT',
-};
-
-// const setDrawingMode = (canvas, options) => {
-//   resetCanvas(canvas);
-
-//   switch (options.currentMode) {
-//     case modes.PENCIL:
-//       draw(canvas, options);
-//       break;
-//     case modes.LINE:
-//       createLine(canvas, options);
-//       break;
-//     case modes.RECTANGLE:
-//       createRect(canvas, options);
-//       break;
-//     case modes.ELLIPSE:
-//       createEllipse(canvas, options);
-//       break;
-//     case modes.TRIANGLE:
-//       createTriangle(canvas, options);
-//       break;
-//     case modes.ERASER:
-//       eraserOn(canvas, options);
-//       break;
-//     case modes.SELECT:
-//       onSelectMode(canvas, options);
-//       break;
-//     case modes.TEXT:
-//       createText(canvas, options);
-//       break;
-//     default:
-//       draw(canvas, options);
-//   }
-// };
-
-// function resetCanvas(canvas) {
-//   removeCanvasListener(canvas);
-//   canvas.isDrawingMode = false;
-//   canvas.defaultCursor = 'auto';
-//   canvas.hoverCursor = 'auto';
-// }
-
-// function drawBackground(canvas) {
-//   const dotSize = 4; // Adjust the size of the dots as needed
-//   const dotSvg = `
-//       <svg xmlns="http://www.w3.org/2000/svg" width="${dotSize * 10}" height="${
-//     dotSize * 10
-//   }" viewBox="0 0 ${dotSize * 10} ${dotSize * 10}">
-//         <circle cx="${dotSize / 2}" cy="${dotSize / 2}" r="${dotSize / 2}" fill="#00000010" />
-//       </svg>
-//     `;
-
-//   let rect;
-
-//   return new Promise((resolve) => {
-//     const dotImage = new Image();
-//     dotImage.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dotSvg);
-//     dotImage.onload = function () {
-//       const dotPattern = new fabric.Pattern({
-//         source: dotImage,
-//         repeat: 'repeat', // Adjust the repeat property to change the pattern repetition
-//       });
-
-//       const width = canvas.getWidth();
-//       const height = canvas.getHeight();
-
-//       const rect = new fabric.Rect({
-//         itemId: 'background-id-rectangle',
-//         width: width,
-//         height: height,
-//         fill: dotPattern,
-//         selectable: false, // Prevent the dot from being selected
-//         evented: false, // Prevent the dot from receiving events
-//         lockMovementX: true, // Prevent horizontal movement of the dot
-//         lockMovementY: true, // Prevent vertical movement of the dot
-//       });
-
-//       canvas.add(rect);
-//       resolve(rect);
-//     };
-//   });
-// }
-
-// function stopDrawing() {
-//   mouseDown = false;
-// }
-
-// function removeCanvasListener(canvas) {
-//   canvas.off('mouse:down');
-//   canvas.off('mouse:move');
-//   canvas.off('mouse:up');
-//   canvas.off('mouse:over');
-// }
-
-/*  ==== line  ==== */
-// function createLine(canvas, options) {
-//   canvas.isDrawingMode = true;
-
-//   canvas.on('mouse:down', startAddLine(canvas, options));
-//   canvas.on('mouse:move', startDrawingLine(canvas));
-//   canvas.on('mouse:up', stopDrawing);
-
-//   canvas.selection = false;
-//   canvas.defaultCursor = cursorPencil;
-//   canvas.hoverCursor = cursorPencil;
-//   canvas.isDrawingMode = false;
-//   canvas.getObjects().map((item) => item.set({ selectable: false }));
-//   canvas.discardActiveObject().requestRenderAll();
-// }
-
-// function startAddLine(canvas, options) {
-//   return ({ e }) => {
-//     mouseDown = true;
-
-//     let pointer = canvas.getPointer(e);
-//     drawInstance = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-//       strokeWidth: options.brushWidth,
-//       stroke: options.currentColor,
-//       selectable: false,
-//       perPixelTargetFind: true,
-//     });
-
-//     canvas.add(drawInstance);
-//     canvas.requestRenderAll();
-//   };
-// }
-
-// function startDrawingLine(canvas) {
-//   return ({ e }) => {
-//     if (mouseDown) {
-//       const pointer = canvas.getPointer(e);
-//       drawInstance.set({
-//         x2: pointer.x,
-//         y2: pointer.y,
-//       });
-//       drawInstance.setCoords();
-//       canvas.requestRenderAll();
-//     }
-//   };
-// }
-
-/* ==== rectangle ==== */
-// function createRect(canvas, options) {
-//   canvas.isDrawingMode = true;
-
-//   canvas.on('mouse:down', startAddRect(canvas, options));
-//   canvas.on('mouse:move', startDrawingRect(canvas));
-//   canvas.on('mouse:up', stopDrawing);
-
-//   canvas.selection = false;
-//   canvas.defaultCursor = cursorPencil;
-//   canvas.hoverCursor = cursorPencil;
-//   canvas.isDrawingMode = false;
-//   canvas.getObjects().map((item) => item.set({ selectable: false }));
-//   canvas.discardActiveObject().requestRenderAll();
-// }
-
-// function startAddRect(canvas, options) {
-//   return ({ e }) => {
-//     mouseDown = true;
-
-//     const pointer = canvas.getPointer(e);
-//     origX = pointer.x;
-//     origY = pointer.y;
-
-//     drawInstance = new fabric.Rect({
-//       stroke: options.currentColor,
-//       strokeWidth: options.brushWidth,
-//       fill: options.fill ? options.currentColor : 'transparent',
-//       left: origX,
-//       top: origY,
-//       width: 0,
-//       height: 0,
-//       selectable: false,
-//       perPixelTargetFind: true,
-//     });
-
-//     canvas.add(drawInstance);
-
-//     drawInstance.on('mousedown', (e) => {
-//       if (options.currentMode === modes.ERASER) {
-//         canvas.remove(e.target);
-//       }
-//     });
-//   };
-// }
-
-// function startDrawingRect(canvas) {
-//   return ({ e }) => {
-//     if (mouseDown) {
-//       const pointer = canvas.getPointer(e);
-
-//       if (pointer.x < origX) {
-//         drawInstance.set('left', pointer.x);
-//       }
-//       if (pointer.y < origY) {
-//         drawInstance.set('top', pointer.y);
-//       }
-//       drawInstance.set({
-//         width: Math.abs(pointer.x - origX),
-//         height: Math.abs(pointer.y - origY),
-//       });
-//       drawInstance.setCoords();
-//       canvas.renderAll();
-//     }
-//   };
-// }
-
-/* ==== Ellipse ==== */
-// function createEllipse(canvas, options) {
-//   canvas.isDrawingMode = true;
-
-//   canvas.on('mouse:down', startAddEllipse(canvas, options));
-//   canvas.on('mouse:move', startDrawingEllipse(canvas));
-//   canvas.on('mouse:up', stopDrawing);
-
-//   canvas.selection = false;
-//   canvas.defaultCursor = cursorPencil;
-//   canvas.hoverCursor = cursorPencil;
-//   canvas.isDrawingMode = false;
-//   canvas.getObjects().map((item) => item.set({ selectable: false }));
-//   canvas.discardActiveObject().requestRenderAll();
-// }
-
-// function startAddEllipse(canvas, options) {
-//   return ({ e }) => {
-//     mouseDown = true;
-
-//     const pointer = canvas.getPointer(e);
-//     origX = pointer.x;
-//     origY = pointer.y;
-//     drawInstance = new fabric.Ellipse({
-//       stroke: options.currentColor,
-//       strokeWidth: options.brushWidth,
-//       fill: options.fill ? options.currentColor : 'transparent',
-//       left: origX,
-//       top: origY,
-//       cornerSize: 7,
-//       objectCaching: false,
-//       selectable: false,
-//       perPixelTargetFind: true,
-//     });
-
-//     canvas.add(drawInstance);
-//   };
-// }
-
-// function startDrawingEllipse() {
-
-//   return ({ e }) => {
-//     if (mouseDown) {
-//       const pointer = canvas.getPointer(e);
-//       if (pointer.x < origX) {
-//         drawInstance.set('left', pointer.x);
-//       }
-//       if (pointer.y < origY) {
-//         drawInstance.set('top', pointer.y);
-//       }
-//       drawInstance.set({
-//         rx: Math.abs(pointer.x - origX) / 2,
-//         ry: Math.abs(pointer.y - origY) / 2,
-//       });
-//       drawInstance.setCoords();
-//       canvas.renderAll();
-//     }
-//   };
-// }
-
-/* === triangle === */
-// function createTriangle(canvas, options) {
-//   canvas.isDrawingMode = true;
-
-//   canvas.on('mouse:down', startAddTriangle(canvas, options));
-//   canvas.on('mouse:move', startDrawingTriangle(canvas));
-//   canvas.on('mouse:up', stopDrawing);
-
-//   canvas.selection = false;
-//   canvas.defaultCursor = cursorPencil;
-//   canvas.hoverCursor = cursorPencil;
-//   canvas.isDrawingMode = false;
-//   canvas.getObjects().map((item) => item.set({ selectable: false }));
-//   canvas.discardActiveObject().requestRenderAll();
-// }
-
-// function startAddTriangle(canvas, options) {
-//   return ({ e }) => {
-//     mouseDown = true;
-//     options.currentMode = modes.TRIANGLE;
-
-//     const pointer = canvas.getPointer(e);
-//     origX = pointer.x;
-//     origY = pointer.y;
-//     drawInstance = new fabric.Triangle({
-//       stroke: options.currentColor,
-//       strokeWidth: options.brushWidth,
-//       fill: options.fill ? options.currentColor : 'transparent',
-//       left: origX,
-//       top: origY,
-//       width: 0,
-//       height: 0,
-//       selectable: false,
-//       perPixelTargetFind: true,
-//     });
-
-//     canvas.add(drawInstance);
-//   };
-// }
-
-// function startDrawingTriangle(canvas) {
-//   return ({ e }) => {
-//     if (mouseDown) {
-//       const pointer = canvas.getPointer(e);
-//       if (pointer.x < origX) {
-//         drawInstance.set('left', pointer.x);
-//       }
-//       if (pointer.y < origY) {
-//         drawInstance.set('top', pointer.y);
-//       }
-//       drawInstance.set({
-//         width: Math.abs(pointer.x - origX),
-//         height: Math.abs(pointer.y - origY),
-//       });
-
-//       drawInstance.setCoords();
-//       canvas.renderAll();
-//     }
-//   };
-// }
-
-// function createText(canvas, options) {
-//   canvas.isDrawingMode = true;
-
-//   canvas.on('mouse:down', addText(canvas, options));
-
-//   canvas.isDrawingMode = false;
-// }
-
-// function addText(canvas, options) {
-//   return ({ e }) => {
-//     const pointer = canvas.getPointer(e);
-//     origX = pointer.x;
-//     origY = pointer.y;
-//     const text = new fabric.Textbox('', {
-//       left: origX - 10,
-//       top: origY - 10,
-//       fontSize: options.brushWidth * 5,
-//       fill: options.currentColor,
-//       editable: true,
-//       keysMap: {
-//         13: 'exitEditing',
-//       },
-//     });
-
-//     canvas.add(text);
-//     canvas.renderAll();
-
-//     text.enterEditing();
-
-//     canvas.off('mouse:down');
-//     canvas.on('mouse:down', function () {
-//       text.exitEditing();
-//       canvas.off('mouse:down');
-//       canvas.on('mouse:down', addText(canvas, options));
-//     });
-//   };
-// }
-
-// function changeToErasingMode(canvas, options) {
-//   if (options.currentMode !== modes.ERASER) {
-//     canvas.isDrawingMode = false;
-
-//     options.currentMode = modes.ERASER;
-//     canvas.hoverCursor = `url(${getCursor({ type: 'eraser' })}), default`;
-//   }
-// }
-
-// function onSelectMode(canvas, options) {
-//   options.currentMode = '';
-//   canvas.isDrawingMode = false;
-
-//   canvas.getObjects().map((item) => item.set({ selectable: true }));
-//   canvas.hoverCursor = 'all-scroll';
-// }
-
-// function clearCanvas(canvas, options) {
-//   canvas.getObjects().forEach((item) => {
-//     if (item !== canvas.backgroundImage) {
-//       canvas.remove(item);
-//     }
-//     // if (options.background) {
-//     //   drawBackground(canvas);
-//     // }
-//   });
-// }
-
-// function eraserOn(canvas) {
-//   canvas.isDrawingMode = false;
-
-//   canvas.on('mouse:down', function (event) {
-//     canvas.remove(event.target);
-
-//     console.log('mouse:down');
-//     canvas.on('mouse:move', function (e) {
-//       console.log('mouse:move');
-//       canvas.remove(e.target);
-//     });
-//   });
-
-//   canvas.on('mouse:up', function () {
-//     canvas.off('mouse:move');
-//   });
-
-//   canvas.on('mouse:over', function (event) {
-//     const hoveredObject = event.target;
-//     if (hoveredObject) {
-//       hoveredObject.set({
-//         opacity: 0.2,
-//       });
-//       canvas.requestRenderAll();
-//     }
-//   });
-
-//   canvas.on('mouse:out', function (event) {
-//     const hoveredObject = event.target;
-//     if (hoveredObject) {
-//       hoveredObject.set({
-//         opacity: 1,
-//       });
-//       canvas.requestRenderAll();
-//     }
-//   });
-
-//   canvas.defaultCursor = getCursor('eraser');
-//   canvas.hoverCursor = getCursor('eraser');
-// }
-
-function canvasToJson(canvas) {
-  const obj = canvas.toJSON();
-  console.log(JSON.stringify(obj));
-  console.log(encodeURI(JSON.stringify(obj)).split(/%..|./).length - 1);
-  alert(JSON.stringify(obj));
-}
-
-// function draw(canvas, options) {
-//   canvas.freeDrawingBrush = new fabric.PencilBrush(canvas, {
-//     perPixelTargetFind: true,
-//   });
-//   canvas.freeDrawingBrush.width = options.brushWidth;
-//   canvas.freeDrawingBrush.color = options.currentColor;
-//   canvas.isDrawingMode = true;
-//   canvas.freeDrawingCursor = cursorPencil;
-// }
-
 function throttle(f, delay) {
   let timer = 0;
   return function (...args) {
@@ -509,7 +40,6 @@ function throttle(f, delay) {
 
 function handleResize(callback) {
   const resize_ob = new ResizeObserver(throttle(callback, 300));
-
   return resize_ob;
 }
 
@@ -530,15 +60,24 @@ const initOptions = {
   currentColor: '#000000',
   brushWidth: 5,
   fill: false,
+  zoom: 1,
   // background: true,
 };
 
 const Whiteboard = ({
   options = {},
   controls = {},
-  canvasJSON = null,
-  onObjectAdded = () => {},
-  onObjectRemoved = () => {},
+  initialJSON = null,
+  onObjectAdded = (data, event, canvas) => {},
+  onObjectRemoved = (data, event, canvas) => {},
+  onZoom = (data, event, canvas) => {},
+  onImageUploaded = (data, event, canvas) => {},
+  onPDFUploaded = (data, event, canvas) => {},
+  onPageChange = (data, event, canvas) => {},
+  onOptionsChange = (data, event, canvas) => {},
+  onSaveCanvasAsImage = (data, event, canvas) => {},
+  onLoadFromJSON = (data, event, canvas) => {},
+  onSaveCanvasState = (data, event, canvas) => {},
 }) => {
   const [canvas, setCanvas] = useState(null);
   const [board, setBoard] = useState();
@@ -556,9 +95,6 @@ const Whiteboard = ({
 
   const enabledControls = useMemo(
     function () {
-      if (!board) {
-        return {};
-      }
       return {
         [modes.PENCIL]: true,
         [modes.LINE]: true,
@@ -580,7 +116,7 @@ const Whiteboard = ({
         ...controls,
       };
     },
-    [controls, board],
+    [controls],
   );
 
   useEffect(() => {
@@ -601,22 +137,11 @@ const Whiteboard = ({
   }, []);
 
   useEffect(() => {
-    if (!canvas || !canvasJSON) return;
+    if (!canvas || !initialJSON) return;
 
-    canvas.loadFromJSON(canvasJSON);
-  }, [canvas, canvasJSON]);
-
-  // useEffect(() => {
-  //   if (!canvas || !options.background) return;
-
-  //   const promiseBackground = drawBackground(canvas);
-
-  //   return () => {
-  //     promiseBackground.then((bg) => {
-  //       canvas.remove(bg);
-  //     });
-  //   };
-  // }, [canvas, options.background]);
+    canvas.loadFromJSON(initialJSON);
+    onLoadFromJSON(initialJSON, null, canvas);
+  }, [canvas, initialJSON]);
 
   useEffect(() => {
     if (!canvas || !whiteboardRef.current) return;
@@ -632,35 +157,11 @@ const Whiteboard = ({
   useEffect(() => {
     if (!canvas) return;
 
-    // {
-    //   const deltaY = opt.e.deltaY;
-    //   const deltaX = opt.e.deltaX;
-    //   const isVerticalScroll = Math.abs(deltaY) > Math.abs(deltaX);
-    //   const isCanvasLargerThanViewport =
-    //     canvas.width > canvas.viewportTransform[4] || canvas.height > canvas.viewportTransform[5];
-
-    //   if (isVerticalScroll && isCanvasLargerThanViewport) {
-    //     // Vertical scroll
-    //     const scrollDeltaY = canvas.height / 100;
-    //     const vertical = -scrollDeltaY * (deltaY > 0 ? 1 : -1);
-    //     console.log(vertical);
-    //     canvas.relativePan(new fabric.Point(0, vertical));
-    //   } else if (!isVerticalScroll && isCanvasLargerThanViewport) {
-    //     // Horizontal scroll
-    //     const scrollDeltaX = canvas.width / 300;
-    //     const horisontal = -scrollDeltaX * (deltaX > 0 ? 1 : -1);
-    //     console.log(horisontal);
-    //     canvas.relativePan(new fabric.Point(horisontal, 0));
-    //   }
-
-    //   opt.e.preventDefault();
-    //   opt.e.stopPropagation();
-    // }
-
     canvas.on('mouse:wheel', (opt) => {
       const evt = window.event || opt.e;
       const scale = (evt.wheelDelta / 240 < 0 ? 0.9 : 1.1) * canvas.getZoom();
       canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, scale);
+      onZoom(scale, opt, canvas);
       if (opt.e != null) opt.e.preventDefault();
     });
 
@@ -697,13 +198,11 @@ const Whiteboard = ({
     });
 
     canvas.on('object:added', (event) => {
-      console.log('object:added', event.target.toJSON());
-      onObjectAdded(event, canvas);
+      onObjectAdded(event.target.toJSON(), event, canvas);
     });
 
     canvas.on('object:removed', (event) => {
-      console.log('object:removed', event.target.toJSON());
-      onObjectRemoved(event, canvas);
+      onObjectRemoved(event.target.toJSON(), event, canvas);
     });
 
     return () => {
@@ -728,7 +227,6 @@ const Whiteboard = ({
     } else {
       const center = canvas.getCenter();
       fabric.Image.fromURL(fileReaderInfo.currentPage, (img) => {
-        console.log(img.width);
         if (img.width > img.height) {
           img.scaleToWidth(canvas.width);
         } else {
@@ -748,8 +246,9 @@ const Whiteboard = ({
 
   useEffect(() => {
     if (!board) return;
-    board.setDrawingMode(canvasOptions.currentMode);
-  }, [canvasOptions]);
+
+    board.setOptions(canvasOptions);
+  }, [canvasOptions, board]);
 
   function uploadImage(e) {
     const reader = new FileReader();
@@ -765,7 +264,7 @@ const Whiteboard = ({
     reader.readAsDataURL(file);
   }
 
-  function saveCanvas() {
+  function saveCanvasState() {
     const newValue = {
       ...canvasObjectsPerPage,
       [fileReaderInfo.file.name]: {
@@ -773,35 +272,42 @@ const Whiteboard = ({
         [fileReaderInfo.currentPageNumber]: canvas.toJSON(),
       },
     };
-    console.log('saveCanvas', newValue);
     setCanvasObjectsPerPage(newValue);
+    onSaveCanvasState(newValue);
   }
 
-  function changeCurrentWidth(e) {
+  function changeBrushWidth(e) {
     const intValue = parseInt(e.target.value);
-    canvasOptions.brushWidth = intValue;
     canvas.freeDrawingBrush.width = intValue;
-    setCanvasOptions({ ...canvasOptions, brushWidth: intValue });
+    const newOptions = { ...canvasOptions, brushWidth: intValue };
+    setCanvasOptions(newOptions);
+    onOptionsChange(newOptions, e, canvas);
   }
 
-  function changeMode(mode) {
+  function changeMode(mode, e) {
     if (canvasOptions.currentMode === mode) return;
-    const newCanvasOptions = { ...canvasOptions, currentMode: mode };
-    setCanvasOptions(newCanvasOptions);
+    const newOptions = { ...canvasOptions, currentMode: mode };
+    setCanvasOptions(newOptions);
+    onOptionsChange(newOptions, e, canvas);
   }
 
-  function changeCurrentColor(color) {
+  function changeCurrentColor(color, e) {
     canvas.freeDrawingBrush.color = color;
-    setCanvasOptions({ ...canvasOptions, currentColor: color });
+    const newOptions = { ...canvasOptions, currentColor: color };
+    setCanvasOptions(newOptions);
+    onOptionsChange(newOptions, e, canvas);
   }
 
   function changeFill(e) {
-    setCanvasOptions({ ...canvasOptions, fill: !canvasOptions.fill });
+    const newOptions = { ...canvasOptions, fill: !canvasOptions.fill };
+    setCanvasOptions(newOptions);
+    onOptionsChange(newOptions, e, canvas);
   }
 
   function onSaveCanvasAsImage() {
     canvasRef.current.toBlob(function (blob) {
       saveAs(blob, 'image.png');
+      onSaveCanvasAsImage(blob, null, canvas);
     });
   }
 
@@ -810,10 +316,12 @@ const Whiteboard = ({
 
     if (event.target.files[0].type.includes('image/')) {
       uploadImage(event);
+      onImageUploaded(event.target.files[0], event, canvas);
     } else if (event.target.files[0].type.includes('pdf')) {
-      saveCanvas();
+      saveCanvasState();
       board.clearCanvas();
       updateFileReaderInfo({ file: event.target.files[0], currentPageNumber: 1 });
+      onPDFUploaded(event.target.files[0], event, canvas);
     }
   }
 
@@ -826,40 +334,47 @@ const Whiteboard = ({
   }
 
   function updateFileReaderInfo(data) {
-    // const board = new Board({
-    //   width: whiteboardRef.current.clientWidth,
-    //   height: whiteboardRef.current.clientHeight,
-    //   ...canvasOptions,
-    // });
-
-    // setCanvas(board.canvas);
-
     const newFileData = { ...fileReaderInfo, ...data };
-    console.log(newFileData);
-
     setFileReaderInfo(newFileData);
+    onPDFUpdated(newFileData, null, canvas);
   }
 
   const handlePageChange = (page) => {
-    saveCanvas();
+    saveCanvasState();
     board.clearCanvas(canvas);
     setFileReaderInfo({ ...fileReaderInfo, currentPageNumber: page });
+    onPageChange({ ...fileReaderInfo, currentPageNumber: page }, null, canvas);
   };
 
-  const handleZoomIn = () => {
-    console.log(canvas.getZoom());
+  const handleZoomIn = (e) => {
     const scale = canvas.getZoom() * 1.1;
-    // canvas.setZoom(scale);
-    canvas.zoomToPoint({ x: window.outerWidth / 2, y: window.outerHeight / 2 }, scale);
+
+    const width = whiteboardRef.current.clientWidth;
+    const height = whiteboardRef.current.clientHeight;
+    const center = { x: width / 2, y: height / 2 };
+
+    canvas.zoomToPoint(center, scale);
+    onZoom({ center, scale }, e, canvas);
   };
 
-  const handleZoomOut = () => {
-    const scale = canvas.getZoom() / 1.1;
-    canvas.zoomToPoint({ x: window.outerWidth / 2, y: window.outerHeight / 2 }, scale);
+  const handleZoomOut = (e) => {
+    const scale = canvas.getZoom() * 0.9;
+
+    const width = whiteboardRef.current.clientWidth;
+    const height = whiteboardRef.current.clientHeight;
+    const center = { x: width / 2, y: height / 2 };
+
+    canvas.zoomToPoint(center, scale);
+    onZoom({ center, scale }, e, canvas);
   };
 
   const handleResetZoom = () => {
-    canvas.setZoom(1);
+    const width = whiteboardRef.current.clientWidth;
+    const height = whiteboardRef.current.clientHeight;
+    const center = { x: width / 2, y: height / 2 };
+
+    canvas.zoomToPoint(center, 1);
+    onZoom({ center, scale: 1 }, e, canvas);
   };
 
   const getControls = () => {
@@ -882,7 +397,7 @@ const Whiteboard = ({
           key={buttonKey}
           type="button"
           className={`${canvasOptions.currentMode === buttonKey ? 'selected' : ''}`}
-          onClick={() => changeMode(buttonKey)}
+          onClick={(e) => changeMode(buttonKey, e)}
         >
           <img src={btn.icon} alt={btn.name} />
         </ButtonS>
@@ -912,7 +427,7 @@ const Whiteboard = ({
                 step={1}
                 thumbColor={canvasOptions.currentColor}
                 value={canvasOptions.brushWidth}
-                onChange={changeCurrentWidth}
+                onChange={changeBrushWidth}
               />
             </ToolbarItemS>
           )}

@@ -1,18 +1,20 @@
 import { fabric } from 'fabric';
 import { getCursor } from './cursors';
 
+export const modes = {
+  PENCIL: 'PENCIL',
+  LINE: 'LINE',
+  RECTANGLE: 'RECTANGLE',
+  TRIANGLE: 'TRIANGLE',
+  ELLIPSE: 'ELLIPSE',
+  ERASER: 'ERASER',
+  SELECT: 'SELECT',
+  TEXT: 'TEXT',
+};
+
 export class Board {
-  canvas = null;
-  modes = {
-    PENCIL: 'PENCIL',
-    LINE: 'LINE',
-    RECTANGLE: 'RECTANGLE',
-    TRIANGLE: 'TRIANGLE',
-    ELLIPSE: 'ELLIPSE',
-    ERASER: 'ERASER',
-    SELECT: 'SELECT',
-    TEXT: 'TEXT',
-  };
+  canvas;
+  modes;
   cursorPencil = getCursor('pencil');
   mouseDown = false;
   drawInstance = null;
@@ -20,6 +22,7 @@ export class Board {
   constructor(options) {
     this.canvas = this.initCanvas(options);
     this.options = options;
+    this.modes = modes;
     this.setDrawingMode(options.currentMode);
   }
 
@@ -38,6 +41,10 @@ export class Board {
 
     const canvas = new fabric.Canvas('canvas', { width: options.width, height: options.height });
 
+    canvas.zoomToPoint({ x: window.outerWidth / 2, y: window.outerHeight / 2 }, options.zoom);
+
+    canvas.perPixelTargetFind = true;
+
     // Todo: Ready to remove
     fabric.Object.prototype.transparentCorners = false;
     fabric.Object.prototype.cornerStyle = 'circle';
@@ -48,10 +55,16 @@ export class Board {
     return canvas;
   }
 
-  setDrawingMode(currentMode) {
+  setOptions(options) {
+    this.options = { ...this.options, ...options };
+    this.setDrawingMode(this.options.currentMode);
+  }
+
+  setDrawingMode(mode) {
+    this.options.currentMode = mode;
     this.resetCanvas();
 
-    switch (currentMode) {
+    switch (mode) {
       case this.modes.PENCIL:
         this.draw();
         break;
@@ -90,6 +103,11 @@ export class Board {
     canvas.defaultCursor = 'auto';
     canvas.hoverCursor = 'auto';
     canvas.getObjects().map((item) => item.set({ selectable: false }));
+
+    if (this.editedTextObject) {
+      this.editedTextObject.exitEditing();
+      this.editedTextObject = null;
+    }
   }
 
   removeCanvasListener() {
@@ -103,9 +121,7 @@ export class Board {
   draw() {
     const canvas = this.canvas;
     const options = this.options;
-    canvas.freeDrawingBrush = new fabric.PencilBrush(canvas, {
-      perPixelTargetFind: true,
-    });
+    canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
     canvas.freeDrawingBrush.width = options.brushWidth;
     canvas.freeDrawingBrush.color = options.currentColor;
     canvas.isDrawingMode = true;
@@ -115,9 +131,9 @@ export class Board {
   createLine() {
     const canvas = this.canvas;
 
-    canvas.on('mouse:down', this.startAddLine());
-    canvas.on('mouse:move', this.startDrawingLine());
-    canvas.on('mouse:up', this.stopDrawing);
+    canvas.on('mouse:down', this.startAddLine().bind(this));
+    canvas.on('mouse:move', this.startDrawingLine().bind(this));
+    canvas.on('mouse:up', this.stopDrawing.bind(this));
 
     canvas.defaultCursor = this.cursorPencil;
     canvas.hoverCursor = this.cursorPencil;
@@ -135,7 +151,6 @@ export class Board {
         strokeWidth: options.brushWidth,
         stroke: options.currentColor,
         selectable: false,
-        perPixelTargetFind: true,
       });
 
       canvas.add(this.drawInstance);
@@ -162,9 +177,9 @@ export class Board {
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
 
-    canvas.on('mouse:down', this.startAddRect());
-    canvas.on('mouse:move', this.startDrawingRect());
-    canvas.on('mouse:up', this.stopDrawing);
+    canvas.on('mouse:down', this.startAddRect().bind(this));
+    canvas.on('mouse:move', this.startDrawingRect().bind(this));
+    canvas.on('mouse:up', this.stopDrawing.bind(this));
 
     canvas.selection = false;
     canvas.defaultCursor = this.cursorPencil;
@@ -193,16 +208,18 @@ export class Board {
         width: 0,
         height: 0,
         selectable: false,
-        perPixelTargetFind: true,
       });
 
       canvas.add(this.drawInstance);
 
-      this.drawInstance.on('mousedown', function (e) {
-        if (options.currentMode === this.modes.ERASER) {
-          canvas.remove(e.target);
-        }
-      });
+      this.drawInstance.on(
+        'mousedown',
+        function (e) {
+          if (options.currentMode === this.modes.ERASER) {
+            canvas.remove(e.target);
+          }
+        }.bind(this),
+      );
     };
   }
 
@@ -237,9 +254,9 @@ export class Board {
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
 
-    canvas.on('mouse:down', this.startAddEllipse());
-    canvas.on('mouse:move', this.startDrawingEllipse());
-    canvas.on('mouse:up', this.stopDrawing);
+    canvas.on('mouse:down', this.startAddEllipse().bind(this));
+    canvas.on('mouse:move', this.startDrawingEllipse().bind(this));
+    canvas.on('mouse:up', this.stopDrawing.bind(this));
 
     canvas.selection = false;
     canvas.defaultCursor = this.cursorPencil;
@@ -267,7 +284,6 @@ export class Board {
         cornerSize: 7,
         objectCaching: false,
         selectable: false,
-        perPixelTargetFind: true,
       });
 
       canvas.add(this.drawInstance);
@@ -300,9 +316,9 @@ export class Board {
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
 
-    canvas.on('mouse:down', this.startAddTriangle());
-    canvas.on('mouse:move', this.startDrawingTriangle());
-    canvas.on('mouse:up', this.stopDrawing);
+    canvas.on('mouse:down', this.startAddTriangle().bind(this));
+    canvas.on('mouse:move', this.startDrawingTriangle().bind(this));
+    canvas.on('mouse:up', this.stopDrawing.bind(this));
 
     canvas.selection = false;
     canvas.defaultCursor = this.cursorPencil;
@@ -331,7 +347,6 @@ export class Board {
         width: 0,
         height: 0,
         selectable: false,
-        perPixelTargetFind: true,
       });
 
       canvas.add(this.drawInstance);
@@ -364,62 +379,71 @@ export class Board {
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
 
-    canvas.on('mouse:down', this.addText());
+    canvas.on('mouse:down', (e) => this.addText.call(this, e));
 
     canvas.isDrawingMode = false;
   }
 
-  addText() {
+  addText(e) {
     const canvas = this.canvas;
     const options = this.options;
-    return function ({ e }) {
-      const pointer = canvas.getPointer(e);
-      this.origX = pointer.x;
-      this.origY = pointer.y;
-      const text = new fabric.Textbox('', {
-        left: this.origX - 10,
-        top: this.origY - 10,
-        fontSize: options.brushWidth * 5,
-        fill: options.currentColor,
-        editable: true,
-        keysMap: {
-          13: 'exitEditing',
-        },
-      });
 
-      canvas.add(text);
-      canvas.renderAll();
+    const pointer = canvas.getPointer(e);
+    this.origX = pointer.x;
+    this.origY = pointer.y;
+    const text = new fabric.Textbox('', {
+      left: this.origX - 10,
+      top: this.origY - 10,
+      fontSize: options.brushWidth * 3 + 10,
+      fill: options.currentColor,
+      editable: true,
+      perPixelTargetFind: false,
+      keysMap: {
+        13: 'exitEditing',
+      },
+    });
 
-      text.enterEditing();
+    canvas.add(text);
+    canvas.renderAll();
 
-      canvas.off('mouse:down');
-      canvas.on('mouse:down', function () {
-        text.exitEditing();
-        canvas.off('mouse:down');
-        canvas.on('mouse:down', this.addText);
-      });
-    };
+    text.enterEditing();
+
+    this.editedTextObject = text;
+
+    canvas.off('mouse:down');
+    canvas.once(
+      'mouse:down',
+      function (e1) {
+        if (text.isEditing) {
+          text.exitEditing();
+          this.editedTextObject = null;
+          canvas.once('mouse:down', (e2) => {
+            this.addText.call(this, e2);
+          });
+        } else {
+          this.addText.call(this, e1);
+        }
+      }.bind(this),
+    );
   }
 
   eraserOn() {
     const canvas = this.canvas;
     canvas.isDrawingMode = false;
 
-    canvas.on('mouse:down', function (event) {
+    canvas.on('mouse:down', (event) => {
       canvas.remove(event.target);
 
-      console.log('mouse:down');
-      canvas.on('mouse:move', function (e) {
-        console.log('mouse:move');
+      canvas.on('mouse:move', (e) => {
         canvas.remove(e.target);
       });
     });
 
-    canvas.on('mouse:up', function () {
+    canvas.on('mouse:up', () => {
       canvas.off('mouse:move');
     });
 
-    canvas.on('mouse:over', function (event) {
+    canvas.on('mouse:over', (event) => {
       const hoveredObject = event.target;
       if (hoveredObject) {
         hoveredObject.set({
@@ -429,7 +453,7 @@ export class Board {
       }
     });
 
-    canvas.on('mouse:out', function (event) {
+    canvas.on('mouse:out', (event) => {
       const hoveredObject = event.target;
       if (hoveredObject) {
         hoveredObject.set({
@@ -464,4 +488,45 @@ export class Board {
       // }
     });
   }
+
+  // function drawBackground(canvas) {
+  //   const dotSize = 4; // Adjust the size of the dots as needed
+  //   const dotSvg = `
+  //       <svg xmlns="http://www.w3.org/2000/svg" width="${dotSize * 10}" height="${
+  //     dotSize * 10
+  //   }" viewBox="0 0 ${dotSize * 10} ${dotSize * 10}">
+  //         <circle cx="${dotSize / 2}" cy="${dotSize / 2}" r="${dotSize / 2}" fill="#00000010" />
+  //       </svg>
+  //     `;
+
+  //   let rect;
+
+  //   return new Promise((resolve) => {
+  //     const dotImage = new Image();
+  //     dotImage.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dotSvg);
+  //     dotImage.onload = function () {
+  //       const dotPattern = new fabric.Pattern({
+  //         source: dotImage,
+  //         repeat: 'repeat', // Adjust the repeat property to change the pattern repetition
+  //       });
+
+  //       const width = canvas.getWidth();
+  //       const height = canvas.getHeight();
+
+  //       const rect = new fabric.Rect({
+  //         itemId: 'background-id-rectangle',
+  //         width: width,
+  //         height: height,
+  //         fill: dotPattern,
+  //         selectable: false, // Prevent the dot from being selected
+  //         evented: false, // Prevent the dot from receiving events
+  //         lockMovementX: true, // Prevent horizontal movement of the dot
+  //         lockMovementY: true, // Prevent vertical movement of the dot
+  //       });
+
+  //       canvas.add(rect);
+  //       resolve(rect);
+  //     };
+  //   });
+  // }
 }
