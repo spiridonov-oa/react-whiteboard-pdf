@@ -43,19 +43,31 @@ yarn add react-whiteboard-pdf
 ## Usage
 
 ```javascript
+const App = () => {
+  return (
+    <div>
+      <Whiteboard />
+    </div>
+  );
+};
+```
+
+You can cange default parameters
+
+```javascript
 import { Whiteboard } from 'react-whiteboard-pdf';
 
 const App = () => {
   return (
     <Whiteboard
-      // default options
-      options={{
+      // default parameters
+      drawingSettings={{
         brushWidth: 5, // :number (optional) (default: 5) - brush size for drawing
         background: false, // :boolean (optional) (default: false) - polkadot as background picture
         currentMode: modes.PENCIL, //
         currentColor: '#000000',
         brushWidth: 5,
-        fill: false,
+        fill: false, // if true, square, rectangle, and triangle will be filled with current color
       }}
       // default controls
       controls={{
@@ -70,15 +82,37 @@ const App = () => {
         CLEAR: true,
         FILL: true,
         BRUSH: true,
-        COLOR: true,
+        COLOR_PICKER: true,
+        DEFAULT_COLORS: true,
         FILES: true,
-        TO_JSON: true,
         SAVE_AS_IMAGE: true,
         ZOOM: true,
       }}
-      canvasJSON={null} // JSON to render in canvas
       onObjectAdded={(addedObject) => {}}
       onObjectRemoved={(removedObject) => {}}
+      settings={{
+        zoom: 1,
+        minZoom: 0.05,
+        maxZoom: 9.99,
+        contentJSON: null, // JSON to render in canvas
+      }}
+      fileInfo={{
+        file: { name: 'Desk 1' },
+        totalPages: 1,
+        currentPageNumber: 0,
+        currentPage: '',
+      }}
+      onObjectAdded={(data, event, canvas) => {}}
+      onObjectRemoved={(data, event, canvas) => {}}
+      onZoom={(data, event, canvas) => {}}
+      onImageUploaded={(data, event, canvas) => {}}
+      onPDFUploaded={(data, event, canvas) => {}}
+      onPDFUpdated={(data, event, canvas) => {}}
+      onPageChange={(data, event, canvas) => {}}
+      onOptionsChange={(data, event, canvas) => {}}
+      onSaveCanvasAsImage={(data, event, canvas) => {}}
+      onLoadFromJSON={(data, event, canvas) => {}}
+      onSaveCanvasState={(data, event, canvas) => {}}
     />
   );
 };

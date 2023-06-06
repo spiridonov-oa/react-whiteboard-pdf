@@ -122,9 +122,9 @@ const Whiteboard = ({
         CLEAR: true,
         FILL: true,
         BRUSH: true,
-        COLOR: true,
+        COLOR_PICKER: true,
+        DEFAULT_COLORS: true,
         FILES: true,
-        TO_JSON: true,
         SAVE_AS_IMAGE: true,
         ZOOM: true,
 
@@ -379,13 +379,15 @@ const Whiteboard = ({
     <WhiteBoardS ref={whiteboardRef}>
       <ToolbarHolderS>
         <ColorBarS>
-          <ToolbarItemS>
-            <ColorPicker
-              size={28}
-              color={canvasDrawingSettings.currentColor}
-              onChange={changeCurrentColor}
-            ></ColorPicker>
-          </ToolbarItemS>
+          {!!enabledControls.COLOR_PICKER && (
+            <ToolbarItemS>
+              <ColorPicker
+                size={28}
+                color={canvasDrawingSettings.currentColor}
+                onChange={changeCurrentColor}
+              ></ColorPicker>
+            </ToolbarItemS>
+          )}
           {!!enabledControls.BRUSH && (
             <ToolbarItemS>
               <RangeInputS
@@ -399,7 +401,7 @@ const Whiteboard = ({
               />
             </ToolbarItemS>
           )}
-          {!!enabledControls.COLOR && (
+          {!!enabledControls.DEFAULT_COLORS && (
             <>{getColorButtons(['#6161ff', '#ff4f4f', '#3fd18d', '#ec70ff', '#000000'])}</>
           )}
           {!!enabledControls.FILL && (
