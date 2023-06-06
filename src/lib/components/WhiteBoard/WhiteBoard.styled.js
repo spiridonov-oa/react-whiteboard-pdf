@@ -12,7 +12,7 @@ export const WhiteBoardS = styled.div`
   min-height: 100%;
 `;
 
-export const ButtonS = styled.div`
+export const ButtonS = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,6 +25,7 @@ export const ButtonS = styled.div`
   background-color: transparent;
   outline: none;
   cursor: pointer;
+  transition: background-color 0.3s;
 
   img {
     width: 18px;
@@ -53,11 +54,52 @@ export const SeparatorS = styled.div`
 `;
 
 export const ToolbarS = styled.div`
-  margin-top: -8px;
-  padding: 12px 8px 4px;
+  padding: 4px 4px;
   border-radius: 5px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  background: white;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  z-index: 1;
+`;
+
+export const ColorBarS = styled.div`
+  position: absolute;
+  top: 100px;
+  left: 50px;
+  transform: rotate(90deg);
+  transform-origin: 0% 0%;
+  padding: 0 0 0 4px;
+  border-radius: 5px;
+  display: flex;
+  font-size: 12px;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  background: white;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  z-index: 1;
+
+  > button {
+    transform: rotate(-90deg);
+  }
+`;
+
+export const ZoomBarS = styled.div`
+  position: absolute;
+  top: 100px;
+  right: 0;
+  padding: 4px 0;
+  border-radius: 5px;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+  display: flex;
+  font-size: 12px;
+  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
   background: white;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
@@ -79,12 +121,27 @@ export const PDFWrapperS = styled.div`
   width: 100%;
 `;
 
+export const ColorButtonS = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 2px;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: 5px;
+  border: none;
+  background-color: ${({ color }) => color};
+  outline: none;
+  cursor: pointer;
+`;
+
 export const RangeInputS = styled.input`
   & {
-    height: 25px;
-    -webkit-appearance: none;
     margin: 10px 0;
+    transform: rotate(180deg);
     width: 100px;
+    height: 25px; /* Adjust height to control the width of the slider */
+    -webkit-appearance: none;
   }
   &:focus {
     outline: none;

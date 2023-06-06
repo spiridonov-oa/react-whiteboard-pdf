@@ -18,15 +18,27 @@ export class Board {
   cursorPencil = getCursor('pencil');
   mouseDown = false;
   drawInstance = null;
+  drawingSettings;
+  canvasSettings = {
+    zoom: 1,
+    contentJSON: null,
+    minZoom: 0.05,
+    maxZoom: 9.99,
+  };
 
-  constructor(options) {
-    this.canvas = this.initCanvas(options);
-    this.options = options;
+  constructor(params) {
+    if (params) {
+      this.drawingSettings = params.drawingSettings;
+      this.canvasSettings = { ...this.canvasSettings, ...params.canvasSettings };
+    }
+
+    this.canvas = this.initCanvas(this.drawingSettings, this.canvasSettings);
     this.modes = modes;
-    this.setDrawingMode(options.currentMode);
+    this.setDrawingMode(this.drawingSettings.currentMode);
+    this.addZoomListeners();
   }
 
-  initCanvas(options) {
+  initCanvas(drawingSettings, canvasSettings) {
     fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
       var object = null,
         objects = this.getObjects();
@@ -39,29 +51,85 @@ export class Board {
       return object;
     };
 
-    const canvas = new fabric.Canvas('canvas', { width: options.width, height: options.height });
+    const canvas = new fabric.Canvas('canvas', {
+      width: drawingSettings.width,
+      height: drawingSettings.height,
+    });
 
-    canvas.zoomToPoint({ x: window.outerWidth / 2, y: window.outerHeight / 2 }, options.zoom);
+    canvas.zoomToPoint({ x: canvas.width / 2, y: canvas.height / 2 }, canvasSettings.zoom);
+
+    if (canvasSettings.contentJSON) {
+      canvas.loadFromJSON(canvasSettings.contentJSON);
+    }
 
     canvas.perPixelTargetFind = true;
-
-    // Todo: Ready to remove
-    fabric.Object.prototype.transparentCorners = false;
-    fabric.Object.prototype.cornerStyle = 'circle';
-    fabric.Object.prototype.cornerSize = 6;
-    fabric.Object.prototype.padding = 10;
-    fabric.Object.prototype.borderDashArray = [5, 5];
 
     return canvas;
   }
 
-  setOptions(options) {
-    this.options = { ...this.options, ...options };
-    this.setDrawingMode(this.options.currentMode);
+  addZoomListeners() {
+    const canvas = this.canvas;
+    const that = this;
+    canvas.on('mouse:wheel', function (opt) {
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
+      if (opt.e.ctrlKey) {
+        const delta = opt.e.deltaY;
+        const scale = 0.98 ** delta;
+        const point = { x: opt.e.offsetX, y: opt.e.offsetY };
+        that.changeZoom({ point, scale });
+      } else {
+        const e = opt.e;
+        let vpt = canvas.viewportTransform;
+        vpt[4] -= e.deltaX;
+        vpt[5] -= e.deltaY;
+        console.log(vpt);
+        canvas.requestRenderAll();
+      }
+    });
+
+    canvas.on('touch:gesture', (event) => {
+      console.log('1 touch:gesture');
+      if (event.e.touches && event.e.touches.length === 2) {
+        const point1 = {
+          x: event.e.touches[0].clientX,
+          y: event.e.touches[0].clientY,
+        };
+        const point2 = {
+          x: event.e.touches[1].clientX,
+          y: event.e.touches[1].clientY,
+        };
+
+        const prevDistance = canvas.getPointerDistance(point1, point2);
+
+        canvas.on('touch:gesture', (event) => {
+          console.log('2 touch:gesture');
+          const newDistance = canvas.getPointerDistance(point1, point2);
+          const zoom = newDistance / prevDistance;
+
+          const point = {
+            x: (point1.x + point2.x) / 2,
+            y: (point1.y + point2.y) / 2,
+          };
+
+          const scale = zoom;
+
+          that.changeZoom({ point, scale });
+          canvas.renderAll();
+
+          prevDistance = newDistance;
+        });
+      }
+    });
+  }
+
+  setDrawingSettings(drawingSettings) {
+    this.drawingSettings = { ...this.drawingSettings, ...drawingSettings };
+    this.setDrawingMode(this.drawingSettings.currentMode);
   }
 
   setDrawingMode(mode) {
-    this.options.currentMode = mode;
+    this.drawingSettings.currentMode = mode;
     this.resetCanvas();
 
     switch (mode) {
@@ -120,10 +188,10 @@ export class Board {
 
   draw() {
     const canvas = this.canvas;
-    const options = this.options;
+    const drawingSettings = this.drawingSettings;
     canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-    canvas.freeDrawingBrush.width = options.brushWidth;
-    canvas.freeDrawingBrush.color = options.currentColor;
+    canvas.freeDrawingBrush.width = drawingSettings.brushWidth;
+    canvas.freeDrawingBrush.color = drawingSettings.currentColor;
     canvas.isDrawingMode = true;
     canvas.freeDrawingCursor = this.cursorPencil;
   }
@@ -142,14 +210,14 @@ export class Board {
 
   startAddLine() {
     const canvas = this.canvas;
-    const options = this.options;
+    const drawingSettings = this.drawingSettings;
     return function ({ e }) {
       this.mouseDown = true;
 
       let pointer = canvas.getPointer(e);
       this.drawInstance = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-        strokeWidth: options.brushWidth,
-        stroke: options.currentColor,
+        strokeWidth: drawingSettings.brushWidth,
+        stroke: drawingSettings.currentColor,
         selectable: false,
       });
 
@@ -191,7 +259,7 @@ export class Board {
 
   startAddRect() {
     const canvas = this.canvas;
-    const options = this.options;
+    const drawingSettings = this.drawingSettings;
     return function ({ e }) {
       this.mouseDown = true;
 
@@ -200,9 +268,9 @@ export class Board {
       this.origY = pointer.y;
 
       this.drawInstance = new fabric.Rect({
-        stroke: options.currentColor,
-        strokeWidth: options.brushWidth,
-        fill: options.fill ? options.currentColor : 'transparent',
+        stroke: drawingSettings.currentColor,
+        strokeWidth: drawingSettings.brushWidth,
+        fill: drawingSettings.fill ? drawingSettings.currentColor : 'transparent',
         left: this.origX,
         top: this.origY,
         width: 0,
@@ -215,7 +283,7 @@ export class Board {
       this.drawInstance.on(
         'mousedown',
         function (e) {
-          if (options.currentMode === this.modes.ERASER) {
+          if (drawingSettings.currentMode === this.modes.ERASER) {
             canvas.remove(e.target);
           }
         }.bind(this),
@@ -268,7 +336,7 @@ export class Board {
 
   startAddEllipse() {
     const canvas = this.canvas;
-    const options = this.options;
+    const drawingSettings = this.drawingSettings;
     return function ({ e }) {
       this.mouseDown = true;
 
@@ -276,9 +344,9 @@ export class Board {
       this.origX = pointer.x;
       this.origY = pointer.y;
       this.drawInstance = new fabric.Ellipse({
-        stroke: options.currentColor,
-        strokeWidth: options.brushWidth,
-        fill: options.fill ? options.currentColor : 'transparent',
+        stroke: drawingSettings.currentColor,
+        strokeWidth: drawingSettings.brushWidth,
+        fill: drawingSettings.fill ? drawingSettings.currentColor : 'transparent',
         left: this.origX,
         top: this.origY,
         cornerSize: 7,
@@ -330,18 +398,18 @@ export class Board {
 
   startAddTriangle() {
     const canvas = this.canvas;
-    const options = this.options;
+    const drawingSettings = this.drawingSettings;
     return function ({ e }) {
       this.mouseDown = true;
-      options.currentMode = this.modes.TRIANGLE;
+      drawingSettings.currentMode = this.modes.TRIANGLE;
 
       const pointer = canvas.getPointer(e);
       this.origX = pointer.x;
       this.origY = pointer.y;
       this.drawInstance = new fabric.Triangle({
-        stroke: options.currentColor,
-        strokeWidth: options.brushWidth,
-        fill: options.fill ? options.currentColor : 'transparent',
+        stroke: drawingSettings.currentColor,
+        strokeWidth: drawingSettings.brushWidth,
+        fill: drawingSettings.fill ? drawingSettings.currentColor : 'transparent',
         left: this.origX,
         top: this.origY,
         width: 0,
@@ -386,7 +454,7 @@ export class Board {
 
   addText(e) {
     const canvas = this.canvas;
-    const options = this.options;
+    const drawingSettings = this.drawingSettings;
 
     const pointer = canvas.getPointer(e);
     this.origX = pointer.x;
@@ -394,8 +462,8 @@ export class Board {
     const text = new fabric.Textbox('', {
       left: this.origX - 10,
       top: this.origY - 10,
-      fontSize: options.brushWidth * 3 + 10,
-      fill: options.currentColor,
+      fontSize: drawingSettings.brushWidth * 3 + 10,
+      fill: drawingSettings.currentColor,
       editable: true,
       perPixelTargetFind: false,
       keysMap: {
@@ -469,8 +537,8 @@ export class Board {
 
   onSelectMode() {
     const canvas = this.canvas;
-    const options = this.options;
-    options.currentMode = '';
+    const drawingSettings = this.drawingSettings;
+    drawingSettings.currentMode = '';
     canvas.isDrawingMode = false;
 
     canvas.getObjects().map((item) => item.set({ selectable: true }));
@@ -483,10 +551,42 @@ export class Board {
       if (item !== canvas.backgroundImage) {
         canvas.remove(item);
       }
-      // if (options.background) {
-      //   drawBackground(canvas);
-      // }
     });
+  }
+
+  changeZoom({ point, scale }) {
+    if (!point) {
+      const width = this.canvas.width;
+      const height = this.canvas.height;
+      point = { x: width / 2, y: height / 2 };
+    }
+
+    const minZoom = this.canvasSettings.minZoom;
+    const maxZoom = this.canvasSettings.maxZoom;
+
+    scale = this.canvas.getZoom() * scale;
+    scale = scale < minZoom ? minZoom : scale > maxZoom ? maxZoom : scale;
+
+    this.canvas.zoomToPoint(point, scale);
+    this.onZoom({ point, scale });
+  }
+
+  resetZoom() {
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+    const point = { x: width / 2, y: height / 2 };
+    const scale = 1;
+    this.canvas.zoomToPoint(point, scale);
+    this.onZoom({ point, scale });
+  }
+
+  onZoom(params) {
+    this.canvas.fire('zoom', params);
+  }
+
+  removeBoard() {
+    this.canvas.off();
+    this.canvas.dispose();
   }
 
   // function drawBackground(canvas) {
