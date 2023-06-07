@@ -1,6 +1,7 @@
 import styled from 'styled-components';
+import theme from './../../theme';
 
-const color = '#ddd';
+const color = theme.color;
 
 export const WhiteBoardS = styled.div`
   font-family: Arial, Helvetica, sans-serif;
