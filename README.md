@@ -1,30 +1,21 @@
 # react-whiteboard-pdf
 
-<div>
-  <h2>
-    React virtual whiteboard with PDF and Images upload functionality
-    <br />
-  </h2>
-</div>
+## Overview
 
-<br />
+React virtual whiteboard with PDF and Images upload functionality
 
-Check App demo here:
+## Demo App
 
-# App [DEMO](https://statuesque-muffin-fb224e.netlify.app/)
-
-<br/>
+[Whiteboard PDF Demo App](https://statuesque-muffin-fb224e.netlify.app/)
 
 ## If you like this project you can help us with $1,000,000 donation or any other amount
 
-github: [github.com/sponsors/spiridonov-oa](https://github.com/sponsors/spiridonov-oa)
-patreon: [patreon.com/OlegSpiridonov](https://patreon.com/OlegSpiridonov)
+- github: [github.com/sponsors/spiridonov-oa](https://github.com/sponsors/spiridonov-oa)
+- patreon: [patreon.com/OlegSpiridonov](https://patreon.com/OlegSpiridonov)
 
 ## Compatibility
 
 React 17
-
-<br/>
 
 ## Installation
 
@@ -37,8 +28,6 @@ or
 ```shell
 yarn add react-whiteboard-pdf
 ```
-
-<br/>
 
 ## Usage
 
