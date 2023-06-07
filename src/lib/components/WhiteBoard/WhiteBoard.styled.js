@@ -17,6 +17,7 @@ export const ButtonS = styled.button`
   justify-content: center;
   align-items: center;
   margin: 0 2px;
+  padding: 0;
   min-width: 40px;
   min-height: 40px;
   border-radius: 5px;
@@ -97,7 +98,6 @@ export const ZoomBarS = styled.div`
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
   display: flex;
-  font-size: 12px;
   flex-wrap: wrap;
   flex-direction: column;
   align-items: center;
