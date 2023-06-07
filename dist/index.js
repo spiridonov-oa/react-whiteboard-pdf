@@ -1,9 +1,8 @@
 "use strict";
 
 exports.__esModule = true;
+exports.Whiteboard = void 0;
 
-var _WhiteBoard = _interopRequireDefault(require("./components/WhiteBoard"));
+var _Whiteboard = require("./components/Whiteboard");
 
-exports.Whiteboard = _WhiteBoard.default;
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+exports.Whiteboard = _Whiteboard.Whiteboard;
