@@ -1,1 +1,1 @@
-export { Whiteboard } from './components/Whiteboard';
+export { Whiteboard } from './components/Whiteboard-fix';
