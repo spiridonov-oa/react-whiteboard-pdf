@@ -88,8 +88,6 @@ const App = () => {
         SAVE_AS_IMAGE: true,
         ZOOM: true,
       }}
-      onObjectAdded={(addedObject) => {}}
-      onObjectRemoved={(removedObject) => {}}
       settings={{
         zoom: 1,
         minZoom: 0.05,
@@ -102,6 +100,8 @@ const App = () => {
         currentPageNumber: 0,
         currentPage: '',
       }}
+      onObjectAdded={(addedObject) => {}}
+      onObjectRemoved={(removedObject) => {}}
       onObjectAdded={(data, event, canvas) => {}}
       onObjectRemoved={(data, event, canvas) => {}}
       onZoom={(data, event, canvas) => {}}
