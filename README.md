@@ -52,7 +52,7 @@ const App = () => {
 };
 ```
 
-You can cange default parameters
+You can change default props
 
 ```javascript
 import { Whiteboard } from 'react-whiteboard-pdf';
@@ -117,3 +117,19 @@ const App = () => {
   );
 };
 ```
+
+## Development:
+
+```shell
+npm i
+npm start
+```
+
+## Author:
+
+[spiridonov-oa](https://github.com/spiridonov-oa)
+
+## Contributors:
+
+Thanks for your help in building this project
+[rodionspi](https://github.com/rodionspi)
