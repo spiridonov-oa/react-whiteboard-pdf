@@ -6,7 +6,7 @@ export const ColorPickerS = styled.div`
   justify-content: center;
   align-items: center;
   border: 1px solid #999;
-  border-radius: 5px;
+  border-radius: ${({ size }) => size || 34}px;
   height: ${({ size }) => size || 34}px;
   width: ${({ size }) => size || 34}px;
   cursor: pointer;
@@ -21,7 +21,7 @@ export const ColorPickerS = styled.div`
 `;
 
 export const ColorLabelS = styled.div`
-  border-radius: 3px;
+  border-radius: ${({ size }) => size - 4 || 28}px;
   height: ${({ size }) => size - 4 || 28}px;
   width: ${({ size }) => size - 4 || 28}px;
   background: ${({ color }) => color || '#000'};

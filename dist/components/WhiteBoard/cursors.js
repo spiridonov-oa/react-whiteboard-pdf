@@ -16,7 +16,6 @@ var cursors = {
 exports.cursors = cursors;
 
 var getCursor = function getCursor(type) {
-  console.log(cursors[type]);
   return cursors[type];
 };
 

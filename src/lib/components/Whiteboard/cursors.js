@@ -7,6 +7,5 @@ export const cursors = {
 };
 
 export const getCursor = (type) => {
-  console.log(cursors[type]);
   return cursors[type];
 };
