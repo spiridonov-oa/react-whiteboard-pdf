@@ -1,6 +1,7 @@
 .pdfReader {
   width: 100%;
   display: flex;
+  font-size: 14px;
   justify-content: center;
   align-items: center;
 
@@ -21,11 +22,7 @@
     }
 
     &:hover {
-      background-color: #c6c7f9;
-    }
-
-    &.selected {
-      background-color: #c6c7f9;
+      background-color: #eee;
     }
   }
 }
