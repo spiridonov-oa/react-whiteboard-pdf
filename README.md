@@ -9,7 +9,7 @@
 
 <br />
 
-![Example](./example.png)
+![Example](./app-example.png)
 
 Check App demo here:
 
