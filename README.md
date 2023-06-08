@@ -9,6 +9,8 @@
 
 <br />
 
+![Example](./example.png)
+
 Check App demo here:
 
 # App [DEMO](https://statuesque-muffin-fb224e.netlify.app/)
