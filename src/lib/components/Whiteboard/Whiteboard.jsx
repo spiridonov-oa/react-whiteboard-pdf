@@ -33,30 +33,6 @@ import DownloadIcon from './../images/download.svg';
 import UploadIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
 
-function throttle(f, delay) {
-  let timer = 0;
-  return function (...args) {
-    clearTimeout(timer);
-    timer = setTimeout(() => f.apply(this, args), delay);
-  };
-}
-
-function handleResize(callback) {
-  const resize_ob = new ResizeObserver(throttle(callback, 300));
-  return resize_ob;
-}
-
-function resizeCanvas(canvas, whiteboard) {
-  return () => {
-    const width = whiteboard.clientWidth;
-    const height = whiteboard.clientHeight;
-    // const scale = width / canvas.getWidth();
-    // const zoom = canvas.getZoom() * scale;
-    canvas.setDimensions({ width: width, height: height });
-    // canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
-  };
-}
-
 const initFileInfo = {
   file: { name: 'whiteboard' },
   totalPages: 1,
@@ -146,8 +122,8 @@ const Whiteboard = ({
     setBoard(board);
 
     return () => {
-      if (board.canvas) {
-        board.canvas.dispose();
+      if (board) {
+        board.removeBoard();
       }
     };
   }, []);
@@ -160,15 +136,12 @@ const Whiteboard = ({
   }, [canvas, canvasSettings.contentJSON]);
 
   useEffect(() => {
-    if (!canvas || !whiteboardRef.current) return;
-
-    const element = handleResize(resizeCanvas(canvas, whiteboardRef.current));
-    element.observe(whiteboardRef.current);
+    if (!board) return;
 
     return () => {
-      element.disconnect();
+      board.removeBoard();
     };
-  }, [canvas, whiteboardRef.current]);
+  }, [board]);
 
   useEffect(() => {
     if (!canvas) return;
@@ -189,7 +162,6 @@ const Whiteboard = ({
     return () => {
       if (!canvas) return;
 
-      canvas.off();
       canvas.dispose();
     };
   }, [canvas]);
@@ -206,22 +178,7 @@ const Whiteboard = ({
     if (json) {
       canvas.loadFromJSON(json);
     } else {
-      const center = canvas.getCenter();
-      fabric.Image.fromURL(fileReaderInfo.currentPage, (img) => {
-        if (img.width > img.height) {
-          img.scaleToWidth(canvas.width);
-        } else {
-          img.scaleToHeight(canvas.height - 100);
-        }
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-          top: center.top,
-          left: center.left,
-          originX: 'center',
-          originY: 'center',
-        });
-
-        canvas.renderAll();
-      });
+      board.openPage(fileReaderInfo.currentPage);
     }
   }, [fileReaderInfo.currentPage]);
 
