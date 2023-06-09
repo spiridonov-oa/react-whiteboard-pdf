@@ -58,7 +58,7 @@ function resizeCanvas(canvas, whiteboard) {
 }
 
 const initFileInfo = {
-  file: { name: 'Desk 1' },
+  file: { name: 'whiteboard' },
   totalPages: 1,
   currentPageNumber: 0,
   currentPage: '',
@@ -285,9 +285,9 @@ const Whiteboard = ({
     onOptionsChange(newOptions, e, canvas);
   }
 
-  function onSaveCanvasAsImage() {
+  function handleSaveCanvasAsImage() {
     canvasRef.current.toBlob(function (blob) {
-      saveAs(blob, `${fileReaderInfo.file.name}_page-${fileReaderInfo.currentPage}.png`);
+      saveAs(blob, `${fileReaderInfo.file.name}${fileReaderInfo.currentPage ? '_page-' : ''}.png`);
       onSaveCanvasAsImage(blob, null, canvas);
     });
   }
@@ -442,7 +442,7 @@ const Whiteboard = ({
 
           {!!enabledControls.SAVE_AS_IMAGE && (
             <ToolbarItemS>
-              <ButtonS onClick={onSaveCanvasAsImage}>
+              <ButtonS onClick={handleSaveCanvasAsImage}>
                 <img src={DownloadIcon} alt="Download" />
               </ButtonS>
             </ToolbarItemS>
