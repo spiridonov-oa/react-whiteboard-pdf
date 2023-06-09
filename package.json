@@ -1,6 +1,6 @@
 {
   "name": "react-whiteboard-pdf",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "React whiteboard with PDF and Images import",
   "author": "Oleg Spiridonov <spiridonov.oa@gmail.com>",
   "private": false,
