@@ -45,6 +45,7 @@ var Board = /*#__PURE__*/function () {
 
     this.canvas = this.initCanvas(this.drawingSettings, this.canvasSettings);
     this.modes = modes;
+    this.resetZoom();
     this.setDrawingMode(this.drawingSettings.currentMode);
     this.addZoomListeners();
   }
@@ -66,6 +67,9 @@ var Board = /*#__PURE__*/function () {
       return object;
     };
 
+    var canvasElement = document.getElementById('canvas');
+    if (!canvasElement) return;
+    var parentElement = canvasElement.parentNode;
     var canvas = new _fabric.fabric.Canvas('canvas', {
       width: drawingSettings.width,
       height: drawingSettings.height
@@ -80,19 +84,27 @@ var Board = /*#__PURE__*/function () {
     }
 
     canvas.perPixelTargetFind = true;
+
+    if (parentElement) {
+      this.element = this.handleResize(this.resizeCanvas(canvas, parentElement).bind(this));
+      this.element.observe(parentElement);
+    }
+
     return canvas;
   };
 
   _proto.addZoomListeners = function addZoomListeners() {
     var canvas = this.canvas;
     var that = this;
+    canvas.off('mouse:wheel');
+    canvas.off('touch:gesture');
     canvas.on('mouse:wheel', function (opt) {
       opt.e.preventDefault();
       opt.e.stopPropagation();
 
       if (opt.e.ctrlKey) {
         var delta = opt.e.deltaY;
-        var scale = Math.pow(0.98, delta);
+        var scale = Math.pow(0.995, delta);
         var point = {
           x: opt.e.offsetX,
           y: opt.e.offsetY
@@ -105,8 +117,29 @@ var Board = /*#__PURE__*/function () {
         var e = opt.e;
         var vpt = canvas.viewportTransform;
         vpt[4] -= e.deltaX;
-        vpt[5] -= e.deltaY;
-        console.log(vpt);
+        vpt[5] -= e.deltaY; // const boundaries = that.getCanvasContentBoundaries();
+        // let scrolledX = vpt[4] + e.deltaX;
+        // let scrolledY = vpt[5] + e.deltaY;
+        // console.log('scrolled', scrolledX, scrolledY);
+        // console.log('boundaries', boundaries);
+        // const offset = 50;
+        // scrolledX =
+        //   scrolledX < -boundaries.maxX + offset
+        //     ? -boundaries.maxX + offset
+        //     : -scrolledX < boundaries.minX - canvas.width + offset
+        //     ? canvas.width - boundaries.minX - offset
+        //     : scrolledX;
+        // scrolledY =
+        //   scrolledY < -boundaries.maxY + offset
+        //     ? -boundaries.maxY + offset
+        //     : -scrolledY < boundaries.minY - canvas.height + offset
+        //     ? canvas.height - boundaries.minY - offset
+        //     : scrolledY;
+        // that.throttle(() => console.log('after', scrolledX, scrolledY));
+        // vpt[4] = scrolledX;
+        // vpt[5] = scrolledY;
+        // console.log(vpt);
+
         canvas.requestRenderAll();
       }
     });
@@ -207,6 +240,43 @@ var Board = /*#__PURE__*/function () {
       this.editedTextObject.exitEditing();
       this.editedTextObject = null;
     }
+  };
+
+  _proto.throttle = function throttle(f, delay) {
+    var timer = 0;
+    return function () {
+      var _this = this;
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        return f.apply(_this, args);
+      }, delay);
+    };
+  };
+
+  _proto.handleResize = function handleResize(callback) {
+    var resize_ob = new ResizeObserver(this.throttle(callback, 300));
+    return resize_ob;
+  };
+
+  _proto.resizeCanvas = function resizeCanvas(canvas, whiteboard) {
+    return function () {
+      var width = whiteboard.clientWidth;
+      var height = whiteboard.clientHeight;
+      this.changeZoom({
+        scale: 1
+      }); // const scale = width / canvas.getWidth();
+      // const zoom = canvas.getZoom() * scale;
+
+      canvas.setDimensions({
+        width: width,
+        height: height
+      }); // canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
+    };
   };
 
   _proto.removeCanvasListener = function removeCanvasListener() {
@@ -484,12 +554,12 @@ var Board = /*#__PURE__*/function () {
   };
 
   _proto.createText = function createText() {
-    var _this = this;
+    var _this2 = this;
 
     var canvas = this.canvas;
     canvas.isDrawingMode = true;
     canvas.on('mouse:down', function (e) {
-      return _this.addText.call(_this, e);
+      return _this2.addText.call(_this2, e);
     });
     canvas.isDrawingMode = false;
   };
@@ -517,13 +587,13 @@ var Board = /*#__PURE__*/function () {
     this.editedTextObject = text;
     canvas.off('mouse:down');
     canvas.once('mouse:down', function (e1) {
-      var _this2 = this;
+      var _this3 = this;
 
       if (text.isEditing) {
         text.exitEditing();
         this.editedTextObject = null;
         canvas.once('mouse:down', function (e2) {
-          _this2.addText.call(_this2, e2);
+          _this3.addText.call(_this3, e2);
         });
       } else {
         this.addText.call(this, e1);
@@ -587,6 +657,7 @@ var Board = /*#__PURE__*/function () {
         canvas.remove(item);
       }
     });
+    canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
   };
 
   _proto.changeZoom = function changeZoom(_ref9) {
@@ -629,10 +700,62 @@ var Board = /*#__PURE__*/function () {
   };
 
   _proto.onZoom = function onZoom(params) {
+    this.addZoomListeners();
     this.canvas.fire('zoom', params);
   };
 
+  _proto.openPage = function openPage(page) {
+    var canvas = this.canvas;
+    var center = canvas.getCenter();
+
+    _fabric.fabric.Image.fromURL(page, function (img) {
+      if (img.width > img.height) {
+        img.scaleToWidth(canvas.width);
+      } else {
+        img.scaleToHeight(canvas.height - 100);
+      }
+
+      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+        top: center.top,
+        left: center.left,
+        originX: 'center',
+        originY: 'center'
+      });
+      canvas.renderAll();
+    });
+  };
+
+  _proto.getCanvasContentBoundaries = function getCanvasContentBoundaries() {
+    var canvas = this.canvas;
+    var objects = canvas.getObjects(); // Initialize variables for min and max coordinates
+
+    var minX = 10000;
+    var minY = 10000;
+    var maxX = -10000;
+    var maxY = -10000; // Iterate through objects to find minimum and maximum coordinates
+
+    objects.forEach(function (object) {
+      var objectBoundingBox = object.getBoundingRect();
+      minX = Math.min(minX, objectBoundingBox.left);
+      minY = Math.min(minY, objectBoundingBox.top);
+      maxX = Math.max(maxX, objectBoundingBox.left + objectBoundingBox.width);
+      maxY = Math.max(maxY, objectBoundingBox.top + objectBoundingBox.height);
+    }); // Calculate canvas size based on content
+
+    var width = maxX - minX;
+    var height = maxY - minY;
+    return {
+      minX: minX,
+      minY: minY,
+      maxX: maxX,
+      maxY: maxY,
+      width: width,
+      height: height
+    };
+  };
+
   _proto.removeBoard = function removeBoard() {
+    this.element.disconnect();
     this.canvas.off();
     this.canvas.dispose();
   } // function drawBackground(canvas) {

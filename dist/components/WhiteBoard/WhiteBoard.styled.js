@@ -5,7 +5,7 @@ exports.ZoomBarS = exports.WhiteBoardS = exports.ToolbarS = exports.ToolbarItemS
 
 var _styledComponents = _interopRequireDefault(require("styled-components"));
 
-var _theme = _interopRequireDefault(require("./../../theme"));
+var _theme = _interopRequireDefault(require("../../theme"));
 
 var _templateObject, _templateObject2, _templateObject3, _templateObject4, _templateObject5, _templateObject6, _templateObject7, _templateObject8, _templateObject9, _templateObject10, _templateObject11;
 
