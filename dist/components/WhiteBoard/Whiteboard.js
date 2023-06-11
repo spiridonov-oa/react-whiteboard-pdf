@@ -7,17 +7,17 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
-var _WhiteboardStyled = require("./Whiteboard.styled.js");
+var _Whiteboard = require("./Whiteboard.styled");
 
 var _fabric = require("fabric");
 
-var _index = require("../PdfReader/index.jsx");
+var _PdfReader = require("../PdfReader");
 
 var _fileSaver = require("file-saver");
 
 var _BoardClass = require("./Board.Class.js");
 
-var _index2 = require("../ColorPicker/index.jsx");
+var _ColorPicker = require("../ColorPicker");
 
 var _cross = _interopRequireDefault(require("./../images/cross.svg"));
 
@@ -88,6 +88,10 @@ var Whiteboard = function Whiteboard(_ref) {
       onObjectAdded = _ref$onObjectAdded === void 0 ? function (data, event, canvas) {} : _ref$onObjectAdded,
       _ref$onObjectRemoved = _ref.onObjectRemoved,
       onObjectRemoved = _ref$onObjectRemoved === void 0 ? function (data, event, canvas) {} : _ref$onObjectRemoved,
+      _ref$onObjectModified = _ref.onObjectModified,
+      onObjectModified = _ref$onObjectModified === void 0 ? function (data, event, canvas) {} : _ref$onObjectModified,
+      _ref$onCanvasChange = _ref.onCanvasChange,
+      onCanvasChange = _ref$onCanvasChange === void 0 ? function (data, event, canvas) {} : _ref$onCanvasChange,
       _ref$onZoom = _ref.onZoom,
       onZoom = _ref$onZoom === void 0 ? function (data, event, canvas) {} : _ref$onZoom,
       _ref$onImageUploaded = _ref.onImageUploaded,
@@ -167,6 +171,9 @@ var Whiteboard = function Whiteboard(_ref) {
   }, [board]);
   (0, _react.useEffect)(function () {
     if (!canvas) return;
+    canvas.on('after:render', function (e) {
+      onCanvasRender(canvas, e, canvas);
+    });
     canvas.on('zoom', function (data) {
       onZoom(data, null, canvas);
       setCanvasSettings(_extends({}, canvasSettings, {
@@ -175,9 +182,15 @@ var Whiteboard = function Whiteboard(_ref) {
     });
     canvas.on('object:added', function (event) {
       onObjectAdded(event.target.toJSON(), event, canvas);
+      onCanvasChange(event.target.toJSON(), event, canvas);
     });
     canvas.on('object:removed', function (event) {
       onObjectRemoved(event.target.toJSON(), event, canvas);
+      onCanvasChange(event.target.toJSON(), event, canvas);
+    });
+    canvas.on('object:modified', function (event) {
+      onObjectModified(event.target.toJSON(), event, canvas);
+      onCanvasChange(event.target.toJSON(), event, canvas);
     });
     return function () {
       if (!canvas) return;
@@ -340,9 +353,9 @@ var Whiteboard = function Whiteboard(_ref) {
 
   var getColorButtons = function getColorButtons(colors) {
     return colors.map(function (color) {
-      return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, {
+      return /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, {
         key: color
-      }, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ColorButtonS, {
+      }, /*#__PURE__*/_react.default.createElement(_Whiteboard.ColorButtonS, {
         color: color,
         onClick: function onClick(e) {
           return changeCurrentColor(color, e);
@@ -382,7 +395,7 @@ var Whiteboard = function Whiteboard(_ref) {
     return Object.keys(modeButtons).map(function (buttonKey) {
       if (!enabledControls[buttonKey]) return;
       var btn = modeButtons[buttonKey];
-      return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+      return /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
         key: buttonKey,
         type: "button",
         className: "" + (canvasDrawingSettings.currentMode === buttonKey ? 'selected' : ''),
@@ -396,13 +409,13 @@ var Whiteboard = function Whiteboard(_ref) {
     });
   };
 
-  return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WhiteBoardS, {
+  return /*#__PURE__*/_react.default.createElement(_Whiteboard.WhiteBoardS, {
     ref: whiteboardRef
-  }, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarHolderS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ColorBarS, null, !!enabledControls.COLOR_PICKER && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_index2.ColorPicker, {
+  }, /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarHolderS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ColorBarS, null, !!enabledControls.COLOR_PICKER && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorPicker, {
     size: 28,
     color: canvasDrawingSettings.currentColor,
     onChange: changeCurrentColor
-  })), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.RangeInputS, {
+  })), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.RangeInputS, {
     type: "range",
     min: 1,
     max: 30,
@@ -410,14 +423,14 @@ var Whiteboard = function Whiteboard(_ref) {
     thumbColor: canvasDrawingSettings.currentColor,
     value: canvasDrawingSettings.brushWidth,
     onChange: changeBrushWidth
-  })), !!enabledControls.DEFAULT_COLORS && /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, getColorButtons(['#6161ff', '#ff4f4f', '#3fd18d', '#ec70ff', '#000000'])), !!enabledControls.FILL && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+  })), !!enabledControls.DEFAULT_COLORS && /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, getColorButtons(['#6161ff', '#ff4f4f', '#3fd18d', '#ec70ff', '#000000'])), !!enabledControls.FILL && /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     type: "button",
     className: canvasDrawingSettings.fill ? 'selected' : '',
     onClick: changeFill
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _colorFill.default,
     alt: "Delete"
-  }))), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarS, null, getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+  }))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarS, null, getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     type: "button",
     onClick: function onClick() {
       return board.clearCanvas();
@@ -425,38 +438,38 @@ var Whiteboard = function Whiteboard(_ref) {
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _delete.default,
     alt: "Delete"
-  })), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.SeparatorS, null), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement("input", {
+  })), /*#__PURE__*/_react.default.createElement(_Whiteboard.SeparatorS, null), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement("input", {
     ref: uploadPdfRef,
     hidden: true,
     accept: "image/*,.pdf",
     type: "file",
     onChange: onFileChange
-  }), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+  }), /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: function onClick() {
       return uploadPdfRef.current.click();
     }
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _addPhoto.default,
     alt: "Delete"
-  }))), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+  }))), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleSaveCanvasAsImage
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _download.default,
     alt: "Download"
-  })))), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+  })))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleZoomIn,
     title: "Zoom In"
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _zoomIn.default,
     alt: "Zoom In"
-  }))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+  }))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleResetZoom,
     title: "Reset Zoom"
   }, /*#__PURE__*/_react.default.createElement("span", {
     style: {
       fontSize: '11px'
     }
-  }, Math.floor(canvasSettings.zoom * 100), "%"))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+  }, Math.floor(canvasSettings.zoom * 100), "%"))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleZoomOut,
     title: "Zoom Out"
   }, /*#__PURE__*/_react.default.createElement("img", {
@@ -465,7 +478,7 @@ var Whiteboard = function Whiteboard(_ref) {
   }))))), /*#__PURE__*/_react.default.createElement("canvas", {
     ref: canvasRef,
     id: "canvas"
-  }), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_index.PdfReader, {
+  }), /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.PdfReader, {
     fileReaderInfo: fileReaderInfo,
     onPageChange: handlePageChange,
     updateFileReaderInfo: updateFileReaderInfo

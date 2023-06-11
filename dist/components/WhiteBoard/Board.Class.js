@@ -243,6 +243,10 @@ var Board = /*#__PURE__*/function () {
   };
 
   _proto.throttle = function throttle(f, delay) {
+    if (delay === void 0) {
+      delay = 300;
+    }
+
     var timer = 0;
     return function () {
       var _this = this;
