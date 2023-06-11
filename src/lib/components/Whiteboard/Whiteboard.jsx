@@ -63,6 +63,7 @@ const Whiteboard = ({
   onObjectAdded = (data, event, canvas) => {},
   onObjectRemoved = (data, event, canvas) => {},
   onObjectModified = (data, event, canvas) => {},
+  onCanvasRender = (data, event, canvas) => {},
   onCanvasChange = (data, event, canvas) => {},
   onZoom = (data, event, canvas) => {},
   onImageUploaded = (data, event, canvas) => {},
