@@ -90,6 +90,8 @@ var Whiteboard = function Whiteboard(_ref) {
       onObjectRemoved = _ref$onObjectRemoved === void 0 ? function (data, event, canvas) {} : _ref$onObjectRemoved,
       _ref$onObjectModified = _ref.onObjectModified,
       onObjectModified = _ref$onObjectModified === void 0 ? function (data, event, canvas) {} : _ref$onObjectModified,
+      _ref$onCanvasRender = _ref.onCanvasRender,
+      onCanvasRender = _ref$onCanvasRender === void 0 ? function (data, event, canvas) {} : _ref$onCanvasRender,
       _ref$onCanvasChange = _ref.onCanvasChange,
       onCanvasChange = _ref$onCanvasChange === void 0 ? function (data, event, canvas) {} : _ref$onCanvasChange,
       _ref$onZoom = _ref.onZoom,
