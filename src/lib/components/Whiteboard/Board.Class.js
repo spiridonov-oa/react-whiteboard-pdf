@@ -220,7 +220,7 @@ export class Board {
     }
   }
 
-  throttle(f, delay) {
+  throttle(f, delay = 300) {
     let timer = 0;
     return function (...args) {
       clearTimeout(timer);

@@ -12,12 +12,13 @@ import {
   SeparatorS,
   ToolbarHolderS,
   PDFWrapperS,
-} from './Whiteboard.styled.js';
+} from './Whiteboard.styled';
 import { fabric } from 'fabric';
-import { PdfReader } from '../PdfReader/index.jsx';
+import { PdfReader } from '../PdfReader';
 import { saveAs } from 'file-saver';
 import { Board, modes } from './Board.Class.js';
-import { ColorPicker } from '../ColorPicker/index.jsx';
+import { ColorPicker } from '../ColorPicker';
+
 import SelectIcon from './../images/cross.svg';
 import EraserIcon from './../images/eraser.svg';
 import TextIcon from './../images/text.svg';
@@ -61,6 +62,8 @@ const Whiteboard = ({
   fileInfo = {},
   onObjectAdded = (data, event, canvas) => {},
   onObjectRemoved = (data, event, canvas) => {},
+  onObjectModified = (data, event, canvas) => {},
+  onCanvasChange = (data, event, canvas) => {},
   onZoom = (data, event, canvas) => {},
   onImageUploaded = (data, event, canvas) => {},
   onPDFUploaded = (data, event, canvas) => {},
@@ -146,6 +149,10 @@ const Whiteboard = ({
   useEffect(() => {
     if (!canvas) return;
 
+    canvas.on('after:render', (e) => {
+      onCanvasRender(canvas, e, canvas);
+    });
+
     canvas.on('zoom', function (data) {
       onZoom(data, null, canvas);
       setCanvasSettings({ ...canvasSettings, zoom: data.scale });
@@ -153,10 +160,17 @@ const Whiteboard = ({
 
     canvas.on('object:added', (event) => {
       onObjectAdded(event.target.toJSON(), event, canvas);
+      onCanvasChange(event.target.toJSON(), event, canvas);
     });
 
     canvas.on('object:removed', (event) => {
       onObjectRemoved(event.target.toJSON(), event, canvas);
+      onCanvasChange(event.target.toJSON(), event, canvas);
+    });
+
+    canvas.on('object:modified', (event) => {
+      onObjectModified(event.target.toJSON(), event, canvas);
+      onCanvasChange(event.target.toJSON(), event, canvas);
     });
 
     return () => {
