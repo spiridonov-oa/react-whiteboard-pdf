@@ -702,8 +702,11 @@ export class Board {
 
   removeBoard() {
     this.element.disconnect();
-    this.canvas.off();
-    this.canvas.dispose();
+    if (this.canvas) {
+      this.canvas.off();
+      this.canvas.dispose();
+    }
+    this.canvas = null;
   }
 
   // function drawBackground(canvas) {
