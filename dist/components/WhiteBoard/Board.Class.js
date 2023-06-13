@@ -25,25 +25,30 @@ exports.modes = modes;
 
 var Board = /*#__PURE__*/function () {
   function Board(params) {
+    var _this = this;
+
     this.canvas = void 0;
     this.modes = void 0;
     this.cursorPencil = (0, _cursors.getCursor)('pencil');
     this.mouseDown = false;
     this.drawInstance = null;
     this.drawingSettings = void 0;
-    this.canvasSettings = {
+    this.canvasConfig = {
       zoom: 1,
       contentJSON: null,
       minZoom: 0.05,
-      maxZoom: 9.99
+      maxZoom: 9.99,
+      viewportTransform: [1, 0, 0, 1, 0, 0]
     };
 
     if (params) {
       this.drawingSettings = params.drawingSettings;
-      this.canvasSettings = _extends({}, this.canvasSettings, params.canvasSettings);
     }
 
-    this.canvas = this.initCanvas(this.drawingSettings, this.canvasSettings);
+    this.canvas = this.initCanvas(this.canvasConfig);
+    this.canvas.once('after:render', function () {
+      _this.applyCanvasConfig(params.canvasConfig);
+    });
     this.modes = modes;
     this.resetZoom();
     this.setDrawingMode(this.drawingSettings.currentMode);
@@ -52,7 +57,7 @@ var Board = /*#__PURE__*/function () {
 
   var _proto = Board.prototype;
 
-  _proto.initCanvas = function initCanvas(drawingSettings, canvasSettings) {
+  _proto.initCanvas = function initCanvas() {
     _fabric.fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
       var object = null,
           objects = this.getObjects();
@@ -70,19 +75,7 @@ var Board = /*#__PURE__*/function () {
     var canvasElement = document.getElementById('canvas');
     if (!canvasElement) return;
     var parentElement = canvasElement.parentNode;
-    var canvas = new _fabric.fabric.Canvas('canvas', {
-      width: drawingSettings.width,
-      height: drawingSettings.height
-    });
-    canvas.zoomToPoint({
-      x: canvas.width / 2,
-      y: canvas.height / 2
-    }, canvasSettings.zoom);
-
-    if (canvasSettings.contentJSON) {
-      canvas.loadFromJSON(canvasSettings.contentJSON);
-    }
-
+    var canvas = new _fabric.fabric.Canvas('canvas');
     canvas.perPixelTargetFind = true;
 
     if (parentElement) {
@@ -91,6 +84,29 @@ var Board = /*#__PURE__*/function () {
     }
 
     return canvas;
+  };
+
+  _proto.applyCanvasConfig = function applyCanvasConfig(canvasConfig) {
+    this.canvasConfig = _extends({}, this.canvasConfig, canvasConfig);
+
+    if (this.canvasConfig.zoom) {
+      this.canvas.setZoom(this.canvasConfig.zoom);
+    }
+
+    if (this.canvasConfig.contentJSON) {
+      this.canvas.loadFromJSON(this.canvasConfig.contentJSON);
+    }
+
+    if (this.canvasConfig.viewportTransform) {
+      this.canvas.viewportTransform = this.canvasConfig.viewportTransform;
+      this.changeZoom({
+        scale: 1
+      });
+    }
+
+    this.canvas.requestRenderAll();
+    console.log(this.canvas.getObjects());
+    this.canvas.fire('config:chnage');
   };
 
   _proto.addZoomListeners = function addZoomListeners() {
@@ -177,8 +193,14 @@ var Board = /*#__PURE__*/function () {
   };
 
   _proto.setDrawingSettings = function setDrawingSettings(drawingSettings) {
+    if (!drawingSettings) return;
     this.drawingSettings = _extends({}, this.drawingSettings, drawingSettings);
     this.setDrawingMode(this.drawingSettings.currentMode);
+  };
+
+  _proto.setCanvasConfig = function setCanvasConfig(canvasConfig) {
+    if (!canvasConfig) return;
+    this.applyCanvasConfig(canvasConfig);
   };
 
   _proto.setDrawingMode = function setDrawingMode(mode) {
@@ -249,7 +271,7 @@ var Board = /*#__PURE__*/function () {
 
     var timer = 0;
     return function () {
-      var _this = this;
+      var _this2 = this;
 
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
@@ -257,7 +279,7 @@ var Board = /*#__PURE__*/function () {
 
       clearTimeout(timer);
       timer = setTimeout(function () {
-        return f.apply(_this, args);
+        return f.apply(_this2, args);
       }, delay);
     };
   };
@@ -558,12 +580,12 @@ var Board = /*#__PURE__*/function () {
   };
 
   _proto.createText = function createText() {
-    var _this2 = this;
+    var _this3 = this;
 
     var canvas = this.canvas;
     canvas.isDrawingMode = true;
     canvas.on('mouse:down', function (e) {
-      return _this2.addText.call(_this2, e);
+      return _this3.addText.call(_this3, e);
     });
     canvas.isDrawingMode = false;
   };
@@ -591,13 +613,13 @@ var Board = /*#__PURE__*/function () {
     this.editedTextObject = text;
     canvas.off('mouse:down');
     canvas.once('mouse:down', function (e1) {
-      var _this3 = this;
+      var _this4 = this;
 
       if (text.isEditing) {
         text.exitEditing();
         this.editedTextObject = null;
         canvas.once('mouse:down', function (e2) {
-          _this3.addText.call(_this3, e2);
+          _this4.addText.call(_this4, e2);
         });
       } else {
         this.addText.call(this, e1);
@@ -619,6 +641,7 @@ var Board = /*#__PURE__*/function () {
     });
     canvas.on('mouse:over', function (event) {
       var hoveredObject = event.target;
+      console.log(hoveredObject);
 
       if (hoveredObject) {
         hoveredObject.set({
@@ -677,8 +700,8 @@ var Board = /*#__PURE__*/function () {
       };
     }
 
-    var minZoom = this.canvasSettings.minZoom;
-    var maxZoom = this.canvasSettings.maxZoom;
+    var minZoom = this.canvasConfig.minZoom;
+    var maxZoom = this.canvasConfig.maxZoom;
     scale = this.canvas.getZoom() * scale;
     scale = scale < minZoom ? minZoom : scale > maxZoom ? maxZoom : scale;
     this.canvas.zoomToPoint(point, scale);
@@ -705,7 +728,7 @@ var Board = /*#__PURE__*/function () {
 
   _proto.onZoom = function onZoom(params) {
     this.addZoomListeners();
-    this.canvas.fire('zoom', params);
+    this.canvas.fire('zoom:change', params);
   };
 
   _proto.openPage = function openPage(page) {
@@ -760,8 +783,13 @@ var Board = /*#__PURE__*/function () {
 
   _proto.removeBoard = function removeBoard() {
     this.element.disconnect();
-    this.canvas.off();
-    this.canvas.dispose();
+
+    if (this.canvas) {
+      this.canvas.off();
+      this.canvas.dispose();
+    }
+
+    this.canvas = null;
   } // function drawBackground(canvas) {
   //   const dotSize = 4; // Adjust the size of the dots as needed
   //   const dotSvg = `
