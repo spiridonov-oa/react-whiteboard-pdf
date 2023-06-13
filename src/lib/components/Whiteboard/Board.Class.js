@@ -19,26 +19,31 @@ export class Board {
   mouseDown = false;
   drawInstance = null;
   drawingSettings;
-  canvasSettings = {
+  canvasConfig = {
     zoom: 1,
     contentJSON: null,
     minZoom: 0.05,
     maxZoom: 9.99,
+    viewportTransform: [1, 0, 0, 1, 0, 0],
   };
 
   constructor(params) {
     if (params) {
       this.drawingSettings = params.drawingSettings;
-      this.canvasSettings = { ...this.canvasSettings, ...params.canvasSettings };
     }
-    this.canvas = this.initCanvas(this.drawingSettings, this.canvasSettings);
+    this.canvas = this.initCanvas(this.canvasConfig);
+
+    this.canvas.once('after:render', () => {
+      this.applyCanvasConfig(params.canvasConfig);
+    });
+
     this.modes = modes;
     this.resetZoom();
     this.setDrawingMode(this.drawingSettings.currentMode);
     this.addZoomListeners();
   }
 
-  initCanvas(drawingSettings, canvasSettings) {
+  initCanvas() {
     fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
       var object = null,
         objects = this.getObjects();
@@ -56,17 +61,7 @@ export class Board {
 
     const parentElement = canvasElement.parentNode;
 
-    const canvas = new fabric.Canvas('canvas', {
-      width: drawingSettings.width,
-      height: drawingSettings.height,
-    });
-
-    canvas.zoomToPoint({ x: canvas.width / 2, y: canvas.height / 2 }, canvasSettings.zoom);
-
-    if (canvasSettings.contentJSON) {
-      canvas.loadFromJSON(canvasSettings.contentJSON);
-    }
-
+    const canvas = new fabric.Canvas('canvas');
     canvas.perPixelTargetFind = true;
 
     if (parentElement) {
@@ -75,6 +70,23 @@ export class Board {
     }
 
     return canvas;
+  }
+
+  applyCanvasConfig(canvasConfig) {
+    this.canvasConfig = { ...this.canvasConfig, ...canvasConfig };
+    if (this.canvasConfig.zoom) {
+      this.canvas.setZoom(this.canvasConfig.zoom);
+    }
+    if (this.canvasConfig.contentJSON) {
+      this.canvas.loadFromJSON(this.canvasConfig.contentJSON);
+    }
+    if (this.canvasConfig.viewportTransform) {
+      this.canvas.viewportTransform = this.canvasConfig.viewportTransform;
+      this.changeZoom({ scale: 1 });
+    }
+    this.canvas.requestRenderAll();
+    console.log(this.canvas.getObjects());
+    this.canvas.fire('config:chnage');
   }
 
   addZoomListeners() {
@@ -166,8 +178,16 @@ export class Board {
   }
 
   setDrawingSettings(drawingSettings) {
+    if (!drawingSettings) return;
+
     this.drawingSettings = { ...this.drawingSettings, ...drawingSettings };
     this.setDrawingMode(this.drawingSettings.currentMode);
+  }
+
+  setCanvasConfig(canvasConfig) {
+    if (!canvasConfig) return;
+
+    this.applyCanvasConfig(canvasConfig);
   }
 
   setDrawingMode(mode) {
@@ -580,6 +600,7 @@ export class Board {
 
     canvas.on('mouse:over', (event) => {
       const hoveredObject = event.target;
+      console.log(hoveredObject);
       if (hoveredObject) {
         hoveredObject.set({
           opacity: 0.2,
@@ -629,8 +650,8 @@ export class Board {
       point = { x: width / 2, y: height / 2 };
     }
 
-    const minZoom = this.canvasSettings.minZoom;
-    const maxZoom = this.canvasSettings.maxZoom;
+    const minZoom = this.canvasConfig.minZoom;
+    const maxZoom = this.canvasConfig.maxZoom;
 
     scale = this.canvas.getZoom() * scale;
     scale = scale < minZoom ? minZoom : scale > maxZoom ? maxZoom : scale;
@@ -650,7 +671,7 @@ export class Board {
 
   onZoom(params) {
     this.addZoomListeners();
-    this.canvas.fire('zoom', params);
+    this.canvas.fire('zoom:change', params);
   }
 
   openPage(page) {

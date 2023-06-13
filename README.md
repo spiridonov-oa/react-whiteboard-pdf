@@ -113,7 +113,7 @@ const App = () => {
       onPageChange={(data, event, canvas) => {}}
       onOptionsChange={(data, event, canvas) => {}}
       onSaveCanvasAsImage={(data, event, canvas) => {}}
-      onLoadFromJSON={(data, event, canvas) => {}}
+      onConfigChange={(data, event, canvas) => {}}
       onSaveCanvasState={(data, event, canvas) => {}}
     />
   );

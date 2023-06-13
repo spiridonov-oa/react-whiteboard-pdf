@@ -72,7 +72,7 @@ const Whiteboard = ({
   onPageChange = (data, event, canvas) => {},
   onOptionsChange = (data, event, canvas) => {},
   onSaveCanvasAsImage = (data, event, canvas) => {},
-  onLoadFromJSON = (data, event, canvas) => {},
+  onConfigChange = (data, event, canvas) => {},
   onSaveCanvasState = (data, event, canvas) => {},
 }) => {
   const [board, setBoard] = useState();
@@ -81,7 +81,8 @@ const Whiteboard = ({
     ...initDrawingSettings,
     ...drawingSettings,
   });
-  const [canvasSettings, setCanvasSettings] = useState({ ...initSettings, ...settings });
+  const canvasConfig = { ...initSettings, ...settings };
+  const [zoom, setZoom] = useState(canvasConfig.zoom);
   const [fileReaderInfo, setFileReaderInfo] = useState({ ...initFileInfo, ...fileInfo });
   const canvasRef = useRef(null);
   const whiteboardRef = useRef(null);
@@ -118,7 +119,8 @@ const Whiteboard = ({
   }, [drawingSettings]);
 
   useEffect(() => {
-    setCanvasSettings({ ...canvasSettings, ...settings });
+    if (!board || !canvasConfig) return;
+    board.setCanvasConfig(canvasConfig);
   }, [settings]);
 
   useEffect(() => {
@@ -132,7 +134,7 @@ const Whiteboard = ({
 
     const newBoard = new Board({
       drawingSettings: canvasDrawingSettings,
-      canvasSettings: canvasSettings,
+      canvasConfig: canvasConfig,
     });
 
     setBoard(newBoard);
@@ -146,11 +148,17 @@ const Whiteboard = ({
   }, [board]);
 
   useEffect(() => {
-    if (!board?.canvas || !canvasSettings.contentJSON) return;
+    if (!board || !canvasDrawingSettings) return;
 
-    board.canvas.loadFromJSON(canvasSettings.contentJSON);
-    onLoadFromJSON(canvasSettings.contentJSON, null, board.canvas);
-  }, [board, canvasSettings]);
+    board.setDrawingSettings(canvasDrawingSettings);
+  }, [canvasDrawingSettings, board]);
+
+  // useEffect(() => {
+  //   if (!board || !canvasConfig) return;
+
+  //   board.setCanvasConfig(canvasConfig);
+  //   onConfigChange(canvasConfig, null, board.canvas);
+  // }, [board, canvasConfig]);
 
   useEffect(() => {
     if (!board?.canvas || !fileReaderInfo.currentPage) {
@@ -168,12 +176,6 @@ const Whiteboard = ({
     }
   }, [fileReaderInfo.currentPage]);
 
-  useEffect(() => {
-    if (!board) return;
-
-    board.setDrawingSettings(canvasDrawingSettings);
-  }, [canvasDrawingSettings, board]);
-
   function uploadImage(e) {
     const reader = new FileReader();
     const file = e.target.files[0];
@@ -190,12 +192,13 @@ const Whiteboard = ({
 
   function addListeners(canvas) {
     canvas.on('after:render', (e) => {
-      onCanvasRender(canvas, e, canvas);
+      const data = getFullData(canvas);
+      onCanvasRender(data, e, canvas);
     });
 
-    canvas.on('zoom', function (data) {
+    canvas.on('zoom:change', function (data) {
       onZoom(data, null, canvas);
-      setCanvasSettings({ ...canvasSettings, zoom: data.scale });
+      setZoom(data.scale);
     });
 
     canvas.on('object:added', (event) => {
@@ -212,6 +215,19 @@ const Whiteboard = ({
       onObjectModified(event.target.toJSON(), event, canvas);
       onCanvasChange(event.target.toJSON(), event, canvas);
     });
+  }
+
+  function getFullData(canvas) {
+    if (!canvas) return;
+
+    return {
+      settings: {
+        contentJSON: canvas.toJSON(),
+        viewportTransform: canvas.viewportTransform,
+      },
+      drawingSettings: canvasDrawingSettings,
+      fileInfo: fileReaderInfo,
+    };
   }
 
   function saveCanvasState() {
@@ -429,7 +445,7 @@ const Whiteboard = ({
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
               <ButtonS onClick={handleResetZoom} title="Reset Zoom">
-                <span style={{ fontSize: '11px' }}>{Math.floor(canvasSettings.zoom * 100)}%</span>
+                <span style={{ fontSize: '11px' }}>{Math.floor(zoom * 100)}%</span>
               </ButtonS>
             </ToolbarItemS>
           )}
