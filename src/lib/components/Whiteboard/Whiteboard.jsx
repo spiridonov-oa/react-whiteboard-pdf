@@ -279,10 +279,8 @@ const Whiteboard = ({
   }
 
   function bringControlTOStartPosition(){
-    console.error('i am getting the control the required position');
     board.canvas.viewportTransform=[1, 0, 0, 1, 0, 0];
-    console.error('earlier drawing setting are ',JSON.stringify(canvasDrawingSettings));
-    setCanvasDrawingSettings({ ...canvasDrawingSettings,viewportTransform:[1, 0, 0, 1, 0, 0]});
+    board.resetZoom(1);
   }
 
   function onFileChange(event) {
