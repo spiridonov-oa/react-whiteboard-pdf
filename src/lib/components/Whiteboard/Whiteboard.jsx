@@ -444,7 +444,7 @@ const Whiteboard = ({
           {!!enabledControls.GO_TO_START && (
             <ToolbarItemS>
               <ButtonS onClick={bringControlTOStartPosition}>
-                <img src={DownloadIcon} alt="Download" />
+                Move to initial location
               </ButtonS>
             </ToolbarItemS>
           )}
