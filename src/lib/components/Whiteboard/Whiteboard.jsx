@@ -106,6 +106,7 @@ const Whiteboard = ({
         DEFAULT_COLORS: true,
         FILES: true,
         SAVE_AS_IMAGE: true,
+        GO_TO_START: true,
         ZOOM: true,
 
         ...controls,
@@ -277,6 +278,13 @@ const Whiteboard = ({
     });
   }
 
+  function bringControlTOStartPosition(){
+    console.error('i am getting the control the required position');
+    board.canvas.viewportTransform=[1, 0, 0, 1, 0, 0];
+    console.error('earlier drawing setting are ',JSON.stringify(canvasDrawingSettings));
+    setCanvasDrawingSettings({ ...canvasDrawingSettings,viewportTransform:[1, 0, 0, 1, 0, 0]});
+  }
+
   function onFileChange(event) {
     if (!event.target.files[0]) return;
 
@@ -432,6 +440,16 @@ const Whiteboard = ({
               </ButtonS>
             </ToolbarItemS>
           )}
+
+          {!!enabledControls.GO_TO_START && (
+            <ToolbarItemS>
+              <ButtonS onClick={bringControlTOStartPosition}>
+                <img src={DownloadIcon} alt="Download" />
+              </ButtonS>
+            </ToolbarItemS>
+          )}
+
+          
         </ToolbarS>
         <ZoomBarS>
           {!!enabledControls.ZOOM && (
