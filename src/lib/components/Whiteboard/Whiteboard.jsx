@@ -106,6 +106,7 @@ const Whiteboard = ({
         DEFAULT_COLORS: true,
         FILES: true,
         SAVE_AS_IMAGE: true,
+        GO_TO_START: true,
         ZOOM: true,
 
         ...controls,
@@ -277,6 +278,11 @@ const Whiteboard = ({
     });
   }
 
+  function bringControlTOStartPosition(){
+    board.canvas.viewportTransform=[1, 0, 0, 1, 0, 0];
+    board.resetZoom(1);
+  }
+
   function onFileChange(event) {
     if (!event.target.files[0]) return;
 
@@ -432,6 +438,16 @@ const Whiteboard = ({
               </ButtonS>
             </ToolbarItemS>
           )}
+
+          {!!enabledControls.GO_TO_START && (
+            <ToolbarItemS>
+              <ButtonS onClick={bringControlTOStartPosition}>
+                Move to initial location
+              </ButtonS>
+            </ToolbarItemS>
+          )}
+
+          
         </ToolbarS>
         <ZoomBarS>
           {!!enabledControls.ZOOM && (
