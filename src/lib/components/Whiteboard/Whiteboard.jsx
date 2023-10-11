@@ -75,6 +75,7 @@ const Whiteboard = ({
   onConfigChange = (data, event, canvas) => {},
   onSaveCanvasState = (data, event, canvas) => {},
 }) => {
+  const [canvasSaveData, setCanvasSaveData] = useState([]);
   const [board, setBoard] = useState();
   const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
   const [canvasDrawingSettings, setCanvasDrawingSettings] = useState({
@@ -216,6 +217,21 @@ const Whiteboard = ({
       onObjectModified(event.target.toJSON(), event, canvas);
       onCanvasChange(event.target.toJSON(), event, canvas);
     });
+  }
+
+  function handleSaveCanvasState() {
+    const newCanvasState = board.canvas.toJSON();
+    setCanvasSaveData((prevStates) => [...prevStates, newCanvasState]);
+    board.clearCanvas();
+  }
+
+  function handleLoadCanvasState(state) {
+    if (board && state) {
+      board.canvas.loadFromJSON(state, () => {
+        board.canvas.renderAll();
+        setCanvasSaveData([]);
+      });
+    }
   }
 
   function getFullData(canvas) {
@@ -447,8 +463,24 @@ const Whiteboard = ({
             </ToolbarItemS>
           )}
 
-          
+          <ToolbarItemS>
+            <ButtonS type="button" onClick={handleSaveCanvasState} >
+              Save
+            </ButtonS>
+          </ToolbarItemS>
+
+          {
+            (canvasSaveData && canvasSaveData.length > 0) && (
+              <ToolbarItemS>
+                <ButtonS
+                  onClick={() => handleLoadCanvasState(canvasSaveData[0])}>
+                  Load
+                </ButtonS>  
+              </ToolbarItemS>
+              )
+          }
         </ToolbarS>
+
         <ZoomBarS>
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
