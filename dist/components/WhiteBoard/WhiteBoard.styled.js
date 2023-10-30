@@ -31,15 +31,15 @@ var SeparatorS = _styledComponents.default.div(_templateObject4 || (_templateObj
 
 exports.SeparatorS = SeparatorS;
 
-var ToolbarS = _styledComponents.default.div(_templateObject5 || (_templateObject5 = _taggedTemplateLiteralLoose(["\n  padding: 4px 4px;\n  border-radius: 5px;\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  background: white;\n  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);\n  z-index: 1;\n"])));
+var ToolbarS = _styledComponents.default.div(_templateObject5 || (_templateObject5 = _taggedTemplateLiteralLoose(["\n  padding: 4px 4px;\n  border-radius: 5px;\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  background: white;\n  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);\n  z-index: 2;\n"])));
 
 exports.ToolbarS = ToolbarS;
 
-var ColorBarS = _styledComponents.default.div(_templateObject6 || (_templateObject6 = _taggedTemplateLiteralLoose(["\n  position: absolute;\n  top: 100px;\n  left: 50px;\n  transform: rotate(90deg);\n  transform-origin: 0% 0%;\n  padding: 0 0 0 4px;\n  border-radius: 5px;\n  display: flex;\n  font-size: 12px;\n  flex-wrap: wrap;\n  flex-direction: row;\n  align-items: center;\n  background: white;\n  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);\n  z-index: 1;\n\n  > button {\n    transform: rotate(-90deg);\n  }\n"])));
+var ColorBarS = _styledComponents.default.div(_templateObject6 || (_templateObject6 = _taggedTemplateLiteralLoose(["\n  position: absolute;\n  top: 100px;\n  left: 50px;\n  transform: rotate(90deg);\n  transform-origin: 0% 0%;\n  padding: 0 0 0 4px;\n  border-radius: 5px;\n  display: flex;\n  font-size: 12px;\n  flex-wrap: wrap;\n  flex-direction: row;\n  align-items: center;\n  background: white;\n  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);\n  z-index: 2;\n\n  > button {\n    transform: rotate(-90deg);\n  }\n"])));
 
 exports.ColorBarS = ColorBarS;
 
-var ZoomBarS = _styledComponents.default.div(_templateObject7 || (_templateObject7 = _taggedTemplateLiteralLoose(["\n  position: absolute;\n  top: 100px;\n  right: 0;\n  padding: 4px 0;\n  border-radius: 5px;\n  border-bottom-right-radius: 0;\n  border-top-right-radius: 0;\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: column;\n  align-items: center;\n  background: white;\n  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);\n  z-index: 1;\n"])));
+var ZoomBarS = _styledComponents.default.div(_templateObject7 || (_templateObject7 = _taggedTemplateLiteralLoose(["\n  position: absolute;\n  top: 100px;\n  right: 0;\n  padding: 4px 0;\n  border-radius: 5px;\n  border-bottom-right-radius: 0;\n  border-top-right-radius: 0;\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: column;\n  align-items: center;\n  background: white;\n  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);\n  z-index: 2;\n"])));
 
 exports.ZoomBarS = ZoomBarS;
 
@@ -47,11 +47,11 @@ var ToolbarHolderS = _styledComponents.default.div(_templateObject8 || (_templat
 
 exports.ToolbarHolderS = ToolbarHolderS;
 
-var PDFWrapperS = _styledComponents.default.div(_templateObject9 || (_templateObject9 = _taggedTemplateLiteralLoose(["\n  position: absolute;\n  bottom: 0;\n  width: 100%;\n"])));
+var PDFWrapperS = _styledComponents.default.div(_templateObject9 || (_templateObject9 = _taggedTemplateLiteralLoose(["\n  position: absolute;\n  top: 50px;\n  bottom: 0;\n  width: 100%;\n"])));
 
 exports.PDFWrapperS = PDFWrapperS;
 
-var ColorButtonS = _styledComponents.default.button(_templateObject10 || (_templateObject10 = _taggedTemplateLiteralLoose(["\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  margin: 0 2px;\n  min-width: 24px;\n  min-height: 24px;\n  border-radius: 5px;\n  border: none;\n  background-color: ", ";\n  outline: none;\n  cursor: pointer;\n"])), function (_ref) {
+var ColorButtonS = _styledComponents.default.button(_templateObject10 || (_templateObject10 = _taggedTemplateLiteralLoose(["\n  z-index: 2;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  margin: 0 2px;\n  min-width: 24px;\n  min-height: 24px;\n  border-radius: 5px;\n  border: none;\n  background-color: ", ";\n  outline: none;\n  cursor: pointer;\n"])), function (_ref) {
   var color = _ref.color;
   return color;
 });

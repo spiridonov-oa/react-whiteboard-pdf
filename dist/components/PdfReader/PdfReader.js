@@ -9,7 +9,7 @@ var _entry = require("react-pdf/dist/esm/entry.webpack");
 
 var _reactPdf = require("react-pdf");
 
-var _indexModule = _interopRequireDefault(require("./index.module.scss"));
+var _PdfReader = require("./PdfReader.styled");
 
 var _back = _interopRequireDefault(require("./../images/back.svg"));
 
@@ -52,12 +52,7 @@ var PDFReader = function PDFReader(_ref) {
     return changePage(-1);
   };
 
-  return /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.pdfReader
-  }, /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.fileContainer
-  }, /*#__PURE__*/_react.default.createElement(_entry.Document, {
-    className: _indexModule.default.document,
+  return /*#__PURE__*/_react.default.createElement(_PdfReader.PDFReaderS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.FileContainer, null, /*#__PURE__*/_react.default.createElement(_entry.Document, {
     file: fileReaderInfo.file,
     onLoadSuccess: onDocumentLoadSuccess,
     onLoadProgress: function onLoadProgress(_ref3) {
@@ -69,18 +64,14 @@ var PDFReader = function PDFReader(_ref) {
     className: "import-pdf-page",
     onRenderSuccess: onRenderSuccess,
     pageNumber: fileReaderInfo.currentPageNumber
-  }))), fileReaderInfo.totalPages > 1 && /*#__PURE__*/_react.default.createElement("div", {
-    className: _indexModule.default.pageInfo
-  }, /*#__PURE__*/_react.default.createElement("button", {
+  }))), fileReaderInfo.totalPages > 1 && /*#__PURE__*/_react.default.createElement(_PdfReader.PageInfoS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.NavigationButton, {
     type: "button",
     disabled: fileReaderInfo.currentPageNumber <= 1,
     onClick: previousPage
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _back.default,
     alt: "Back"
-  })), /*#__PURE__*/_react.default.createElement("span", {
-    className: _indexModule.default.pageInfoDetails
-  }, "Page\xA0", /*#__PURE__*/_react.default.createElement("b", null, fileReaderInfo.currentPageNumber), "\xA0of", ' ', fileReaderInfo.totalPages || '--'), /*#__PURE__*/_react.default.createElement("button", {
+  })), /*#__PURE__*/_react.default.createElement(_PdfReader.PageInfoDetails, null, "Page\xA0", /*#__PURE__*/_react.default.createElement("b", null, fileReaderInfo.currentPageNumber), "\xA0of", ' ', fileReaderInfo.totalPages || '--'), /*#__PURE__*/_react.default.createElement(_PdfReader.NavigationButton, {
     type: "button",
     disabled: fileReaderInfo.currentPageNumber >= fileReaderInfo.totalPages,
     onClick: nextPage

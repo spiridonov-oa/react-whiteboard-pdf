@@ -7,7 +7,7 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
-var _Whiteboard = require("./Whiteboard.styled");
+var _WhiteboardStyled = require("./Whiteboard.styled.js");
 
 var _fabric = require("fabric");
 
@@ -47,6 +47,8 @@ var _addPhoto = _interopRequireDefault(require("./../images/add-photo.svg"));
 
 var _colorFill = _interopRequireDefault(require("./../images/color-fill.svg"));
 
+var _focus = _interopRequireDefault(require("./../images/focus.svg"));
+
 var _initDrawingSettings;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -76,6 +78,8 @@ var initSettings = {
 };
 
 var Whiteboard = function Whiteboard(_ref) {
+  var _fileReaderInfo$file;
+
   var controls = _ref.controls,
       settings = _ref.settings,
       drawingSettings = _ref.drawingSettings,
@@ -109,27 +113,31 @@ var Whiteboard = function Whiteboard(_ref) {
       _ref$onSaveCanvasStat = _ref.onSaveCanvasState,
       onSaveCanvasState = _ref$onSaveCanvasStat === void 0 ? function (data, event, canvas) {} : _ref$onSaveCanvasStat;
 
-  var _useState = (0, _react.useState)(),
-      board = _useState[0],
-      setBoard = _useState[1];
+  var _useState = (0, _react.useState)([]),
+      canvasSaveData = _useState[0],
+      setCanvasSaveData = _useState[1];
 
-  var _useState2 = (0, _react.useState)({}),
-      canvasObjectsPerPage = _useState2[0],
-      setCanvasObjectsPerPage = _useState2[1];
+  var _useState2 = (0, _react.useState)(),
+      board = _useState2[0],
+      setBoard = _useState2[1];
 
-  var _useState3 = (0, _react.useState)(_extends({}, initDrawingSettings, drawingSettings)),
-      canvasDrawingSettings = _useState3[0],
-      setCanvasDrawingSettings = _useState3[1];
+  var _useState3 = (0, _react.useState)({}),
+      canvasObjectsPerPage = _useState3[0],
+      setCanvasObjectsPerPage = _useState3[1];
+
+  var _useState4 = (0, _react.useState)(_extends({}, initDrawingSettings, drawingSettings)),
+      canvasDrawingSettings = _useState4[0],
+      setCanvasDrawingSettings = _useState4[1];
 
   var canvasConfig = _extends({}, initSettings, settings);
 
-  var _useState4 = (0, _react.useState)(canvasConfig.zoom),
-      zoom = _useState4[0],
-      setZoom = _useState4[1];
+  var _useState5 = (0, _react.useState)(canvasConfig.zoom),
+      zoom = _useState5[0],
+      setZoom = _useState5[1];
 
-  var _useState5 = (0, _react.useState)(_extends({}, initFileInfo, fileInfo)),
-      fileReaderInfo = _useState5[0],
-      setFileReaderInfo = _useState5[1];
+  var _useState6 = (0, _react.useState)(_extends({}, initFileInfo, fileInfo)),
+      fileReaderInfo = _useState6[0],
+      setFileReaderInfo = _useState6[1];
 
   var canvasRef = (0, _react.useRef)(null);
   var whiteboardRef = (0, _react.useRef)(null);
@@ -137,7 +145,7 @@ var Whiteboard = function Whiteboard(_ref) {
   var enabledControls = (0, _react.useMemo)(function () {
     var _extends2;
 
-    return _extends((_extends2 = {}, _extends2[_BoardClass.modes.PENCIL] = true, _extends2[_BoardClass.modes.LINE] = true, _extends2[_BoardClass.modes.RECTANGLE] = true, _extends2[_BoardClass.modes.ELLIPSE] = true, _extends2[_BoardClass.modes.TRIANGLE] = true, _extends2[_BoardClass.modes.TEXT] = true, _extends2[_BoardClass.modes.SELECT] = true, _extends2[_BoardClass.modes.ERASER] = true, _extends2.CLEAR = true, _extends2.FILL = true, _extends2.BRUSH = true, _extends2.COLOR_PICKER = true, _extends2.DEFAULT_COLORS = true, _extends2.FILES = true, _extends2.SAVE_AS_IMAGE = true, _extends2.ZOOM = true, _extends2), controls);
+    return _extends((_extends2 = {}, _extends2[_BoardClass.modes.PENCIL] = true, _extends2[_BoardClass.modes.LINE] = true, _extends2[_BoardClass.modes.RECTANGLE] = true, _extends2[_BoardClass.modes.ELLIPSE] = true, _extends2[_BoardClass.modes.TRIANGLE] = true, _extends2[_BoardClass.modes.TEXT] = true, _extends2[_BoardClass.modes.SELECT] = true, _extends2[_BoardClass.modes.ERASER] = true, _extends2.CLEAR = true, _extends2.FILL = true, _extends2.BRUSH = true, _extends2.COLOR_PICKER = true, _extends2.DEFAULT_COLORS = true, _extends2.FILES = true, _extends2.SAVE_AS_IMAGE = true, _extends2.GO_TO_START = true, _extends2.SAVE_AND_LOAD = true, _extends2.ZOOM = true, _extends2), controls);
   }, [controls]);
   (0, _react.useEffect)(function () {
     setCanvasDrawingSettings(_extends({}, canvasDrawingSettings, drawingSettings));
@@ -227,6 +235,21 @@ var Whiteboard = function Whiteboard(_ref) {
     });
   }
 
+  function handleSaveCanvasState() {
+    var newCanvasState = board.canvas.toJSON();
+    setCanvasSaveData(function (prevStates) {
+      return [].concat(prevStates, [newCanvasState]);
+    });
+  }
+
+  function handleLoadCanvasState(state) {
+    if (board && state) {
+      board.canvas.loadFromJSON(state, function () {
+        board.canvas.renderAll();
+      });
+    }
+  }
+
   function getFullData(canvas) {
     if (!canvas) return;
     return {
@@ -252,9 +275,7 @@ var Whiteboard = function Whiteboard(_ref) {
     var intValue = parseInt(e.target.value);
     board.canvas.freeDrawingBrush.width = intValue;
 
-    var newOptions = _extends({}, canvasDrawingSettings, {
-      brushWidth: intValue
-    });
+    var newOptions = _extends({}, canvasDrawingSettings);
 
     setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, board.canvas);
@@ -293,9 +314,14 @@ var Whiteboard = function Whiteboard(_ref) {
 
   function handleSaveCanvasAsImage() {
     canvasRef.current.toBlob(function (blob) {
-      (0, _fileSaver.saveAs)(blob, "" + fileReaderInfo.file.name + (fileReaderInfo.currentPage ? '_page-' : '') + ".png");
+      (0, _fileSaver.saveAs)(blob, fileReaderInfo.file.name + "-" + (fileReaderInfo.currentPageNumber ? '_page-' : '') + ".png");
       onSaveCanvasAsImage(blob, null, board.canvas);
     });
+  }
+
+  function bringControlTOStartPosition() {
+    board.canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
+    board.resetZoom(1);
   }
 
   function onFileChange(event) {
@@ -362,9 +388,9 @@ var Whiteboard = function Whiteboard(_ref) {
 
   var getColorButtons = function getColorButtons(colors) {
     return colors.map(function (color) {
-      return /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, {
+      return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, {
         key: color
-      }, /*#__PURE__*/_react.default.createElement(_Whiteboard.ColorButtonS, {
+      }, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ColorButtonS, {
         color: color,
         onClick: function onClick(e) {
           return changeCurrentColor(color, e);
@@ -404,7 +430,7 @@ var Whiteboard = function Whiteboard(_ref) {
     return Object.keys(modeButtons).map(function (buttonKey) {
       if (!enabledControls[buttonKey]) return;
       var btn = modeButtons[buttonKey];
-      return /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+      return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
         key: buttonKey,
         type: "button",
         className: "" + (canvasDrawingSettings.currentMode === buttonKey ? 'selected' : ''),
@@ -418,13 +444,13 @@ var Whiteboard = function Whiteboard(_ref) {
     });
   };
 
-  return /*#__PURE__*/_react.default.createElement(_Whiteboard.WhiteBoardS, {
+  return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WhiteBoardS, {
     ref: whiteboardRef
-  }, /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarHolderS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ColorBarS, null, !!enabledControls.COLOR_PICKER && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorPicker, {
+  }, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarHolderS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ColorBarS, null, !!enabledControls.COLOR_PICKER && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorPicker, {
     size: 28,
     color: canvasDrawingSettings.currentColor,
     onChange: changeCurrentColor
-  })), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.RangeInputS, {
+  })), !!enabledControls.BRUSH && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.RangeInputS, {
     type: "range",
     min: 1,
     max: 30,
@@ -432,14 +458,14 @@ var Whiteboard = function Whiteboard(_ref) {
     thumbColor: canvasDrawingSettings.currentColor,
     value: canvasDrawingSettings.brushWidth,
     onChange: changeBrushWidth
-  })), !!enabledControls.DEFAULT_COLORS && /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, getColorButtons(['#6161ff', '#ff4f4f', '#3fd18d', '#ec70ff', '#000000'])), !!enabledControls.FILL && /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  })), !!enabledControls.DEFAULT_COLORS && /*#__PURE__*/_react.default.createElement(_react.default.Fragment, null, getColorButtons(['#6161ff', '#ff4f4f', '#3fd18d', '#ec70ff', '#000000'])), !!enabledControls.FILL && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     type: "button",
     className: canvasDrawingSettings.fill ? 'selected' : '',
     onClick: changeFill
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _colorFill.default,
     alt: "Delete"
-  }))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarS, null, getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }))), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarS, null, getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     type: "button",
     onClick: function onClick() {
       return board.clearCanvas();
@@ -447,47 +473,62 @@ var Whiteboard = function Whiteboard(_ref) {
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _delete.default,
     alt: "Delete"
-  })), /*#__PURE__*/_react.default.createElement(_Whiteboard.SeparatorS, null), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement("input", {
+  })), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.SeparatorS, null), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement("input", {
     ref: uploadPdfRef,
     hidden: true,
     accept: "image/*,.pdf",
     type: "file",
     onChange: onFileChange
-  }), /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     onClick: function onClick() {
       return uploadPdfRef.current.click();
     }
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _addPhoto.default,
     alt: "Delete"
-  }))), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }))), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     onClick: handleSaveCanvasAsImage
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _download.default,
     alt: "Download"
-  })))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }))), !!enabledControls.GO_TO_START && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+    onClick: bringControlTOStartPosition
+  }, /*#__PURE__*/_react.default.createElement("img", {
+    src: _focus.default,
+    alt: "Recenter"
+  }))), !!enabledControls.SAVE_AND_LOAD && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+    type: "button",
+    onClick: handleSaveCanvasState
+  }, "Save")), !!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
+    onClick: function onClick() {
+      return handleLoadCanvasState(canvasSaveData[0]);
+    }
+  }, "Load"))), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     onClick: handleZoomIn,
     title: "Zoom In"
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _zoomIn.default,
     alt: "Zoom In"
-  }))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     onClick: handleResetZoom,
     title: "Reset Zoom"
   }, /*#__PURE__*/_react.default.createElement("span", {
     style: {
       fontSize: '11px'
     }
-  }, Math.floor(zoom * 100), "%"))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }, Math.floor(zoom * 100), "%"))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     onClick: handleZoomOut,
     title: "Zoom Out"
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _zoomOut.default,
     alt: "Zoom Out"
   }))))), /*#__PURE__*/_react.default.createElement("canvas", {
+    style: {
+      zIndex: 1
+    },
     ref: canvasRef,
     id: "canvas"
-  }), /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.PdfReader, {
+  }), !!(fileReaderInfo != null && (_fileReaderInfo$file = fileReaderInfo.file) != null && _fileReaderInfo$file.size) && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.PdfReader, {
     fileReaderInfo: fileReaderInfo,
     onPageChange: handlePageChange,
     updateFileReaderInfo: updateFileReaderInfo
