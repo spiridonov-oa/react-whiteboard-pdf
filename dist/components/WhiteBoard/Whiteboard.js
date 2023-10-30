@@ -286,7 +286,9 @@ var Whiteboard = function Whiteboard(_ref) {
     var intValue = parseInt(e.target.value);
     board.canvas.freeDrawingBrush.width = intValue;
 
-    var newOptions = _extends({}, canvasDrawingSettings);
+    var newOptions = _extends({}, canvasDrawingSettings, {
+      brushWidth: intValue
+    });
 
     setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, board.canvas);
