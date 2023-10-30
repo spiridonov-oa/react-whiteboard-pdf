@@ -65,7 +65,7 @@ export const ToolbarS = styled.div`
   align-items: center;
   background: white;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  z-index: 1;
+  z-index: 2;
 `;
 
 export const ColorBarS = styled.div`
@@ -83,7 +83,7 @@ export const ColorBarS = styled.div`
   align-items: center;
   background: white;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  z-index: 1;
+  z-index: 2;
 
   > button {
     transform: rotate(-90deg);
@@ -104,7 +104,7 @@ export const ZoomBarS = styled.div`
   align-items: center;
   background: white;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  z-index: 1;
+  z-index: 2;
 `;
 
 export const ToolbarHolderS = styled.div`
@@ -118,11 +118,13 @@ export const ToolbarHolderS = styled.div`
 
 export const PDFWrapperS = styled.div`
   position: absolute;
+  top: 50px;
   bottom: 0;
   width: 100%;
 `;
 
 export const ColorButtonS = styled.button`
+  z-index: 2;
   display: flex;
   justify-content: center;
   align-items: center;

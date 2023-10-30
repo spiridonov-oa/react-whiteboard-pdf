@@ -12,7 +12,7 @@ import {
   SeparatorS,
   ToolbarHolderS,
   PDFWrapperS,
-} from './Whiteboard.styled';
+} from './Whiteboard.styled.js';
 import { fabric } from 'fabric';
 import { PdfReader } from '../PdfReader';
 import { saveAs } from 'file-saver';
@@ -33,6 +33,7 @@ import ZoomOutIcon from './../images/zoom-out.svg';
 import DownloadIcon from './../images/download.svg';
 import UploadIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
+import Recenter from './../images/focus.svg';
 
 const initFileInfo = {
   file: { name: 'whiteboard' },
@@ -108,6 +109,7 @@ const Whiteboard = ({
         FILES: true,
         SAVE_AS_IMAGE: true,
         GO_TO_START: true,
+        SAVE_AND_LOAD: true,
         ZOOM: true,
 
         ...controls,
@@ -222,14 +224,12 @@ const Whiteboard = ({
   function handleSaveCanvasState() {
     const newCanvasState = board.canvas.toJSON();
     setCanvasSaveData((prevStates) => [...prevStates, newCanvasState]);
-    board.clearCanvas();
   }
 
   function handleLoadCanvasState(state) {
     if (board && state) {
       board.canvas.loadFromJSON(state, () => {
         board.canvas.renderAll();
-        setCanvasSaveData([]);
       });
     }
   }
@@ -262,7 +262,7 @@ const Whiteboard = ({
   function changeBrushWidth(e) {
     const intValue = parseInt(e.target.value);
     board.canvas.freeDrawingBrush.width = intValue;
-    const newOptions = { ...canvasDrawingSettings };    
+    const newOptions = { ...canvasDrawingSettings };
     setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, board.canvas);
   }
@@ -289,13 +289,16 @@ const Whiteboard = ({
 
   function handleSaveCanvasAsImage() {
     canvasRef.current.toBlob(function (blob) {
-      saveAs(blob, `${fileReaderInfo.file.name}${fileReaderInfo.currentPage ? '_page-' : ''}.png`);
+      saveAs(
+        blob,
+        `${fileReaderInfo.file.name}-${fileReaderInfo.currentPageNumber ? '_page-' : ''}.png`,
+      );
       onSaveCanvasAsImage(blob, null, board.canvas);
     });
   }
 
-  function bringControlTOStartPosition(){
-    board.canvas.viewportTransform=[1, 0, 0, 1, 0, 0];
+  function bringControlTOStartPosition() {
+    board.canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
     board.resetZoom(1);
   }
 
@@ -458,29 +461,25 @@ const Whiteboard = ({
           {!!enabledControls.GO_TO_START && (
             <ToolbarItemS>
               <ButtonS onClick={bringControlTOStartPosition}>
-                Move to initial location
+                <img src={Recenter} alt="Recenter" />
               </ButtonS>
             </ToolbarItemS>
           )}
 
-          <ToolbarItemS>
-            <ButtonS type="button" onClick={handleSaveCanvasState} >
-              Save
-            </ButtonS>
-          </ToolbarItemS>
+          {!!enabledControls.SAVE_AND_LOAD && (
+            <ToolbarItemS>
+              <ButtonS type="button" onClick={handleSaveCanvasState}>
+                Save
+              </ButtonS>
+            </ToolbarItemS>
+          )}
 
-          {
-            (canvasSaveData && canvasSaveData.length > 0) && (
-              <ToolbarItemS>
-                <ButtonS
-                  onClick={() => handleLoadCanvasState(canvasSaveData[0])}>
-                  Load
-                </ButtonS>  
-              </ToolbarItemS>
-              )
-          }
+          {!!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && (
+            <ToolbarItemS>
+              <ButtonS onClick={() => handleLoadCanvasState(canvasSaveData[0])}>Load</ButtonS>
+            </ToolbarItemS>
+          )}
         </ToolbarS>
-
         <ZoomBarS>
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
@@ -508,14 +507,17 @@ const Whiteboard = ({
         </ZoomBarS>
       </ToolbarHolderS>
 
-      <canvas ref={canvasRef} id="canvas" />
-      <PDFWrapperS>
-        <PdfReader
-          fileReaderInfo={fileReaderInfo}
-          onPageChange={handlePageChange}
-          updateFileReaderInfo={updateFileReaderInfo}
-        />
-      </PDFWrapperS>
+      <canvas style={{ zIndex: 1 }} ref={canvasRef} id="canvas" />
+
+      {!!fileReaderInfo?.file?.size && (
+        <PDFWrapperS>
+          <PdfReader
+            fileReaderInfo={fileReaderInfo}
+            onPageChange={handlePageChange}
+            updateFileReaderInfo={updateFileReaderInfo}
+          />
+        </PDFWrapperS>
+      )}
     </WhiteBoardS>
   );
 };

@@ -1,7 +1,13 @@
 import React from 'react';
 import { Document, Page } from 'react-pdf/dist/esm/entry.webpack';
 import { pdfjs } from 'react-pdf';
-import styles from './index.module.scss';
+import {
+  PDFReaderS,
+  FileContainer,
+  PageInfoS,
+  NavigationButton,
+  PageInfoDetails,
+} from './PdfReader.styled';
 import BackIcon from './../images/back.svg';
 import NextIcon from './../images/next.svg';
 
@@ -26,12 +32,10 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange }) => {
 
   const nextPage = () => changePage(1);
   const previousPage = () => changePage(-1);
-
   return (
-    <div className={styles.pdfReader}>
-      <div className={styles.fileContainer}>
+    <PDFReaderS>
+      <FileContainer>
         <Document
-          className={styles.document}
           file={fileReaderInfo.file}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadProgress={({ loaded, total }) =>
@@ -44,30 +48,30 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange }) => {
             pageNumber={fileReaderInfo.currentPageNumber}
           />
         </Document>
-      </div>
+      </FileContainer>
       {fileReaderInfo.totalPages > 1 && (
-        <div className={styles.pageInfo}>
-          <button
+        <PageInfoS>
+          <NavigationButton
             type="button"
             disabled={fileReaderInfo.currentPageNumber <= 1}
             onClick={previousPage}
           >
             <img src={BackIcon} alt="Back" />
-          </button>
-          <span className={styles.pageInfoDetails}>
+          </NavigationButton>
+          <PageInfoDetails>
             Page&nbsp;<b>{fileReaderInfo.currentPageNumber}</b>&nbsp;of{' '}
             {fileReaderInfo.totalPages || '--'}
-          </span>
-          <button
+          </PageInfoDetails>
+          <NavigationButton
             type="button"
             disabled={fileReaderInfo.currentPageNumber >= fileReaderInfo.totalPages}
             onClick={nextPage}
           >
             <img src={NextIcon} alt="Next" />
-          </button>
-        </div>
+          </NavigationButton>
+        </PageInfoS>
       )}
-    </div>
+    </PDFReaderS>
   );
 };
 
