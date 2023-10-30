@@ -3,7 +3,6 @@ import theme from '../../theme';
 
 export const PDFReaderS = styled.div`
   width: 100%;
-  padding-bottom: 50px;
   display: flex;
   font-size: 14px;
   justify-content: center;
@@ -17,7 +16,7 @@ export const FileContainer = styled.div`
 export const PageInfoS = styled.div`
   position: absolute;
   z-index: 2;
-  bottom: 0px;
+  bottom: 50px;
   display: flex;
   align-items: center;
   background: white;
