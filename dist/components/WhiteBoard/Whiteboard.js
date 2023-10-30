@@ -61,10 +61,10 @@ function _extends() { _extends = Object.assign ? Object.assign.bind() : function
 
 var initFileInfo = {
   file: {
-    name: 'whiteboard'
+    name: 'Whiteboard'
   },
   totalPages: 1,
-  currentPageNumber: 0,
+  currentPageNumber: 1,
   currentPage: ''
 };
 var initDrawingSettings = (_initDrawingSettings = {
@@ -78,7 +78,7 @@ var initSettings = {
 };
 
 var Whiteboard = function Whiteboard(_ref) {
-  var _fileReaderInfo$file;
+  var _fileReaderInfo$file, _fileReaderInfo$file2;
 
   var controls = _ref.controls,
       settings = _ref.settings,
@@ -131,13 +131,17 @@ var Whiteboard = function Whiteboard(_ref) {
 
   var canvasConfig = _extends({}, initSettings, settings);
 
-  var _useState5 = (0, _react.useState)(canvasConfig.zoom),
-      zoom = _useState5[0],
-      setZoom = _useState5[1];
+  var _useState5 = (0, _react.useState)(new Map().set(initFileInfo.file.name, initFileInfo.file)),
+      documents = _useState5[0],
+      setDocuments = _useState5[1];
 
-  var _useState6 = (0, _react.useState)(_extends({}, initFileInfo, fileInfo)),
-      fileReaderInfo = _useState6[0],
-      setFileReaderInfo = _useState6[1];
+  var _useState6 = (0, _react.useState)(canvasConfig.zoom),
+      zoom = _useState6[0],
+      setZoom = _useState6[1];
+
+  var _useState7 = (0, _react.useState)(_extends({}, initFileInfo, fileInfo)),
+      fileReaderInfo = _useState7[0],
+      setFileReaderInfo = _useState7[1];
 
   var canvasRef = (0, _react.useRef)(null);
   var whiteboardRef = (0, _react.useRef)(null);
@@ -145,7 +149,7 @@ var Whiteboard = function Whiteboard(_ref) {
   var enabledControls = (0, _react.useMemo)(function () {
     var _extends2;
 
-    return _extends((_extends2 = {}, _extends2[_BoardClass.modes.PENCIL] = true, _extends2[_BoardClass.modes.LINE] = true, _extends2[_BoardClass.modes.RECTANGLE] = true, _extends2[_BoardClass.modes.ELLIPSE] = true, _extends2[_BoardClass.modes.TRIANGLE] = true, _extends2[_BoardClass.modes.TEXT] = true, _extends2[_BoardClass.modes.SELECT] = true, _extends2[_BoardClass.modes.ERASER] = true, _extends2.CLEAR = true, _extends2.FILL = true, _extends2.BRUSH = true, _extends2.COLOR_PICKER = true, _extends2.DEFAULT_COLORS = true, _extends2.FILES = true, _extends2.SAVE_AS_IMAGE = true, _extends2.GO_TO_START = true, _extends2.SAVE_AND_LOAD = true, _extends2.ZOOM = true, _extends2), controls);
+    return _extends((_extends2 = {}, _extends2[_BoardClass.modes.PENCIL] = true, _extends2[_BoardClass.modes.LINE] = true, _extends2[_BoardClass.modes.RECTANGLE] = true, _extends2[_BoardClass.modes.ELLIPSE] = true, _extends2[_BoardClass.modes.TRIANGLE] = true, _extends2[_BoardClass.modes.TEXT] = true, _extends2[_BoardClass.modes.SELECT] = true, _extends2[_BoardClass.modes.ERASER] = true, _extends2.CLEAR = true, _extends2.FILL = true, _extends2.BRUSH = true, _extends2.COLOR_PICKER = true, _extends2.DEFAULT_COLORS = true, _extends2.FILES = true, _extends2.SAVE_AS_IMAGE = true, _extends2.GO_TO_START = true, _extends2.SAVE_AND_LOAD = true, _extends2.ZOOM = true, _extends2.TABS = true, _extends2), controls);
   }, [controls]);
   (0, _react.useEffect)(function () {
     setCanvasDrawingSettings(_extends({}, canvasDrawingSettings, drawingSettings));
@@ -184,7 +188,7 @@ var Whiteboard = function Whiteboard(_ref) {
   // }, [board, canvasConfig]);
 
   (0, _react.useEffect)(function () {
-    if (!(board != null && board.canvas) || !fileReaderInfo.currentPage) {
+    if (!(board != null && board.canvas)) {
       return;
     }
 
@@ -198,7 +202,7 @@ var Whiteboard = function Whiteboard(_ref) {
     } else {
       board.openPage(fileReaderInfo.currentPage);
     }
-  }, [fileReaderInfo.currentPage]);
+  }, [fileReaderInfo == null ? void 0 : (_fileReaderInfo$file = fileReaderInfo.file) == null ? void 0 : _fileReaderInfo$file.name, fileReaderInfo.currentPage]);
 
   function uploadImage(e) {
     var reader = new FileReader();
@@ -268,6 +272,9 @@ var Whiteboard = function Whiteboard(_ref) {
     var newValue = _extends({}, canvasObjectsPerPage, (_extends4 = {}, _extends4[fileReaderInfo.file.name] = _extends({}, canvasObjectsPerPage[fileReaderInfo.file.name], (_extends3 = {}, _extends3[fileReaderInfo.currentPageNumber] = board.canvas.toJSON(), _extends3)), _extends4));
 
     setCanvasObjectsPerPage(newValue);
+    console.log({
+      newValue: newValue
+    });
     onSaveCanvasState(newValue);
   }
 
@@ -325,19 +332,25 @@ var Whiteboard = function Whiteboard(_ref) {
   }
 
   function onFileChange(event) {
-    if (!event.target.files[0]) return;
+    var _event$target, _event$target$files;
 
-    if (event.target.files[0].type.includes('image/')) {
+    var file = (_event$target = event.target) == null ? void 0 : (_event$target$files = _event$target.files) == null ? void 0 : _event$target$files[0];
+    if (!file) return;
+
+    if (file.type.includes('image/')) {
       uploadImage(event);
-      onImageUploaded(event.target.files[0], event, board.canvas);
-    } else if (event.target.files[0].type.includes('pdf')) {
+      onImageUploaded(file, event, board.canvas);
+    } else if (file.type.includes('pdf')) {
       saveCanvasState();
       board.clearCanvas();
       updateFileReaderInfo({
-        file: event.target.files[0],
+        file: file,
         currentPageNumber: 1
       });
-      onPDFUploaded(event.target.files[0], event, board.canvas);
+      setDocuments(function (prev) {
+        return new Map(prev.set(file.name, file));
+      });
+      onPDFUploaded(file, event, board.canvas);
     }
   }
 
@@ -368,6 +381,20 @@ var Whiteboard = function Whiteboard(_ref) {
     onPageChange(_extends({}, fileReaderInfo, {
       currentPageNumber: page
     }), null, board.canvas);
+  };
+
+  var changeDocument = function changeDocument(name) {
+    bringControlTOStartPosition();
+    saveCanvasState();
+    board.clearCanvas(board.canvas);
+    setFileReaderInfo({
+      file: documents.get(name),
+      currentPageNumber: 1
+    });
+    onDocumentChanged({
+      file: documents.get(name),
+      currentPageNumber: 1
+    }, null, board.canvas);
   };
 
   var handleZoomIn = function handleZoomIn() {
@@ -444,7 +471,18 @@ var Whiteboard = function Whiteboard(_ref) {
     });
   };
 
-  return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WhiteBoardS, {
+  return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WrapperS, null, !!enabledControls.TABS && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.TabsS, null, Array.from(documents.keys()).map(function (document, index) {
+    return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.TabS, {
+      key: index // Using index as a key if document is not unique
+      ,
+      onClick: function onClick() {
+        return changeDocument(document);
+      },
+      style: document === fileReaderInfo.file.name ? {
+        backgroundColor: 'rgba(0,0,0,0.1)'
+      } : {}
+    }, document);
+  })), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WhiteBoardS, {
     ref: whiteboardRef
   }, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarHolderS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ColorBarS, null, !!enabledControls.COLOR_PICKER && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorPicker, {
     size: 28,
@@ -528,11 +566,11 @@ var Whiteboard = function Whiteboard(_ref) {
     },
     ref: canvasRef,
     id: "canvas"
-  }), !!(fileReaderInfo != null && (_fileReaderInfo$file = fileReaderInfo.file) != null && _fileReaderInfo$file.size) && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.PdfReader, {
+  }), !!(fileReaderInfo != null && (_fileReaderInfo$file2 = fileReaderInfo.file) != null && _fileReaderInfo$file2.size) && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.PdfReader, {
     fileReaderInfo: fileReaderInfo,
     onPageChange: handlePageChange,
     updateFileReaderInfo: updateFileReaderInfo
-  })));
+  }))));
 };
 
 Whiteboard.propTypes = {
