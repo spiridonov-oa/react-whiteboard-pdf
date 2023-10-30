@@ -88,7 +88,10 @@ const App = () => {
         DEFAULT_COLORS: true,
         FILES: true,
         SAVE_AS_IMAGE: true,
+        GO_TO_START: true,
+        SAVE_AND_LOAD: true,
         ZOOM: true,
+        TABS: true,
       }}
       settings={{
         zoom: 1,
@@ -97,9 +100,9 @@ const App = () => {
         contentJSON: null, // JSON to render in canvas
       }}
       fileInfo={{
-        file: { name: 'Desk 1' },
+        file: { name: 'Whiteboard' },
         totalPages: 1,
-        currentPageNumber: 0,
+        currentPageNumber: 1,
         currentPage: '',
       }}
       onObjectAdded={(addedObject) => {}}
@@ -115,6 +118,7 @@ const App = () => {
       onSaveCanvasAsImage={(data, event, canvas) => {}}
       onConfigChange={(data, event, canvas) => {}}
       onSaveCanvasState={(data, event, canvas) => {}}
+      onDocumentChanged={(data, event, canvas) => {}}
     />
   );
 };

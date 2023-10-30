@@ -58,26 +58,28 @@ const initSettings = {
   zoom: 1,
   contentJSON: null,
 };
+const defaultFunction = (data, event, canvas) => {};
 
 const Whiteboard = ({
   controls,
   settings,
   drawingSettings,
   fileInfo,
-  onObjectAdded = (data, event, canvas) => {},
-  onObjectRemoved = (data, event, canvas) => {},
-  onObjectModified = (data, event, canvas) => {},
-  onCanvasRender = (data, event, canvas) => {},
-  onCanvasChange = (data, event, canvas) => {},
-  onZoom = (data, event, canvas) => {},
-  onImageUploaded = (data, event, canvas) => {},
-  onPDFUploaded = (data, event, canvas) => {},
-  onPDFUpdated = (data, event, canvas) => {},
-  onPageChange = (data, event, canvas) => {},
-  onOptionsChange = (data, event, canvas) => {},
-  onSaveCanvasAsImage = (data, event, canvas) => {},
-  onConfigChange = (data, event, canvas) => {},
-  onSaveCanvasState = (data, event, canvas) => {},
+  onObjectAdded = defaultFunction,
+  onObjectRemoved = defaultFunction,
+  onObjectModified = defaultFunction,
+  onCanvasRender = defaultFunction,
+  onCanvasChange = defaultFunction,
+  onZoom = defaultFunction,
+  onImageUploaded = defaultFunction,
+  onPDFUploaded = defaultFunction,
+  onPDFUpdated = defaultFunction,
+  onPageChange = defaultFunction,
+  onOptionsChange = defaultFunction,
+  onSaveCanvasAsImage = defaultFunction,
+  onConfigChange = defaultFunction,
+  onSaveCanvasState = defaultFunction,
+  onDocumentChanged = defaultFunction,
 }) => {
   const [canvasSaveData, setCanvasSaveData] = useState([]);
   const [board, setBoard] = useState();
