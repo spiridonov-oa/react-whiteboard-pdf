@@ -77,6 +77,8 @@ var initSettings = {
   contentJSON: null
 };
 
+var defaultFunction = function defaultFunction(data, event, canvas) {};
+
 var Whiteboard = function Whiteboard(_ref) {
   var _fileReaderInfo$file, _fileReaderInfo$file2;
 
@@ -85,33 +87,35 @@ var Whiteboard = function Whiteboard(_ref) {
       drawingSettings = _ref.drawingSettings,
       fileInfo = _ref.fileInfo,
       _ref$onObjectAdded = _ref.onObjectAdded,
-      onObjectAdded = _ref$onObjectAdded === void 0 ? function (data, event, canvas) {} : _ref$onObjectAdded,
+      onObjectAdded = _ref$onObjectAdded === void 0 ? defaultFunction : _ref$onObjectAdded,
       _ref$onObjectRemoved = _ref.onObjectRemoved,
-      onObjectRemoved = _ref$onObjectRemoved === void 0 ? function (data, event, canvas) {} : _ref$onObjectRemoved,
+      onObjectRemoved = _ref$onObjectRemoved === void 0 ? defaultFunction : _ref$onObjectRemoved,
       _ref$onObjectModified = _ref.onObjectModified,
-      onObjectModified = _ref$onObjectModified === void 0 ? function (data, event, canvas) {} : _ref$onObjectModified,
+      onObjectModified = _ref$onObjectModified === void 0 ? defaultFunction : _ref$onObjectModified,
       _ref$onCanvasRender = _ref.onCanvasRender,
-      onCanvasRender = _ref$onCanvasRender === void 0 ? function (data, event, canvas) {} : _ref$onCanvasRender,
+      onCanvasRender = _ref$onCanvasRender === void 0 ? defaultFunction : _ref$onCanvasRender,
       _ref$onCanvasChange = _ref.onCanvasChange,
-      onCanvasChange = _ref$onCanvasChange === void 0 ? function (data, event, canvas) {} : _ref$onCanvasChange,
+      onCanvasChange = _ref$onCanvasChange === void 0 ? defaultFunction : _ref$onCanvasChange,
       _ref$onZoom = _ref.onZoom,
-      onZoom = _ref$onZoom === void 0 ? function (data, event, canvas) {} : _ref$onZoom,
+      onZoom = _ref$onZoom === void 0 ? defaultFunction : _ref$onZoom,
       _ref$onImageUploaded = _ref.onImageUploaded,
-      onImageUploaded = _ref$onImageUploaded === void 0 ? function (data, event, canvas) {} : _ref$onImageUploaded,
+      onImageUploaded = _ref$onImageUploaded === void 0 ? defaultFunction : _ref$onImageUploaded,
       _ref$onPDFUploaded = _ref.onPDFUploaded,
-      onPDFUploaded = _ref$onPDFUploaded === void 0 ? function (data, event, canvas) {} : _ref$onPDFUploaded,
+      onPDFUploaded = _ref$onPDFUploaded === void 0 ? defaultFunction : _ref$onPDFUploaded,
       _ref$onPDFUpdated = _ref.onPDFUpdated,
-      onPDFUpdated = _ref$onPDFUpdated === void 0 ? function (data, event, canvas) {} : _ref$onPDFUpdated,
+      onPDFUpdated = _ref$onPDFUpdated === void 0 ? defaultFunction : _ref$onPDFUpdated,
       _ref$onPageChange = _ref.onPageChange,
-      onPageChange = _ref$onPageChange === void 0 ? function (data, event, canvas) {} : _ref$onPageChange,
+      onPageChange = _ref$onPageChange === void 0 ? defaultFunction : _ref$onPageChange,
       _ref$onOptionsChange = _ref.onOptionsChange,
-      onOptionsChange = _ref$onOptionsChange === void 0 ? function (data, event, canvas) {} : _ref$onOptionsChange,
+      onOptionsChange = _ref$onOptionsChange === void 0 ? defaultFunction : _ref$onOptionsChange,
       _ref$onSaveCanvasAsIm = _ref.onSaveCanvasAsImage,
-      onSaveCanvasAsImage = _ref$onSaveCanvasAsIm === void 0 ? function (data, event, canvas) {} : _ref$onSaveCanvasAsIm,
+      onSaveCanvasAsImage = _ref$onSaveCanvasAsIm === void 0 ? defaultFunction : _ref$onSaveCanvasAsIm,
       _ref$onConfigChange = _ref.onConfigChange,
-      onConfigChange = _ref$onConfigChange === void 0 ? function (data, event, canvas) {} : _ref$onConfigChange,
+      onConfigChange = _ref$onConfigChange === void 0 ? defaultFunction : _ref$onConfigChange,
       _ref$onSaveCanvasStat = _ref.onSaveCanvasState,
-      onSaveCanvasState = _ref$onSaveCanvasStat === void 0 ? function (data, event, canvas) {} : _ref$onSaveCanvasStat;
+      onSaveCanvasState = _ref$onSaveCanvasStat === void 0 ? defaultFunction : _ref$onSaveCanvasStat,
+      _ref$onDocumentChange = _ref.onDocumentChanged,
+      onDocumentChanged = _ref$onDocumentChange === void 0 ? defaultFunction : _ref$onDocumentChange;
 
   var _useState = (0, _react.useState)([]),
       canvasSaveData = _useState[0],
