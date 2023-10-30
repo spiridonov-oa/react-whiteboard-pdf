@@ -272,7 +272,7 @@ const Whiteboard = ({
   function changeBrushWidth(e) {
     const intValue = parseInt(e.target.value);
     board.canvas.freeDrawingBrush.width = intValue;
-    const newOptions = { ...canvasDrawingSettings };
+    const newOptions = { ...canvasDrawingSettings, brushWidth: intValue };
     setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, board.canvas);
   }
