@@ -724,11 +724,8 @@ export class Board {
     // [Sketch range limits] Modified so that when the screen is reduced while reaching the end of the wall, it does not go beyond the border of the transparent wall that I set.
     if(scale < 1) {
       const newVpt = this.canvas.viewportTransform;
-      const x = this.axisLimit({ scale, vpt: this.nowX, axis: "x" });
-      const y = this.axisLimit({ scale, vpt: this.nowY, axis: "y" });
-
-      newVpt[4] = x;
-      newVpt[5] = y;
+      newVpt[4] = this.axisLimit({ scale, vpt: this.nowX, axis: "x" });
+      newVpt[5] = this.axisLimit({ scale, vpt: this.nowY, axis: "y" });
     }
   }
 
