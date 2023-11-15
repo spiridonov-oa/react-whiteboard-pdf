@@ -148,6 +148,7 @@ const Whiteboard = ({
     const newBoard = new Board({
       drawingSettings: canvasDrawingSettings,
       canvasConfig: canvasConfig,
+      canvasRef: canvasRef,  // Sketch range limits
     });
 
     setBoard(newBoard);
@@ -310,6 +311,9 @@ const Whiteboard = ({
   function bringControlTOStartPosition() {
     board.canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
     board.resetZoom(1);
+
+    board.nowX = 0;
+    board.nowY = 0;
   }
 
   function onFileChange(event) {
