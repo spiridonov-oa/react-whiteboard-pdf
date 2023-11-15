@@ -690,7 +690,8 @@ export class Board {
     const drawingSettings = this.drawingSettings;
     drawingSettings.currentMode = '';
     canvas.isDrawingMode = false;
-
+    canvas.selection = true;
+    
     canvas.getObjects().map((item) => item.set({ selectable: true }));
     canvas.hoverCursor = 'all-scroll';
   }
