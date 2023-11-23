@@ -24,6 +24,7 @@ var modes = {
 exports.modes = modes;
 
 var Board = /*#__PURE__*/function () {
+  // [Sketch range limits]
   function Board(params) {
     var _this = this;
 
@@ -40,8 +41,20 @@ var Board = /*#__PURE__*/function () {
       maxZoom: 9.99,
       viewportTransform: [1, 0, 0, 1, 0, 0]
     };
+    this.nowX = 0;
+    this.nowY = 0;
+    this.canvasRef = void 0;
+    this.limitScale = 10;
+    this.sketchWidthLimit = 1920 * this.limitScale;
+    this.sketchHeightLimit = 1080 * this.limitScale;
+    // [Sketch range limits]
+    var windowWidth = this.limitScale * (window.screen.width || window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth);
+    var windowHeight = this.limitScale * (window.screen.height || window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
+    this.sketchWidthLimit = windowWidth > this.sketchWidthLimit ? windowWidth : this.sketchWidthLimit;
+    this.sketchHeightLimit = windowHeight > this.sketchHeightLimit ? windowHeight : this.sketchHeightLimit;
 
     if (params) {
+      this.canvasRef = params.canvasRef;
       this.drawingSettings = params.drawingSettings;
     }
 
@@ -109,7 +122,7 @@ var Board = /*#__PURE__*/function () {
     this.canvas.fire('config:chnage');
   };
 
-  _proto.addZoomListeners = function addZoomListeners() {
+  _proto.addZoomListeners = function addZoomListeners(params) {
     var canvas = this.canvas;
     var that = this;
     canvas.off('mouse:wheel');
@@ -133,7 +146,28 @@ var Board = /*#__PURE__*/function () {
         var e = opt.e;
         var vpt = canvas.viewportTransform;
         vpt[4] -= e.deltaX;
-        vpt[5] -= e.deltaY; // const boundaries = that.getCanvasContentBoundaries();
+        vpt[5] -= e.deltaY;
+
+        try {
+          // [Sketch range limits]
+          var _scale = params ? params.scale : 1;
+
+          vpt[4] = that.axisLimit({
+            scale: _scale,
+            vpt: vpt[4],
+            axis: "x"
+          });
+          vpt[5] = that.axisLimit({
+            scale: _scale,
+            vpt: vpt[5],
+            axis: "y"
+          }); // x, y coordinates used to zoom out the screen at the end of the wall (To prevent the screen from going beyond the border of the transparent wall I set when reducing the screen)
+
+          that.nowX = vpt[4];
+          that.nowY = vpt[5];
+        } catch (error) {
+          console.log(error);
+        } // const boundaries = that.getCanvasContentBoundaries();
         // let scrolledX = vpt[4] + e.deltaX;
         // let scrolledY = vpt[5] + e.deltaY;
         // console.log('scrolled', scrolledX, scrolledY);
@@ -155,6 +189,7 @@ var Board = /*#__PURE__*/function () {
         // vpt[4] = scrolledX;
         // vpt[5] = scrolledY;
         // console.log(vpt);
+
 
         canvas.requestRenderAll();
       }
@@ -190,6 +225,38 @@ var Board = /*#__PURE__*/function () {
         });
       }
     });
+  } // [Sketch range limits]
+  ;
+
+  _proto.axisLimit = function axisLimit(_ref) {
+    var scale = _ref.scale,
+        vpt = _ref.vpt,
+        axis = _ref.axis;
+    var result = vpt;
+    var containerElement = this.canvasRef.current;
+
+    if (!containerElement) {
+      return vpt;
+    } // Determined by whether it is the x-axis or y-axis
+
+
+    var containerSize = axis === "x" ? containerElement.offsetWidth : containerElement.offsetHeight;
+    var addScroll = axis === "x" ? this.sketchWidthLimit : this.sketchHeightLimit; // Range adjustment when zooming in/out
+
+    var zoomInMinusValue = containerSize * scale - containerSize;
+    var zoomOutPlusValue = containerSize * (1 - scale); // left || top
+
+    if (result > addScroll * scale) {
+      result = addScroll * scale;
+    } // zoom in && right || zoom in && bottom
+    else if (scale >= 1 && result < -(addScroll * scale) - zoomInMinusValue) {
+      result = -(addScroll * scale) - zoomInMinusValue;
+    } // zoom out && right || zoom out && bottom
+    else if (scale < 1 && result < -(addScroll * scale) + zoomOutPlusValue) {
+      result = -(addScroll * scale) + zoomOutPlusValue;
+    }
+
+    return result;
   };
 
   _proto.setDrawingSettings = function setDrawingSettings(drawingSettings) {
@@ -336,8 +403,8 @@ var Board = /*#__PURE__*/function () {
   _proto.startAddLine = function startAddLine() {
     var canvas = this.canvas;
     var drawingSettings = this.drawingSettings;
-    return function (_ref) {
-      var e = _ref.e;
+    return function (_ref2) {
+      var e = _ref2.e;
       this.mouseDown = true;
       var pointer = canvas.getPointer(e);
       this.drawInstance = new _fabric.fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
@@ -352,8 +419,8 @@ var Board = /*#__PURE__*/function () {
 
   _proto.startDrawingLine = function startDrawingLine() {
     var canvas = this.canvas;
-    return function (_ref2) {
-      var e = _ref2.e;
+    return function (_ref3) {
+      var e = _ref3.e;
 
       if (this.mouseDown) {
         var pointer = canvas.getPointer(e);
@@ -388,8 +455,8 @@ var Board = /*#__PURE__*/function () {
   _proto.startAddRect = function startAddRect() {
     var canvas = this.canvas;
     var drawingSettings = this.drawingSettings;
-    return function (_ref3) {
-      var e = _ref3.e;
+    return function (_ref4) {
+      var e = _ref4.e;
       this.mouseDown = true;
       var pointer = canvas.getPointer(e);
       this.origX = pointer.x;
@@ -415,8 +482,8 @@ var Board = /*#__PURE__*/function () {
 
   _proto.startDrawingRect = function startDrawingRect() {
     var canvas = this.canvas;
-    return function (_ref4) {
-      var e = _ref4.e;
+    return function (_ref5) {
+      var e = _ref5.e;
 
       if (this.mouseDown) {
         var pointer = canvas.getPointer(e);
@@ -465,8 +532,8 @@ var Board = /*#__PURE__*/function () {
   _proto.startAddEllipse = function startAddEllipse() {
     var canvas = this.canvas;
     var drawingSettings = this.drawingSettings;
-    return function (_ref5) {
-      var e = _ref5.e;
+    return function (_ref6) {
+      var e = _ref6.e;
       this.mouseDown = true;
       var pointer = canvas.getPointer(e);
       this.origX = pointer.x;
@@ -487,8 +554,8 @@ var Board = /*#__PURE__*/function () {
 
   _proto.startDrawingEllipse = function startDrawingEllipse() {
     var canvas = this.canvas;
-    return function (_ref6) {
-      var e = _ref6.e;
+    return function (_ref7) {
+      var e = _ref7.e;
 
       if (this.mouseDown) {
         var pointer = canvas.getPointer(e);
@@ -532,8 +599,8 @@ var Board = /*#__PURE__*/function () {
   _proto.startAddTriangle = function startAddTriangle() {
     var canvas = this.canvas;
     var drawingSettings = this.drawingSettings;
-    return function (_ref7) {
-      var e = _ref7.e;
+    return function (_ref8) {
+      var e = _ref8.e;
       this.mouseDown = true;
       drawingSettings.currentMode = this.modes.TRIANGLE;
       var pointer = canvas.getPointer(e);
@@ -555,8 +622,8 @@ var Board = /*#__PURE__*/function () {
 
   _proto.startDrawingTriangle = function startDrawingTriangle() {
     var canvas = this.canvas;
-    return function (_ref8) {
-      var e = _ref8.e;
+    return function (_ref9) {
+      var e = _ref9.e;
 
       if (this.mouseDown) {
         var pointer = canvas.getPointer(e);
@@ -669,6 +736,7 @@ var Board = /*#__PURE__*/function () {
     var drawingSettings = this.drawingSettings;
     drawingSettings.currentMode = '';
     canvas.isDrawingMode = false;
+    canvas.selection = true;
     canvas.getObjects().map(function (item) {
       return item.set({
         selectable: true
@@ -687,9 +755,9 @@ var Board = /*#__PURE__*/function () {
     canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
   };
 
-  _proto.changeZoom = function changeZoom(_ref9) {
-    var point = _ref9.point,
-        scale = _ref9.scale;
+  _proto.changeZoom = function changeZoom(_ref10) {
+    var point = _ref10.point,
+        scale = _ref10.scale;
 
     if (!point) {
       var width = this.canvas.width;
@@ -708,7 +776,21 @@ var Board = /*#__PURE__*/function () {
     this.onZoom({
       point: point,
       scale: scale
-    });
+    }); // [Sketch range limits] Modified so that when the screen is reduced while reaching the end of the wall, it does not go beyond the border of the transparent wall that I set.
+
+    if (scale < 1) {
+      var newVpt = this.canvas.viewportTransform;
+      newVpt[4] = this.axisLimit({
+        scale: scale,
+        vpt: this.nowX,
+        axis: "x"
+      });
+      newVpt[5] = this.axisLimit({
+        scale: scale,
+        vpt: this.nowY,
+        axis: "y"
+      });
+    }
   };
 
   _proto.resetZoom = function resetZoom() {
@@ -727,7 +809,7 @@ var Board = /*#__PURE__*/function () {
   };
 
   _proto.onZoom = function onZoom(params) {
-    this.addZoomListeners();
+    this.addZoomListeners(params);
     this.canvas.fire('zoom:change', params);
   };
 
