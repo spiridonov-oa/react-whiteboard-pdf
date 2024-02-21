@@ -770,26 +770,28 @@ export class Board {
     const objects = canvas.getObjects();
 
     // Initialize variables for min and max coordinates
-    let minX = 10000;
-    let minY = 10000;
-    let maxX = -10000;
-    let maxY = -10000;
+   let minX = Infinity;
+   let minY = Infinity;
+   let maxX = -Infinity;
+   let maxY = -Infinity;
 
     // Iterate through objects to find minimum and maximum coordinates
-    objects.forEach((object) => {
-      const objectBoundingBox = object.getBoundingRect();
+    
+    for (const object of objects) {
+    const objectBoundingBox = object.getBoundingRect();
 
-      minX = Math.min(minX, objectBoundingBox.left);
-      minY = Math.min(minY, objectBoundingBox.top);
-      maxX = Math.max(maxX, objectBoundingBox.left + objectBoundingBox.width);
-      maxY = Math.max(maxY, objectBoundingBox.top + objectBoundingBox.height);
-    });
+             minX = Math.min(minX, objectBoundingBox.left);
+             minY = Math.min(minY, objectBoundingBox.top);
+             maxX = Math.max(maxX, objectBoundingBox.left + objectBoundingBox.width);
+             maxY = Math.max(maxY, objectBoundingBox.top + objectBoundingBox.height);
+    }
 
     // Calculate canvas size based on content
-    const width = maxX - minX;
-    const height = maxY - minY;
+     const width = maxX - minX;
+     const height = maxY - minY;
+ 
     return { minX, minY, maxX, maxY, width, height };
-  }
+}
 
   removeBoard() {
     this.element.disconnect();
@@ -799,6 +801,10 @@ export class Board {
     }
     this.canvas = null;
   }
+
+
+
+
 
   // function drawBackground(canvas) {
   //   const dotSize = 4; // Adjust the size of the dots as needed
