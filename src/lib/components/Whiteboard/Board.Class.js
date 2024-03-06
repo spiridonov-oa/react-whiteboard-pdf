@@ -28,19 +28,31 @@ export class Board {
   };
 
   // [Sketch range limits]
-  nowX = 0
+  nowX = 0;
   nowY = 0;
-  canvasRef
+  canvasRef;
   limitScale = 10;
   sketchWidthLimit = 1920 * this.limitScale;
   sketchHeightLimit = 1080 * this.limitScale;
 
   constructor(params) {
     // [Sketch range limits]
-    const windowWidth = this.limitScale * (window.screen.width || window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth);
-    const windowHeight = this.limitScale * (window.screen.height || window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
-    this.sketchWidthLimit = (windowWidth > this.sketchWidthLimit) ? windowWidth : this.sketchWidthLimit;
-    this.sketchHeightLimit = (windowHeight > this.sketchHeightLimit) ? windowHeight : this.sketchHeightLimit;
+    const windowWidth =
+      this.limitScale *
+      (window.screen.width ||
+        window.innerWidth ||
+        document.documentElement.clientWidth ||
+        document.body.clientWidth);
+    const windowHeight =
+      this.limitScale *
+      (window.screen.height ||
+        window.innerHeight ||
+        document.documentElement.clientHeight ||
+        document.body.clientHeight);
+    this.sketchWidthLimit =
+      windowWidth > this.sketchWidthLimit ? windowWidth : this.sketchWidthLimit;
+    this.sketchHeightLimit =
+      windowHeight > this.sketchHeightLimit ? windowHeight : this.sketchHeightLimit;
 
     if (params) {
       this.canvasRef = params.canvasRef;
@@ -127,8 +139,8 @@ export class Board {
         try {
           // [Sketch range limits]
           const scale = params ? params.scale : 1;
-          vpt[4] = that.axisLimit({ scale, vpt: vpt[4], axis: "x" });
-          vpt[5] = that.axisLimit({ scale, vpt: vpt[5], axis: "y" });
+          vpt[4] = that.axisLimit({ scale, vpt: vpt[4], axis: 'x' });
+          vpt[5] = that.axisLimit({ scale, vpt: vpt[5], axis: 'y' });
 
           // x, y coordinates used to zoom out the screen at the end of the wall (To prevent the screen from going beyond the border of the transparent wall I set when reducing the screen)
           that.nowX = vpt[4];
@@ -214,13 +226,14 @@ export class Board {
     }
 
     // Determined by whether it is the x-axis or y-axis
-    const containerSize = (axis === "x") ? containerElement.offsetWidth : containerElement.offsetHeight;  
-    const addScroll = (axis === "x") ? this.sketchWidthLimit : this.sketchHeightLimit;
-    
+    const containerSize =
+      axis === 'x' ? containerElement.offsetWidth : containerElement.offsetHeight;
+    const addScroll = axis === 'x' ? this.sketchWidthLimit : this.sketchHeightLimit;
+
     // Range adjustment when zooming in/out
-    const zoomInMinusValue = (containerSize * scale - (containerSize));
-    const zoomOutPlusValue = (containerSize * (1 - scale));
-    
+    const zoomInMinusValue = containerSize * scale - containerSize;
+    const zoomOutPlusValue = containerSize * (1 - scale);
+
     // left || top
     if (result > addScroll * scale) {
       result = addScroll * scale;
@@ -691,7 +704,7 @@ export class Board {
     drawingSettings.currentMode = '';
     canvas.isDrawingMode = false;
     canvas.selection = true;
-    
+
     canvas.getObjects().map((item) => item.set({ selectable: true }));
     canvas.hoverCursor = 'all-scroll';
   }
@@ -723,11 +736,11 @@ export class Board {
     this.onZoom({ point, scale });
 
     // [Sketch range limits] Modified so that when the screen is reduced while reaching the end of the wall, it does not go beyond the border of the transparent wall that I set.
-    if(scale < 1) {
-      const newVpt = this.canvas.viewportTransform;
-      newVpt[4] = this.axisLimit({ scale, vpt: this.nowX, axis: "x" });
-      newVpt[5] = this.axisLimit({ scale, vpt: this.nowY, axis: "y" });
-    }
+    // if(scale < 1) {
+    //   const newVpt = this.canvas.viewportTransform;
+    //   newVpt[4] = this.axisLimit({ scale, vpt: this.nowX, axis: "x" });
+    //   newVpt[5] = this.axisLimit({ scale, vpt: this.nowY, axis: "y" });
+    // }
   }
 
   resetZoom() {
@@ -770,28 +783,28 @@ export class Board {
     const objects = canvas.getObjects();
 
     // Initialize variables for min and max coordinates
-   let minX = Infinity;
-   let minY = Infinity;
-   let maxX = -Infinity;
-   let maxY = -Infinity;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
 
     // Iterate through objects to find minimum and maximum coordinates
-    
-    for (const object of objects) {
-    const objectBoundingBox = object.getBoundingRect();
 
-             minX = Math.min(minX, objectBoundingBox.left);
-             minY = Math.min(minY, objectBoundingBox.top);
-             maxX = Math.max(maxX, objectBoundingBox.left + objectBoundingBox.width);
-             maxY = Math.max(maxY, objectBoundingBox.top + objectBoundingBox.height);
+    for (const object of objects) {
+      const objectBoundingBox = object.getBoundingRect();
+
+      minX = Math.min(minX, objectBoundingBox.left);
+      minY = Math.min(minY, objectBoundingBox.top);
+      maxX = Math.max(maxX, objectBoundingBox.left + objectBoundingBox.width);
+      maxY = Math.max(maxY, objectBoundingBox.top + objectBoundingBox.height);
     }
 
     // Calculate canvas size based on content
-     const width = maxX - minX;
-     const height = maxY - minY;
- 
+    const width = maxX - minX;
+    const height = maxY - minY;
+
     return { minX, minY, maxX, maxY, width, height };
-}
+  }
 
   removeBoard() {
     this.element.disconnect();
@@ -801,10 +814,6 @@ export class Board {
     }
     this.canvas = null;
   }
-
-
-
-
 
   // function drawBackground(canvas) {
   //   const dotSize = 4; // Adjust the size of the dots as needed
