@@ -2,16 +2,9 @@
 
 exports.__esModule = true;
 exports.modes = exports.Board = void 0;
-
 var _fabric = require("fabric");
-
 var _cursors = require("./cursors");
-
-function _readOnlyError(name) { throw new TypeError("\"" + name + "\" is read-only"); }
-
-function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-var modes = {
+const modes = exports.modes = {
   PENCIL: 'PENCIL',
   LINE: 'LINE',
   RECTANGLE: 'RECTANGLE',
@@ -21,13 +14,8 @@ var modes = {
   SELECT: 'SELECT',
   TEXT: 'TEXT'
 };
-exports.modes = modes;
-
-var Board = /*#__PURE__*/function () {
-  // [Sketch range limits]
-  function Board(params) {
-    var _this = this;
-
+class Board {
+  constructor(params) {
     this.canvas = void 0;
     this.modes = void 0;
     this.cursorPencil = (0, _cursors.getCursor)('pencil');
@@ -41,6 +29,7 @@ var Board = /*#__PURE__*/function () {
       maxZoom: 9.99,
       viewportTransform: [1, 0, 0, 1, 0, 0]
     };
+    // [Sketch range limits]
     this.nowX = 0;
     this.nowY = 0;
     this.canvasRef = void 0;
@@ -48,131 +37,121 @@ var Board = /*#__PURE__*/function () {
     this.sketchWidthLimit = 1920 * this.limitScale;
     this.sketchHeightLimit = 1080 * this.limitScale;
     // [Sketch range limits]
-    var windowWidth = this.limitScale * (window.screen.width || window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth);
-    var windowHeight = this.limitScale * (window.screen.height || window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
+    const windowWidth = this.limitScale * (window.screen.width || window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth);
+    const windowHeight = this.limitScale * (window.screen.height || window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
     this.sketchWidthLimit = windowWidth > this.sketchWidthLimit ? windowWidth : this.sketchWidthLimit;
     this.sketchHeightLimit = windowHeight > this.sketchHeightLimit ? windowHeight : this.sketchHeightLimit;
-
     if (params) {
       this.canvasRef = params.canvasRef;
       this.drawingSettings = params.drawingSettings;
     }
-
     this.canvas = this.initCanvas(this.canvasConfig);
-    this.canvas.once('after:render', function () {
-      _this.applyCanvasConfig(params.canvasConfig);
+    this.canvas.once('after:render', () => {
+      this.applyCanvasConfig(params.canvasConfig);
     });
     this.modes = modes;
     this.resetZoom();
     this.setDrawingMode(this.drawingSettings.currentMode);
     this.addZoomListeners();
   }
-
-  var _proto = Board.prototype;
-
-  _proto.initCanvas = function initCanvas() {
+  initCanvas() {
     _fabric.fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
       var object = null,
-          objects = this.getObjects();
-
+        objects = this.getObjects();
       for (var i = 0, len = this.size(); i < len; i++) {
         if (objects[i][attr] && objects[i][attr] === name) {
           object = objects[i];
           break;
         }
       }
-
       return object;
     };
-
-    var canvasElement = document.getElementById('canvas');
+    const canvasElement = document.getElementById('canvas');
     if (!canvasElement) return;
-    var parentElement = canvasElement.parentNode;
-    var canvas = new _fabric.fabric.Canvas('canvas');
+    const parentElement = canvasElement.parentNode;
+    const canvas = new _fabric.fabric.Canvas('canvas');
     canvas.perPixelTargetFind = true;
-
     if (parentElement) {
       this.element = this.handleResize(this.resizeCanvas(canvas, parentElement).bind(this));
       this.element.observe(parentElement);
     }
-
     return canvas;
-  };
-
-  _proto.applyCanvasConfig = function applyCanvasConfig(canvasConfig) {
-    this.canvasConfig = _extends({}, this.canvasConfig, canvasConfig);
-
+  }
+  applyCanvasConfig(canvasConfig) {
+    this.canvasConfig = {
+      ...this.canvasConfig,
+      ...canvasConfig
+    };
     if (this.canvasConfig.zoom) {
       this.canvas.setZoom(this.canvasConfig.zoom);
     }
-
     if (this.canvasConfig.contentJSON) {
       this.canvas.loadFromJSON(this.canvasConfig.contentJSON);
     }
-
     if (this.canvasConfig.viewportTransform) {
       this.canvas.viewportTransform = this.canvasConfig.viewportTransform;
       this.changeZoom({
         scale: 1
       });
     }
-
     this.canvas.requestRenderAll();
     console.log(this.canvas.getObjects());
     this.canvas.fire('config:chnage');
-  };
-
-  _proto.addZoomListeners = function addZoomListeners(params) {
-    var canvas = this.canvas;
-    var that = this;
+  }
+  addZoomListeners(params) {
+    const canvas = this.canvas;
+    const that = this;
     canvas.off('mouse:wheel');
     canvas.off('touch:gesture');
     canvas.on('mouse:wheel', function (opt) {
       opt.e.preventDefault();
       opt.e.stopPropagation();
-
       if (opt.e.ctrlKey) {
-        var delta = opt.e.deltaY;
-        var scale = Math.pow(0.995, delta);
-        var point = {
+        const delta = opt.e.deltaY;
+        const scale = 0.995 ** delta;
+        const point = {
           x: opt.e.offsetX,
           y: opt.e.offsetY
         };
         that.changeZoom({
-          point: point,
-          scale: scale
+          point,
+          scale
         });
       } else {
-        var e = opt.e;
-        var vpt = canvas.viewportTransform;
+        const e = opt.e;
+        let vpt = canvas.viewportTransform;
         vpt[4] -= e.deltaX;
         vpt[5] -= e.deltaY;
-
         try {
           // [Sketch range limits]
-          var _scale = params ? params.scale : 1;
-
+          const scale = params ? params.scale : 1;
           vpt[4] = that.axisLimit({
-            scale: _scale,
+            scale,
             vpt: vpt[4],
-            axis: "x"
+            axis: 'x'
           });
           vpt[5] = that.axisLimit({
-            scale: _scale,
+            scale,
             vpt: vpt[5],
-            axis: "y"
-          }); // x, y coordinates used to zoom out the screen at the end of the wall (To prevent the screen from going beyond the border of the transparent wall I set when reducing the screen)
+            axis: 'y'
+          });
 
+          // x, y coordinates used to zoom out the screen at the end of the wall (To prevent the screen from going beyond the border of the transparent wall I set when reducing the screen)
           that.nowX = vpt[4];
           that.nowY = vpt[5];
         } catch (error) {
           console.log(error);
-        } // const boundaries = that.getCanvasContentBoundaries();
+        }
+
+        // const boundaries = that.getCanvasContentBoundaries();
+
         // let scrolledX = vpt[4] + e.deltaX;
         // let scrolledY = vpt[5] + e.deltaY;
         // console.log('scrolled', scrolledX, scrolledY);
         // console.log('boundaries', boundaries);
+
         // const offset = 50;
+
         // scrolledX =
         //   scrolledX < -boundaries.maxX + offset
         //     ? -boundaries.maxX + offset
@@ -185,228 +164,212 @@ var Board = /*#__PURE__*/function () {
         //     : -scrolledY < boundaries.minY - canvas.height + offset
         //     ? canvas.height - boundaries.minY - offset
         //     : scrolledY;
+
         // that.throttle(() => console.log('after', scrolledX, scrolledY));
+
         // vpt[4] = scrolledX;
         // vpt[5] = scrolledY;
-        // console.log(vpt);
 
+        // console.log(vpt);
 
         canvas.requestRenderAll();
       }
     });
-    canvas.on('touch:gesture', function (event) {
+    canvas.on('touch:gesture', event => {
       console.log('1 touch:gesture');
-
       if (event.e.touches && event.e.touches.length === 2) {
-        var point1 = {
+        const point1 = {
           x: event.e.touches[0].clientX,
           y: event.e.touches[0].clientY
         };
-        var point2 = {
+        const point2 = {
           x: event.e.touches[1].clientX,
           y: event.e.touches[1].clientY
         };
-        var prevDistance = canvas.getPointerDistance(point1, point2);
-        canvas.on('touch:gesture', function (event) {
+        const prevDistance = canvas.getPointerDistance(point1, point2);
+        canvas.on('touch:gesture', event => {
           console.log('2 touch:gesture');
-          var newDistance = canvas.getPointerDistance(point1, point2);
-          var zoom = newDistance / prevDistance;
-          var point = {
+          const newDistance = canvas.getPointerDistance(point1, point2);
+          const zoom = newDistance / prevDistance;
+          const point = {
             x: (point1.x + point2.x) / 2,
             y: (point1.y + point2.y) / 2
           };
-          var scale = zoom;
+          const scale = zoom;
           that.changeZoom({
-            point: point,
-            scale: scale
+            point,
+            scale
           });
           canvas.renderAll();
-          newDistance, _readOnlyError("prevDistance");
+          prevDistance = newDistance;
         });
       }
     });
-  } // [Sketch range limits]
-  ;
+  }
 
-  _proto.axisLimit = function axisLimit(_ref) {
-    var scale = _ref.scale,
-        vpt = _ref.vpt,
-        axis = _ref.axis;
-    var result = vpt;
-    var containerElement = this.canvasRef.current;
-
+  // [Sketch range limits]
+  axisLimit(_ref) {
+    let {
+      scale,
+      vpt,
+      axis
+    } = _ref;
+    let result = vpt;
+    const containerElement = this.canvasRef.current;
     if (!containerElement) {
       return vpt;
-    } // Determined by whether it is the x-axis or y-axis
+    }
 
+    // Determined by whether it is the x-axis or y-axis
+    const containerSize = axis === 'x' ? containerElement.offsetWidth : containerElement.offsetHeight;
+    const addScroll = axis === 'x' ? this.sketchWidthLimit : this.sketchHeightLimit;
 
-    var containerSize = axis === "x" ? containerElement.offsetWidth : containerElement.offsetHeight;
-    var addScroll = axis === "x" ? this.sketchWidthLimit : this.sketchHeightLimit; // Range adjustment when zooming in/out
+    // Range adjustment when zooming in/out
+    const zoomInMinusValue = containerSize * scale - containerSize;
+    const zoomOutPlusValue = containerSize * (1 - scale);
 
-    var zoomInMinusValue = containerSize * scale - containerSize;
-    var zoomOutPlusValue = containerSize * (1 - scale); // left || top
-
+    // left || top
     if (result > addScroll * scale) {
       result = addScroll * scale;
-    } // zoom in && right || zoom in && bottom
+    }
+
+    // zoom in && right || zoom in && bottom
     else if (scale >= 1 && result < -(addScroll * scale) - zoomInMinusValue) {
       result = -(addScroll * scale) - zoomInMinusValue;
-    } // zoom out && right || zoom out && bottom
+    }
+
+    // zoom out && right || zoom out && bottom
     else if (scale < 1 && result < -(addScroll * scale) + zoomOutPlusValue) {
       result = -(addScroll * scale) + zoomOutPlusValue;
     }
-
     return result;
-  };
-
-  _proto.setDrawingSettings = function setDrawingSettings(drawingSettings) {
+  }
+  setDrawingSettings(drawingSettings) {
     if (!drawingSettings) return;
-    this.drawingSettings = _extends({}, this.drawingSettings, drawingSettings);
+    this.drawingSettings = {
+      ...this.drawingSettings,
+      ...drawingSettings
+    };
     this.setDrawingMode(this.drawingSettings.currentMode);
-  };
-
-  _proto.setCanvasConfig = function setCanvasConfig(canvasConfig) {
+  }
+  setCanvasConfig(canvasConfig) {
     if (!canvasConfig) return;
     this.applyCanvasConfig(canvasConfig);
-  };
-
-  _proto.setDrawingMode = function setDrawingMode(mode) {
+  }
+  setDrawingMode(mode) {
     this.drawingSettings.currentMode = mode;
     this.resetCanvas();
-
     switch (mode) {
       case this.modes.PENCIL:
         this.draw();
         break;
-
       case this.modes.LINE:
         this.createLine();
         break;
-
       case this.modes.RECTANGLE:
         this.createRect();
         break;
-
       case this.modes.ELLIPSE:
         this.createEllipse();
         break;
-
       case this.modes.TRIANGLE:
         this.createTriangle();
         break;
-
       case this.modes.ERASER:
         this.eraserOn();
         break;
-
       case this.modes.SELECT:
         this.onSelectMode();
         break;
-
       case this.modes.TEXT:
         this.createText();
         break;
-
       default:
         this.draw();
     }
-  };
-
-  _proto.resetCanvas = function resetCanvas() {
-    var canvas = this.canvas;
+  }
+  resetCanvas() {
+    const canvas = this.canvas;
     this.removeCanvasListener(canvas);
     canvas.selection = false;
     canvas.isDrawingMode = false;
     canvas.defaultCursor = 'auto';
     canvas.hoverCursor = 'auto';
-    canvas.getObjects().map(function (item) {
-      return item.set({
-        selectable: false
-      });
-    });
-
+    canvas.getObjects().map(item => item.set({
+      selectable: false
+    }));
     if (this.editedTextObject) {
       this.editedTextObject.exitEditing();
       this.editedTextObject = null;
     }
-  };
-
-  _proto.throttle = function throttle(f, delay) {
+  }
+  throttle(f, delay) {
     if (delay === void 0) {
       delay = 300;
     }
-
-    var timer = 0;
+    let timer = 0;
     return function () {
-      var _this2 = this;
-
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
-
       clearTimeout(timer);
-      timer = setTimeout(function () {
-        return f.apply(_this2, args);
-      }, delay);
+      timer = setTimeout(() => f.apply(this, args), delay);
     };
-  };
-
-  _proto.handleResize = function handleResize(callback) {
-    var resize_ob = new ResizeObserver(this.throttle(callback, 300));
+  }
+  handleResize(callback) {
+    const resize_ob = new ResizeObserver(this.throttle(callback, 300));
     return resize_ob;
-  };
-
-  _proto.resizeCanvas = function resizeCanvas(canvas, whiteboard) {
+  }
+  resizeCanvas(canvas, whiteboard) {
     return function () {
-      var width = whiteboard.clientWidth;
-      var height = whiteboard.clientHeight;
+      const width = whiteboard.clientWidth;
+      const height = whiteboard.clientHeight;
       this.changeZoom({
         scale: 1
-      }); // const scale = width / canvas.getWidth();
+      });
+      // const scale = width / canvas.getWidth();
       // const zoom = canvas.getZoom() * scale;
-
       canvas.setDimensions({
         width: width,
         height: height
-      }); // canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
+      });
+      // canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
     };
-  };
-
-  _proto.removeCanvasListener = function removeCanvasListener() {
-    var canvas = this.canvas;
+  }
+  removeCanvasListener() {
+    const canvas = this.canvas;
     canvas.off('mouse:down');
     canvas.off('mouse:move');
     canvas.off('mouse:up');
     canvas.off('mouse:over');
-  };
-
-  _proto.draw = function draw() {
-    var canvas = this.canvas;
-    var drawingSettings = this.drawingSettings;
+  }
+  draw() {
+    const canvas = this.canvas;
+    const drawingSettings = this.drawingSettings;
     canvas.freeDrawingBrush = new _fabric.fabric.PencilBrush(canvas);
     canvas.freeDrawingBrush.width = drawingSettings.brushWidth;
     canvas.freeDrawingBrush.color = drawingSettings.currentColor;
     canvas.isDrawingMode = true;
     canvas.freeDrawingCursor = this.cursorPencil;
-  };
-
-  _proto.createLine = function createLine() {
-    var canvas = this.canvas;
+  }
+  createLine() {
+    const canvas = this.canvas;
     canvas.on('mouse:down', this.startAddLine().bind(this));
     canvas.on('mouse:move', this.startDrawingLine().bind(this));
     canvas.on('mouse:up', this.stopDrawing.bind(this));
     canvas.defaultCursor = this.cursorPencil;
     canvas.hoverCursor = this.cursorPencil;
     canvas.discardActiveObject().requestRenderAll();
-  };
-
-  _proto.startAddLine = function startAddLine() {
-    var canvas = this.canvas;
-    var drawingSettings = this.drawingSettings;
+  }
+  startAddLine() {
+    const canvas = this.canvas;
+    const drawingSettings = this.drawingSettings;
     return function (_ref2) {
-      var e = _ref2.e;
+      let {
+        e
+      } = _ref2;
       this.mouseDown = true;
-      var pointer = canvas.getPointer(e);
+      let pointer = canvas.getPointer(e);
       this.drawInstance = new _fabric.fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
         strokeWidth: drawingSettings.brushWidth,
         stroke: drawingSettings.currentColor,
@@ -415,15 +378,15 @@ var Board = /*#__PURE__*/function () {
       canvas.add(this.drawInstance);
       canvas.requestRenderAll();
     };
-  };
-
-  _proto.startDrawingLine = function startDrawingLine() {
-    var canvas = this.canvas;
+  }
+  startDrawingLine() {
+    const canvas = this.canvas;
     return function (_ref3) {
-      var e = _ref3.e;
-
+      let {
+        e
+      } = _ref3;
       if (this.mouseDown) {
-        var pointer = canvas.getPointer(e);
+        const pointer = canvas.getPointer(e);
         this.drawInstance.set({
           x2: pointer.x,
           y2: pointer.y
@@ -432,10 +395,9 @@ var Board = /*#__PURE__*/function () {
         canvas.requestRenderAll();
       }
     };
-  };
-
-  _proto.createRect = function createRect() {
-    var canvas = this.canvas;
+  }
+  createRect() {
+    const canvas = this.canvas;
     canvas.isDrawingMode = true;
     canvas.on('mouse:down', this.startAddRect().bind(this));
     canvas.on('mouse:move', this.startDrawingRect().bind(this));
@@ -444,21 +406,20 @@ var Board = /*#__PURE__*/function () {
     canvas.defaultCursor = this.cursorPencil;
     canvas.hoverCursor = this.cursorPencil;
     canvas.isDrawingMode = false;
-    canvas.getObjects().map(function (item) {
-      return item.set({
-        selectable: false
-      });
-    });
+    canvas.getObjects().map(item => item.set({
+      selectable: false
+    }));
     canvas.discardActiveObject().requestRenderAll();
-  };
-
-  _proto.startAddRect = function startAddRect() {
-    var canvas = this.canvas;
-    var drawingSettings = this.drawingSettings;
+  }
+  startAddRect() {
+    const canvas = this.canvas;
+    const drawingSettings = this.drawingSettings;
     return function (_ref4) {
-      var e = _ref4.e;
+      let {
+        e
+      } = _ref4;
       this.mouseDown = true;
-      var pointer = canvas.getPointer(e);
+      const pointer = canvas.getPointer(e);
       this.origX = pointer.x;
       this.origY = pointer.y;
       this.drawInstance = new _fabric.fabric.Rect({
@@ -478,24 +439,21 @@ var Board = /*#__PURE__*/function () {
         }
       }.bind(this));
     };
-  };
-
-  _proto.startDrawingRect = function startDrawingRect() {
-    var canvas = this.canvas;
+  }
+  startDrawingRect() {
+    const canvas = this.canvas;
     return function (_ref5) {
-      var e = _ref5.e;
-
+      let {
+        e
+      } = _ref5;
       if (this.mouseDown) {
-        var pointer = canvas.getPointer(e);
-
+        const pointer = canvas.getPointer(e);
         if (pointer.x < this.origX) {
           this.drawInstance.set('left', pointer.x);
         }
-
         if (pointer.y < this.origY) {
           this.drawInstance.set('top', pointer.y);
         }
-
         this.drawInstance.set({
           width: Math.abs(pointer.x - this.origX),
           height: Math.abs(pointer.y - this.origY)
@@ -504,15 +462,13 @@ var Board = /*#__PURE__*/function () {
         canvas.renderAll();
       }
     };
-  };
-
-  _proto.stopDrawing = function stopDrawing() {
+  }
+  stopDrawing() {
     this.mouseDown = false;
-  };
-
-  _proto.createEllipse = function createEllipse() {
+  }
+  createEllipse() {
     //main
-    var canvas = this.canvas;
+    const canvas = this.canvas;
     canvas.isDrawingMode = true;
     canvas.on('mouse:down', this.startAddEllipse().bind(this));
     canvas.on('mouse:move', this.startDrawingEllipse().bind(this));
@@ -521,21 +477,20 @@ var Board = /*#__PURE__*/function () {
     canvas.defaultCursor = this.cursorPencil;
     canvas.hoverCursor = this.cursorPencil;
     canvas.isDrawingMode = false;
-    canvas.getObjects().map(function (item) {
-      return item.set({
-        selectable: false
-      });
-    });
+    canvas.getObjects().map(item => item.set({
+      selectable: false
+    }));
     canvas.discardActiveObject().requestRenderAll();
-  };
-
-  _proto.startAddEllipse = function startAddEllipse() {
-    var canvas = this.canvas;
-    var drawingSettings = this.drawingSettings;
+  }
+  startAddEllipse() {
+    const canvas = this.canvas;
+    const drawingSettings = this.drawingSettings;
     return function (_ref6) {
-      var e = _ref6.e;
+      let {
+        e
+      } = _ref6;
       this.mouseDown = true;
-      var pointer = canvas.getPointer(e);
+      const pointer = canvas.getPointer(e);
       this.origX = pointer.x;
       this.origY = pointer.y;
       this.drawInstance = new _fabric.fabric.Ellipse({
@@ -550,24 +505,21 @@ var Board = /*#__PURE__*/function () {
       });
       canvas.add(this.drawInstance);
     };
-  };
-
-  _proto.startDrawingEllipse = function startDrawingEllipse() {
-    var canvas = this.canvas;
+  }
+  startDrawingEllipse() {
+    const canvas = this.canvas;
     return function (_ref7) {
-      var e = _ref7.e;
-
+      let {
+        e
+      } = _ref7;
       if (this.mouseDown) {
-        var pointer = canvas.getPointer(e);
-
+        const pointer = canvas.getPointer(e);
         if (pointer.x < this.origX) {
           this.drawInstance.set('left', pointer.x);
         }
-
         if (pointer.y < this.origY) {
           this.drawInstance.set('top', pointer.y);
         }
-
         this.drawInstance.set({
           rx: Math.abs(pointer.x - this.origX) / 2,
           ry: Math.abs(pointer.y - this.origY) / 2
@@ -576,10 +528,9 @@ var Board = /*#__PURE__*/function () {
         canvas.renderAll();
       }
     };
-  };
-
-  _proto.createTriangle = function createTriangle() {
-    var canvas = this.canvas;
+  }
+  createTriangle() {
+    const canvas = this.canvas;
     canvas.isDrawingMode = true;
     canvas.on('mouse:down', this.startAddTriangle().bind(this));
     canvas.on('mouse:move', this.startDrawingTriangle().bind(this));
@@ -588,22 +539,21 @@ var Board = /*#__PURE__*/function () {
     canvas.defaultCursor = this.cursorPencil;
     canvas.hoverCursor = this.cursorPencil;
     canvas.isDrawingMode = false;
-    canvas.getObjects().map(function (item) {
-      return item.set({
-        selectable: false
-      });
-    });
+    canvas.getObjects().map(item => item.set({
+      selectable: false
+    }));
     canvas.discardActiveObject().requestRenderAll();
-  };
-
-  _proto.startAddTriangle = function startAddTriangle() {
-    var canvas = this.canvas;
-    var drawingSettings = this.drawingSettings;
+  }
+  startAddTriangle() {
+    const canvas = this.canvas;
+    const drawingSettings = this.drawingSettings;
     return function (_ref8) {
-      var e = _ref8.e;
+      let {
+        e
+      } = _ref8;
       this.mouseDown = true;
       drawingSettings.currentMode = this.modes.TRIANGLE;
-      var pointer = canvas.getPointer(e);
+      const pointer = canvas.getPointer(e);
       this.origX = pointer.x;
       this.origY = pointer.y;
       this.drawInstance = new _fabric.fabric.Triangle({
@@ -618,24 +568,21 @@ var Board = /*#__PURE__*/function () {
       });
       canvas.add(this.drawInstance);
     };
-  };
-
-  _proto.startDrawingTriangle = function startDrawingTriangle() {
-    var canvas = this.canvas;
+  }
+  startDrawingTriangle() {
+    const canvas = this.canvas;
     return function (_ref9) {
-      var e = _ref9.e;
-
+      let {
+        e
+      } = _ref9;
       if (this.mouseDown) {
-        var pointer = canvas.getPointer(e);
-
+        const pointer = canvas.getPointer(e);
         if (pointer.x < this.origX) {
           this.drawInstance.set('left', pointer.x);
         }
-
         if (pointer.y < this.origY) {
           this.drawInstance.set('top', pointer.y);
         }
-
         this.drawInstance.set({
           width: Math.abs(pointer.x - this.origX),
           height: Math.abs(pointer.y - this.origY)
@@ -644,26 +591,20 @@ var Board = /*#__PURE__*/function () {
         canvas.renderAll();
       }
     };
-  };
-
-  _proto.createText = function createText() {
-    var _this3 = this;
-
-    var canvas = this.canvas;
+  }
+  createText() {
+    const canvas = this.canvas;
     canvas.isDrawingMode = true;
-    canvas.on('mouse:down', function (e) {
-      return _this3.addText.call(_this3, e);
-    });
+    canvas.on('mouse:down', e => this.addText.call(this, e));
     canvas.isDrawingMode = false;
-  };
-
-  _proto.addText = function addText(e) {
-    var canvas = this.canvas;
-    var drawingSettings = this.drawingSettings;
-    var pointer = canvas.getPointer(e);
+  }
+  addText(e) {
+    const canvas = this.canvas;
+    const drawingSettings = this.drawingSettings;
+    const pointer = canvas.getPointer(e);
     this.origX = pointer.x;
     this.origY = pointer.y;
-    var text = new _fabric.fabric.Textbox('', {
+    const text = new _fabric.fabric.Textbox('', {
       left: this.origX - 10,
       top: this.origY - 10,
       fontSize: drawingSettings.brushWidth * 3 + 10,
@@ -680,36 +621,32 @@ var Board = /*#__PURE__*/function () {
     this.editedTextObject = text;
     canvas.off('mouse:down');
     canvas.once('mouse:down', function (e1) {
-      var _this4 = this;
-
       if (text.isEditing) {
         text.exitEditing();
         this.editedTextObject = null;
-        canvas.once('mouse:down', function (e2) {
-          _this4.addText.call(_this4, e2);
+        canvas.once('mouse:down', e2 => {
+          this.addText.call(this, e2);
         });
       } else {
         this.addText.call(this, e1);
       }
     }.bind(this));
-  };
-
-  _proto.eraserOn = function eraserOn() {
-    var canvas = this.canvas;
+  }
+  eraserOn() {
+    const canvas = this.canvas;
     canvas.isDrawingMode = false;
-    canvas.on('mouse:down', function (event) {
+    canvas.on('mouse:down', event => {
       canvas.remove(event.target);
-      canvas.on('mouse:move', function (e) {
+      canvas.on('mouse:move', e => {
         canvas.remove(e.target);
       });
     });
-    canvas.on('mouse:up', function () {
+    canvas.on('mouse:up', () => {
       canvas.off('mouse:move');
     });
-    canvas.on('mouse:over', function (event) {
-      var hoveredObject = event.target;
+    canvas.on('mouse:over', event => {
+      const hoveredObject = event.target;
       console.log(hoveredObject);
-
       if (hoveredObject) {
         hoveredObject.set({
           opacity: 0.2
@@ -717,9 +654,8 @@ var Board = /*#__PURE__*/function () {
         canvas.requestRenderAll();
       }
     });
-    canvas.on('mouse:out', function (event) {
-      var hoveredObject = event.target;
-
+    canvas.on('mouse:out', event => {
+      const hoveredObject = event.target;
       if (hoveredObject) {
         hoveredObject.set({
           opacity: 1
@@ -729,101 +665,84 @@ var Board = /*#__PURE__*/function () {
     });
     canvas.defaultCursor = (0, _cursors.getCursor)('eraser');
     canvas.hoverCursor = (0, _cursors.getCursor)('eraser');
-  };
-
-  _proto.onSelectMode = function onSelectMode() {
-    var canvas = this.canvas;
-    var drawingSettings = this.drawingSettings;
+  }
+  onSelectMode() {
+    const canvas = this.canvas;
+    const drawingSettings = this.drawingSettings;
     drawingSettings.currentMode = '';
     canvas.isDrawingMode = false;
     canvas.selection = true;
-    canvas.getObjects().map(function (item) {
-      return item.set({
-        selectable: true
-      });
-    });
+    canvas.getObjects().map(item => item.set({
+      selectable: true
+    }));
     canvas.hoverCursor = 'all-scroll';
-  };
-
-  _proto.clearCanvas = function clearCanvas() {
-    var canvas = this.canvas;
+  }
+  clearCanvas() {
+    const canvas = this.canvas;
     canvas.getObjects().forEach(function (item) {
       if (item !== canvas.backgroundImage) {
         canvas.remove(item);
       }
     });
     canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
-  };
-
-  _proto.changeZoom = function changeZoom(_ref10) {
-    var point = _ref10.point,
-        scale = _ref10.scale;
-
+  }
+  changeZoom(_ref10) {
+    let {
+      point,
+      scale
+    } = _ref10;
     if (!point) {
-      var width = this.canvas.width;
-      var height = this.canvas.height;
+      const width = this.canvas.width;
+      const height = this.canvas.height;
       point = {
         x: width / 2,
         y: height / 2
       };
     }
-
-    var minZoom = this.canvasConfig.minZoom;
-    var maxZoom = this.canvasConfig.maxZoom;
+    const minZoom = this.canvasConfig.minZoom;
+    const maxZoom = this.canvasConfig.maxZoom;
     scale = this.canvas.getZoom() * scale;
     scale = scale < minZoom ? minZoom : scale > maxZoom ? maxZoom : scale;
     this.canvas.zoomToPoint(point, scale);
     this.onZoom({
-      point: point,
-      scale: scale
-    }); // [Sketch range limits] Modified so that when the screen is reduced while reaching the end of the wall, it does not go beyond the border of the transparent wall that I set.
+      point,
+      scale
+    });
 
-    if (scale < 1) {
-      var newVpt = this.canvas.viewportTransform;
-      newVpt[4] = this.axisLimit({
-        scale: scale,
-        vpt: this.nowX,
-        axis: "x"
-      });
-      newVpt[5] = this.axisLimit({
-        scale: scale,
-        vpt: this.nowY,
-        axis: "y"
-      });
-    }
-  };
-
-  _proto.resetZoom = function resetZoom() {
-    var width = this.canvas.width;
-    var height = this.canvas.height;
-    var point = {
+    // [Sketch range limits] Modified so that when the screen is reduced while reaching the end of the wall, it does not go beyond the border of the transparent wall that I set.
+    // if(scale < 1) {
+    //   const newVpt = this.canvas.viewportTransform;
+    //   newVpt[4] = this.axisLimit({ scale, vpt: this.nowX, axis: "x" });
+    //   newVpt[5] = this.axisLimit({ scale, vpt: this.nowY, axis: "y" });
+    // }
+  }
+  resetZoom() {
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+    const point = {
       x: width / 2,
       y: height / 2
     };
-    var scale = 1;
+    const scale = 1;
     this.canvas.zoomToPoint(point, scale);
     this.onZoom({
-      point: point,
-      scale: scale
+      point,
+      scale
     });
-  };
-
-  _proto.onZoom = function onZoom(params) {
+  }
+  onZoom(params) {
     this.addZoomListeners(params);
     this.canvas.fire('zoom:change', params);
-  };
-
-  _proto.openPage = function openPage(page) {
-    var canvas = this.canvas;
-    var center = canvas.getCenter();
-
-    _fabric.fabric.Image.fromURL(page, function (img) {
+  }
+  openPage(page) {
+    const canvas = this.canvas;
+    const center = canvas.getCenter();
+    _fabric.fabric.Image.fromURL(page, img => {
       if (img.width > img.height) {
         img.scaleToWidth(canvas.width);
       } else {
         img.scaleToHeight(canvas.height - 100);
       }
-
       canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
         top: center.top,
         left: center.left,
@@ -832,47 +751,49 @@ var Board = /*#__PURE__*/function () {
       });
       canvas.renderAll();
     });
-  };
+  }
+  getCanvasContentBoundaries() {
+    const canvas = this.canvas;
+    const objects = canvas.getObjects();
 
-  _proto.getCanvasContentBoundaries = function getCanvasContentBoundaries() {
-    var canvas = this.canvas;
-    var objects = canvas.getObjects(); // Initialize variables for min and max coordinates
+    // Initialize variables for min and max coordinates
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
 
-    var minX = 10000;
-    var minY = 10000;
-    var maxX = -10000;
-    var maxY = -10000; // Iterate through objects to find minimum and maximum coordinates
+    // Iterate through objects to find minimum and maximum coordinates
 
-    objects.forEach(function (object) {
-      var objectBoundingBox = object.getBoundingRect();
+    for (const object of objects) {
+      const objectBoundingBox = object.getBoundingRect();
       minX = Math.min(minX, objectBoundingBox.left);
       minY = Math.min(minY, objectBoundingBox.top);
       maxX = Math.max(maxX, objectBoundingBox.left + objectBoundingBox.width);
       maxY = Math.max(maxY, objectBoundingBox.top + objectBoundingBox.height);
-    }); // Calculate canvas size based on content
+    }
 
-    var width = maxX - minX;
-    var height = maxY - minY;
+    // Calculate canvas size based on content
+    const width = maxX - minX;
+    const height = maxY - minY;
     return {
-      minX: minX,
-      minY: minY,
-      maxX: maxX,
-      maxY: maxY,
-      width: width,
-      height: height
+      minX,
+      minY,
+      maxX,
+      maxY,
+      width,
+      height
     };
-  };
-
-  _proto.removeBoard = function removeBoard() {
+  }
+  removeBoard() {
     this.element.disconnect();
-
     if (this.canvas) {
       this.canvas.off();
       this.canvas.dispose();
     }
-
     this.canvas = null;
-  } // function drawBackground(canvas) {
+  }
+
+  // function drawBackground(canvas) {
   //   const dotSize = 4; // Adjust the size of the dots as needed
   //   const dotSvg = `
   //       <svg xmlns="http://www.w3.org/2000/svg" width="${dotSize * 10}" height="${
@@ -881,7 +802,9 @@ var Board = /*#__PURE__*/function () {
   //         <circle cx="${dotSize / 2}" cy="${dotSize / 2}" r="${dotSize / 2}" fill="#00000010" />
   //       </svg>
   //     `;
+
   //   let rect;
+
   //   return new Promise((resolve) => {
   //     const dotImage = new Image();
   //     dotImage.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dotSvg);
@@ -890,8 +813,10 @@ var Board = /*#__PURE__*/function () {
   //         source: dotImage,
   //         repeat: 'repeat', // Adjust the repeat property to change the pattern repetition
   //       });
+
   //       const width = canvas.getWidth();
   //       const height = canvas.getHeight();
+
   //       const rect = new fabric.Rect({
   //         itemId: 'background-id-rectangle',
   //         width: width,
@@ -902,14 +827,11 @@ var Board = /*#__PURE__*/function () {
   //         lockMovementX: true, // Prevent horizontal movement of the dot
   //         lockMovementY: true, // Prevent vertical movement of the dot
   //       });
+
   //       canvas.add(rect);
   //       resolve(rect);
   //     };
   //   });
   // }
-  ;
-
-  return Board;
-}();
-
+}
 exports.Board = Board;

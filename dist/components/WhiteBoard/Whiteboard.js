@@ -2,64 +2,33 @@
 
 exports.__esModule = true;
 exports.default = void 0;
-
 var _react = _interopRequireWildcard(require("react"));
-
 var _propTypes = _interopRequireDefault(require("prop-types"));
-
 var _WhiteboardStyled = require("./Whiteboard.styled.js");
-
 var _fabric = require("fabric");
-
 var _PdfReader = require("../PdfReader");
-
 var _fileSaver = require("file-saver");
-
 var _BoardClass = require("./Board.Class.js");
-
 var _ColorPicker = require("../ColorPicker");
-
 var _cross = _interopRequireDefault(require("./../images/cross.svg"));
-
 var _eraser = _interopRequireDefault(require("./../images/eraser.svg"));
-
 var _text = _interopRequireDefault(require("./../images/text.svg"));
-
 var _rectangle = _interopRequireDefault(require("./../images/rectangle.svg"));
-
 var _line = _interopRequireDefault(require("./../images/line.svg"));
-
 var _ellipse = _interopRequireDefault(require("./../images/ellipse.svg"));
-
 var _triangle = _interopRequireDefault(require("./../images/triangle.svg"));
-
 var _pencil = _interopRequireDefault(require("./../images/pencil.svg"));
-
 var _delete = _interopRequireDefault(require("./../images/delete.svg"));
-
 var _zoomIn = _interopRequireDefault(require("./../images/zoom-in.svg"));
-
 var _zoomOut = _interopRequireDefault(require("./../images/zoom-out.svg"));
-
 var _download = _interopRequireDefault(require("./../images/download.svg"));
-
 var _addPhoto = _interopRequireDefault(require("./../images/add-photo.svg"));
-
 var _colorFill = _interopRequireDefault(require("./../images/color-fill.svg"));
-
 var _focus = _interopRequireDefault(require("./../images/focus.svg"));
-
-var _initDrawingSettings;
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-var initFileInfo = {
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+const initFileInfo = {
   file: {
     name: 'Whiteboard'
   },
@@ -67,199 +36,189 @@ var initFileInfo = {
   currentPageNumber: 1,
   currentPage: ''
 };
-var initDrawingSettings = (_initDrawingSettings = {
+const initDrawingSettings = {
   brushWidth: 5,
   currentMode: 'PENCIL',
-  currentColor: '#000000'
-}, _initDrawingSettings["brushWidth"] = 5, _initDrawingSettings.fill = false, _initDrawingSettings);
-var initSettings = {
+  currentColor: '#000000',
+  brushWidth: 5,
+  fill: false
+  // background: true,
+};
+const initSettings = {
   zoom: 1,
   contentJSON: null
 };
-
-var defaultFunction = function defaultFunction(data, event, canvas) {};
-
-var Whiteboard = function Whiteboard(_ref) {
+const defaultFunction = (data, event, canvas) => {};
+const Whiteboard = _ref => {
   var _fileReaderInfo$file, _fileReaderInfo$file2;
-
-  var controls = _ref.controls,
-      settings = _ref.settings,
-      drawingSettings = _ref.drawingSettings,
-      fileInfo = _ref.fileInfo,
-      _ref$onObjectAdded = _ref.onObjectAdded,
-      onObjectAdded = _ref$onObjectAdded === void 0 ? defaultFunction : _ref$onObjectAdded,
-      _ref$onObjectRemoved = _ref.onObjectRemoved,
-      onObjectRemoved = _ref$onObjectRemoved === void 0 ? defaultFunction : _ref$onObjectRemoved,
-      _ref$onObjectModified = _ref.onObjectModified,
-      onObjectModified = _ref$onObjectModified === void 0 ? defaultFunction : _ref$onObjectModified,
-      _ref$onCanvasRender = _ref.onCanvasRender,
-      onCanvasRender = _ref$onCanvasRender === void 0 ? defaultFunction : _ref$onCanvasRender,
-      _ref$onCanvasChange = _ref.onCanvasChange,
-      onCanvasChange = _ref$onCanvasChange === void 0 ? defaultFunction : _ref$onCanvasChange,
-      _ref$onZoom = _ref.onZoom,
-      onZoom = _ref$onZoom === void 0 ? defaultFunction : _ref$onZoom,
-      _ref$onImageUploaded = _ref.onImageUploaded,
-      onImageUploaded = _ref$onImageUploaded === void 0 ? defaultFunction : _ref$onImageUploaded,
-      _ref$onPDFUploaded = _ref.onPDFUploaded,
-      onPDFUploaded = _ref$onPDFUploaded === void 0 ? defaultFunction : _ref$onPDFUploaded,
-      _ref$onPDFUpdated = _ref.onPDFUpdated,
-      onPDFUpdated = _ref$onPDFUpdated === void 0 ? defaultFunction : _ref$onPDFUpdated,
-      _ref$onPageChange = _ref.onPageChange,
-      onPageChange = _ref$onPageChange === void 0 ? defaultFunction : _ref$onPageChange,
-      _ref$onOptionsChange = _ref.onOptionsChange,
-      onOptionsChange = _ref$onOptionsChange === void 0 ? defaultFunction : _ref$onOptionsChange,
-      _ref$onSaveCanvasAsIm = _ref.onSaveCanvasAsImage,
-      onSaveCanvasAsImage = _ref$onSaveCanvasAsIm === void 0 ? defaultFunction : _ref$onSaveCanvasAsIm,
-      _ref$onConfigChange = _ref.onConfigChange,
-      onConfigChange = _ref$onConfigChange === void 0 ? defaultFunction : _ref$onConfigChange,
-      _ref$onSaveCanvasStat = _ref.onSaveCanvasState,
-      onSaveCanvasState = _ref$onSaveCanvasStat === void 0 ? defaultFunction : _ref$onSaveCanvasStat,
-      _ref$onDocumentChange = _ref.onDocumentChanged,
-      onDocumentChanged = _ref$onDocumentChange === void 0 ? defaultFunction : _ref$onDocumentChange;
-
-  var _useState = (0, _react.useState)([]),
-      canvasSaveData = _useState[0],
-      setCanvasSaveData = _useState[1];
-
-  var _useState2 = (0, _react.useState)(),
-      board = _useState2[0],
-      setBoard = _useState2[1];
-
-  var _useState3 = (0, _react.useState)({}),
-      canvasObjectsPerPage = _useState3[0],
-      setCanvasObjectsPerPage = _useState3[1];
-
-  var _useState4 = (0, _react.useState)(_extends({}, initDrawingSettings, drawingSettings)),
-      canvasDrawingSettings = _useState4[0],
-      setCanvasDrawingSettings = _useState4[1];
-
-  var canvasConfig = _extends({}, initSettings, settings);
-
-  var _useState5 = (0, _react.useState)(new Map().set(initFileInfo.file.name, initFileInfo.file)),
-      documents = _useState5[0],
-      setDocuments = _useState5[1];
-
-  var _useState6 = (0, _react.useState)(canvasConfig.zoom),
-      zoom = _useState6[0],
-      setZoom = _useState6[1];
-
-  var _useState7 = (0, _react.useState)(_extends({}, initFileInfo, fileInfo)),
-      fileReaderInfo = _useState7[0],
-      setFileReaderInfo = _useState7[1];
-
-  var canvasRef = (0, _react.useRef)(null);
-  var whiteboardRef = (0, _react.useRef)(null);
-  var uploadPdfRef = (0, _react.useRef)(null);
-  var enabledControls = (0, _react.useMemo)(function () {
-    var _extends2;
-
-    return _extends((_extends2 = {}, _extends2[_BoardClass.modes.PENCIL] = true, _extends2[_BoardClass.modes.LINE] = true, _extends2[_BoardClass.modes.RECTANGLE] = true, _extends2[_BoardClass.modes.ELLIPSE] = true, _extends2[_BoardClass.modes.TRIANGLE] = true, _extends2[_BoardClass.modes.TEXT] = true, _extends2[_BoardClass.modes.SELECT] = true, _extends2[_BoardClass.modes.ERASER] = true, _extends2.CLEAR = true, _extends2.FILL = true, _extends2.BRUSH = true, _extends2.COLOR_PICKER = true, _extends2.DEFAULT_COLORS = true, _extends2.FILES = true, _extends2.SAVE_AS_IMAGE = true, _extends2.GO_TO_START = true, _extends2.SAVE_AND_LOAD = true, _extends2.ZOOM = true, _extends2.TABS = true, _extends2), controls);
+  let {
+    controls,
+    settings,
+    drawingSettings,
+    fileInfo,
+    onObjectAdded = defaultFunction,
+    onObjectRemoved = defaultFunction,
+    onObjectModified = defaultFunction,
+    onCanvasRender = defaultFunction,
+    onCanvasChange = defaultFunction,
+    onZoom = defaultFunction,
+    onImageUploaded = defaultFunction,
+    onPDFUploaded = defaultFunction,
+    onPDFUpdated = defaultFunction,
+    onPageChange = defaultFunction,
+    onOptionsChange = defaultFunction,
+    onSaveCanvasAsImage = defaultFunction,
+    onConfigChange = defaultFunction,
+    onSaveCanvasState = defaultFunction,
+    onDocumentChanged = defaultFunction
+  } = _ref;
+  const [canvasSaveData, setCanvasSaveData] = (0, _react.useState)([]);
+  const [board, setBoard] = (0, _react.useState)();
+  const [canvasObjectsPerPage, setCanvasObjectsPerPage] = (0, _react.useState)({});
+  const [canvasDrawingSettings, setCanvasDrawingSettings] = (0, _react.useState)({
+    ...initDrawingSettings,
+    ...drawingSettings
+  });
+  const canvasConfig = {
+    ...initSettings,
+    ...settings
+  };
+  const [documents, setDocuments] = (0, _react.useState)(new Map().set(initFileInfo.file.name, initFileInfo.file));
+  const [zoom, setZoom] = (0, _react.useState)(canvasConfig.zoom);
+  const [fileReaderInfo, setFileReaderInfo] = (0, _react.useState)({
+    ...initFileInfo,
+    ...fileInfo
+  });
+  const canvasRef = (0, _react.useRef)(null);
+  const whiteboardRef = (0, _react.useRef)(null);
+  const uploadPdfRef = (0, _react.useRef)(null);
+  const enabledControls = (0, _react.useMemo)(function () {
+    return {
+      [_BoardClass.modes.PENCIL]: true,
+      [_BoardClass.modes.LINE]: true,
+      [_BoardClass.modes.RECTANGLE]: true,
+      [_BoardClass.modes.ELLIPSE]: true,
+      [_BoardClass.modes.TRIANGLE]: true,
+      [_BoardClass.modes.TEXT]: true,
+      [_BoardClass.modes.SELECT]: true,
+      [_BoardClass.modes.ERASER]: true,
+      CLEAR: true,
+      FILL: true,
+      BRUSH: true,
+      COLOR_PICKER: true,
+      DEFAULT_COLORS: true,
+      FILES: true,
+      SAVE_AS_IMAGE: true,
+      GO_TO_START: true,
+      SAVE_AND_LOAD: true,
+      ZOOM: true,
+      TABS: true,
+      ...controls
+    };
   }, [controls]);
-  (0, _react.useEffect)(function () {
-    setCanvasDrawingSettings(_extends({}, canvasDrawingSettings, drawingSettings));
+  (0, _react.useEffect)(() => {
+    setCanvasDrawingSettings({
+      ...canvasDrawingSettings,
+      ...drawingSettings
+    });
   }, [drawingSettings]);
-  (0, _react.useEffect)(function () {
+  (0, _react.useEffect)(() => {
     if (!board || !canvasConfig) return;
     board.setCanvasConfig(canvasConfig);
   }, [settings]);
-  (0, _react.useEffect)(function () {
-    setFileReaderInfo(_extends({}, fileReaderInfo, fileInfo));
+  (0, _react.useEffect)(() => {
+    setFileReaderInfo({
+      ...fileReaderInfo,
+      ...fileInfo
+    });
   }, [fileInfo]);
-  (0, _react.useEffect)(function () {
+  (0, _react.useEffect)(() => {
     if (board) {
       return;
     }
-
-    var newBoard = new _BoardClass.Board({
+    const newBoard = new _BoardClass.Board({
       drawingSettings: canvasDrawingSettings,
       canvasConfig: canvasConfig,
       canvasRef: canvasRef // Sketch range limits
-
     });
     setBoard(newBoard);
     addListeners(newBoard.canvas);
-    return function () {
+    return () => {
       if (board) {
         board.removeBoard();
       }
     };
   }, [board]);
-  (0, _react.useEffect)(function () {
+  (0, _react.useEffect)(() => {
     if (!board || !canvasDrawingSettings) return;
     board.setDrawingSettings(canvasDrawingSettings);
-  }, [canvasDrawingSettings, board]); // useEffect(() => {
+  }, [canvasDrawingSettings, board]);
+
+  // useEffect(() => {
   //   if (!board || !canvasConfig) return;
+
   //   board.setCanvasConfig(canvasConfig);
   //   onConfigChange(canvasConfig, null, board.canvas);
   // }, [board, canvasConfig]);
 
-  (0, _react.useEffect)(function () {
+  (0, _react.useEffect)(() => {
     if (!(board != null && board.canvas)) {
       return;
     }
-
-    var json = getPageJSON({
+    const json = getPageJSON({
       fileName: fileReaderInfo.file.name,
       pageNumber: fileReaderInfo.currentPageNumber
     });
-
     if (json) {
       board.canvas.loadFromJSON(json);
     } else {
       board.openPage(fileReaderInfo.currentPage);
     }
-  }, [fileReaderInfo == null ? void 0 : (_fileReaderInfo$file = fileReaderInfo.file) == null ? void 0 : _fileReaderInfo$file.name, fileReaderInfo.currentPage]);
-
+  }, [fileReaderInfo == null || (_fileReaderInfo$file = fileReaderInfo.file) == null ? void 0 : _fileReaderInfo$file.name, fileReaderInfo.currentPage]);
   function uploadImage(e) {
-    var reader = new FileReader();
-    var file = e.target.files[0];
-    reader.addEventListener('load', function () {
-      _fabric.fabric.Image.fromURL(reader.result, function (img) {
+    const reader = new FileReader();
+    const file = e.target.files[0];
+    reader.addEventListener('load', () => {
+      _fabric.fabric.Image.fromURL(reader.result, img => {
         img.scaleToHeight(board.canvas.height);
         board.canvas.add(img);
       });
     });
     reader.readAsDataURL(file);
   }
-
   function addListeners(canvas) {
-    canvas.on('after:render', function (e) {
-      var data = getFullData(canvas);
+    canvas.on('after:render', e => {
+      const data = getFullData(canvas);
       onCanvasRender(data, e, canvas);
     });
     canvas.on('zoom:change', function (data) {
       onZoom(data, null, canvas);
       setZoom(data.scale);
     });
-    canvas.on('object:added', function (event) {
+    canvas.on('object:added', event => {
       onObjectAdded(event.target.toJSON(), event, canvas);
       onCanvasChange(event.target.toJSON(), event, canvas);
     });
-    canvas.on('object:removed', function (event) {
+    canvas.on('object:removed', event => {
       onObjectRemoved(event.target.toJSON(), event, canvas);
       onCanvasChange(event.target.toJSON(), event, canvas);
     });
-    canvas.on('object:modified', function (event) {
+    canvas.on('object:modified', event => {
       onObjectModified(event.target.toJSON(), event, canvas);
       onCanvasChange(event.target.toJSON(), event, canvas);
     });
   }
-
   function handleSaveCanvasState() {
-    var newCanvasState = board.canvas.toJSON();
-    setCanvasSaveData(function (prevStates) {
-      return [].concat(prevStates, [newCanvasState]);
-    });
+    const newCanvasState = board.canvas.toJSON();
+    setCanvasSaveData(prevStates => [...prevStates, newCanvasState]);
   }
-
   function handleLoadCanvasState(state) {
     if (board && state) {
-      board.canvas.loadFromJSON(state, function () {
+      board.canvas.loadFromJSON(state, () => {
         board.canvas.renderAll();
       });
     }
   }
-
   function getFullData(canvas) {
     if (!canvas) return;
     return {
@@ -271,82 +230,72 @@ var Whiteboard = function Whiteboard(_ref) {
       fileInfo: fileReaderInfo
     };
   }
-
   function saveCanvasState() {
-    var _extends3, _extends4;
-
-    var newValue = _extends({}, canvasObjectsPerPage, (_extends4 = {}, _extends4[fileReaderInfo.file.name] = _extends({}, canvasObjectsPerPage[fileReaderInfo.file.name], (_extends3 = {}, _extends3[fileReaderInfo.currentPageNumber] = board.canvas.toJSON(), _extends3)), _extends4));
-
+    const newValue = {
+      ...canvasObjectsPerPage,
+      [fileReaderInfo.file.name]: {
+        ...canvasObjectsPerPage[fileReaderInfo.file.name],
+        [fileReaderInfo.currentPageNumber]: board.canvas.toJSON()
+      }
+    };
     setCanvasObjectsPerPage(newValue);
     console.log({
-      newValue: newValue
+      newValue
     });
     onSaveCanvasState(newValue);
   }
-
   function changeBrushWidth(e) {
-    var intValue = parseInt(e.target.value);
+    const intValue = parseInt(e.target.value);
     board.canvas.freeDrawingBrush.width = intValue;
-
-    var newOptions = _extends({}, canvasDrawingSettings, {
+    const newOptions = {
+      ...canvasDrawingSettings,
       brushWidth: intValue
-    });
-
+    };
     setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, board.canvas);
   }
-
   function changeMode(mode, e) {
     if (canvasDrawingSettings.currentMode === mode) return;
-
-    var newOptions = _extends({}, canvasDrawingSettings, {
+    const newOptions = {
+      ...canvasDrawingSettings,
       currentMode: mode
-    });
-
+    };
     setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, board.canvas);
   }
-
   function changeCurrentColor(color, e) {
     board.canvas.freeDrawingBrush.color = color;
-
-    var newOptions = _extends({}, canvasDrawingSettings, {
+    const newOptions = {
+      ...canvasDrawingSettings,
       currentColor: color
-    });
-
+    };
     setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, board.canvas);
   }
-
   function changeFill(e) {
-    var newOptions = _extends({}, canvasDrawingSettings, {
+    const newOptions = {
+      ...canvasDrawingSettings,
       fill: !canvasDrawingSettings.fill
-    });
-
+    };
     setCanvasDrawingSettings(newOptions);
     onOptionsChange(newOptions, e, board.canvas);
   }
-
   function handleSaveCanvasAsImage() {
     canvasRef.current.toBlob(function (blob) {
       (0, _fileSaver.saveAs)(blob, fileReaderInfo.file.name + "-" + (fileReaderInfo.currentPageNumber ? '_page-' : '') + ".png");
       onSaveCanvasAsImage(blob, null, board.canvas);
     });
   }
-
   function bringControlTOStartPosition() {
     board.canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
     board.resetZoom(1);
     board.nowX = 0;
     board.nowY = 0;
   }
-
   function onFileChange(event) {
-    var _event$target, _event$target$files;
-
-    var file = (_event$target = event.target) == null ? void 0 : (_event$target$files = _event$target.files) == null ? void 0 : _event$target$files[0];
+    var _event$target;
+    const file = (_event$target = event.target) == null || (_event$target = _event$target.files) == null ? void 0 : _event$target[0];
     if (!file) return;
-
     if (file.type.includes('image/')) {
       uploadImage(event);
       onImageUploaded(file, event, board.canvas);
@@ -357,43 +306,42 @@ var Whiteboard = function Whiteboard(_ref) {
         file: file,
         currentPageNumber: 1
       });
-      setDocuments(function (prev) {
-        return new Map(prev.set(file.name, file));
-      });
+      setDocuments(prev => new Map(prev.set(file.name, file)));
       onPDFUploaded(file, event, board.canvas);
     }
   }
-
   function getPageJSON(_ref2) {
-    var fileName = _ref2.fileName,
-        pageNumber = _ref2.pageNumber;
-
+    let {
+      fileName,
+      pageNumber
+    } = _ref2;
     if (canvasObjectsPerPage[fileName] && canvasObjectsPerPage[fileName][pageNumber]) {
       return canvasObjectsPerPage[fileName][pageNumber];
     } else {
       return null;
     }
   }
-
   function updateFileReaderInfo(data) {
-    var newFileData = _extends({}, fileReaderInfo, data);
-
+    const newFileData = {
+      ...fileReaderInfo,
+      ...data
+    };
     setFileReaderInfo(newFileData);
     onPDFUpdated(newFileData, null, board.canvas);
   }
-
-  var handlePageChange = function handlePageChange(page) {
+  const handlePageChange = page => {
     saveCanvasState();
     board.clearCanvas(board.canvas);
-    setFileReaderInfo(_extends({}, fileReaderInfo, {
+    setFileReaderInfo({
+      ...fileReaderInfo,
       currentPageNumber: page
-    }));
-    onPageChange(_extends({}, fileReaderInfo, {
+    });
+    onPageChange({
+      ...fileReaderInfo,
       currentPageNumber: page
-    }), null, board.canvas);
+    }, null, board.canvas);
   };
-
-  var changeDocument = function changeDocument(name) {
+  const changeDocument = name => {
     bringControlTOStartPosition();
     saveCanvasState();
     board.clearCanvas(board.canvas);
@@ -406,93 +354,84 @@ var Whiteboard = function Whiteboard(_ref) {
       currentPageNumber: 1
     }, null, board.canvas);
   };
-
-  var handleZoomIn = function handleZoomIn() {
+  const handleZoomIn = () => {
     board.changeZoom({
       scale: 1.1
     });
   };
-
-  var handleZoomOut = function handleZoomOut() {
+  const handleZoomOut = () => {
     board.changeZoom({
       scale: 0.9
     });
   };
-
-  var handleResetZoom = function handleResetZoom() {
+  const handleResetZoom = () => {
     board.resetZoom(1);
   };
-
-  var getColorButtons = function getColorButtons(colors) {
-    return colors.map(function (color) {
-      return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, {
-        key: color
-      }, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ColorButtonS, {
-        color: color,
-        onClick: function onClick(e) {
-          return changeCurrentColor(color, e);
-        }
-      }));
-    });
+  const getColorButtons = colors => {
+    return colors.map(color => /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, {
+      key: color
+    }, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ColorButtonS, {
+      color: color,
+      onClick: e => changeCurrentColor(color, e)
+    })));
   };
-
-  var getControls = function getControls() {
-    var _modeButtons;
-
-    var modeButtons = (_modeButtons = {}, _modeButtons[_BoardClass.modes.PENCIL] = {
-      icon: _pencil.default,
-      name: 'Pencil'
-    }, _modeButtons[_BoardClass.modes.LINE] = {
-      icon: _line.default,
-      name: 'Line'
-    }, _modeButtons[_BoardClass.modes.RECTANGLE] = {
-      icon: _rectangle.default,
-      name: 'Rectangle'
-    }, _modeButtons[_BoardClass.modes.ELLIPSE] = {
-      icon: _ellipse.default,
-      name: 'Ellipse'
-    }, _modeButtons[_BoardClass.modes.TRIANGLE] = {
-      icon: _triangle.default,
-      name: 'Triangle'
-    }, _modeButtons[_BoardClass.modes.TEXT] = {
-      icon: _text.default,
-      name: 'Text'
-    }, _modeButtons[_BoardClass.modes.SELECT] = {
-      icon: _cross.default,
-      name: 'Select'
-    }, _modeButtons[_BoardClass.modes.ERASER] = {
-      icon: _eraser.default,
-      name: 'Eraser'
-    }, _modeButtons);
-    return Object.keys(modeButtons).map(function (buttonKey) {
+  const getControls = () => {
+    const modeButtons = {
+      [_BoardClass.modes.PENCIL]: {
+        icon: _pencil.default,
+        name: 'Pencil'
+      },
+      [_BoardClass.modes.LINE]: {
+        icon: _line.default,
+        name: 'Line'
+      },
+      [_BoardClass.modes.RECTANGLE]: {
+        icon: _rectangle.default,
+        name: 'Rectangle'
+      },
+      [_BoardClass.modes.ELLIPSE]: {
+        icon: _ellipse.default,
+        name: 'Ellipse'
+      },
+      [_BoardClass.modes.TRIANGLE]: {
+        icon: _triangle.default,
+        name: 'Triangle'
+      },
+      [_BoardClass.modes.TEXT]: {
+        icon: _text.default,
+        name: 'Text'
+      },
+      [_BoardClass.modes.SELECT]: {
+        icon: _cross.default,
+        name: 'Select'
+      },
+      [_BoardClass.modes.ERASER]: {
+        icon: _eraser.default,
+        name: 'Eraser'
+      }
+    };
+    return Object.keys(modeButtons).map(buttonKey => {
       if (!enabledControls[buttonKey]) return;
-      var btn = modeButtons[buttonKey];
+      const btn = modeButtons[buttonKey];
       return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
         key: buttonKey,
         type: "button",
         className: "" + (canvasDrawingSettings.currentMode === buttonKey ? 'selected' : ''),
-        onClick: function onClick(e) {
-          return changeMode(buttonKey, e);
-        }
+        onClick: e => changeMode(buttonKey, e)
       }, /*#__PURE__*/_react.default.createElement("img", {
         src: btn.icon,
         alt: btn.name
       }));
     });
   };
-
-  return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WrapperS, null, !!enabledControls.TABS && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.TabsS, null, Array.from(documents.keys()).map(function (document, index) {
-    return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.TabS, {
-      key: index // Using index as a key if document is not unique
-      ,
-      onClick: function onClick() {
-        return changeDocument(document);
-      },
-      style: document === fileReaderInfo.file.name ? {
-        backgroundColor: 'rgba(0,0,0,0.1)'
-      } : {}
-    }, document);
-  })), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WhiteBoardS, {
+  return /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WrapperS, null, !!enabledControls.TABS && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.TabsS, null, Array.from(documents.keys()).map((document, index) => /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.TabS, {
+    key: index // Using index as a key if document is not unique
+    ,
+    onClick: () => changeDocument(document),
+    style: document === fileReaderInfo.file.name ? {
+      backgroundColor: 'rgba(0,0,0,0.1)'
+    } : {}
+  }, document))), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.WhiteBoardS, {
     ref: whiteboardRef
   }, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarHolderS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ColorBarS, null, !!enabledControls.COLOR_PICKER && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorPicker, {
     size: 28,
@@ -515,9 +454,7 @@ var Whiteboard = function Whiteboard(_ref) {
     alt: "Delete"
   }))), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarS, null, getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     type: "button",
-    onClick: function onClick() {
-      return board.clearCanvas();
-    }
+    onClick: () => board.clearCanvas()
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _delete.default,
     alt: "Delete"
@@ -528,9 +465,7 @@ var Whiteboard = function Whiteboard(_ref) {
     type: "file",
     onChange: onFileChange
   }), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
-    onClick: function onClick() {
-      return uploadPdfRef.current.click();
-    }
+    onClick: () => uploadPdfRef.current.click()
   }, /*#__PURE__*/_react.default.createElement("img", {
     src: _addPhoto.default,
     alt: "Delete"
@@ -548,9 +483,7 @@ var Whiteboard = function Whiteboard(_ref) {
     type: "button",
     onClick: handleSaveCanvasState
   }, "Save")), !!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
-    onClick: function onClick() {
-      return handleLoadCanvasState(canvasSaveData[0]);
-    }
+    onClick: () => handleLoadCanvasState(canvasSaveData[0])
   }, "Load"))), /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_WhiteboardStyled.ButtonS, {
     onClick: handleZoomIn,
     title: "Zoom In"
@@ -582,9 +515,7 @@ var Whiteboard = function Whiteboard(_ref) {
     updateFileReaderInfo: updateFileReaderInfo
   }))));
 };
-
 Whiteboard.propTypes = {
   aspectRatio: _propTypes.default.number
 };
-var _default = Whiteboard;
-exports.default = _default;
+var _default = exports.default = Whiteboard;

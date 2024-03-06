@@ -2,65 +2,51 @@
 
 exports.__esModule = true;
 exports.default = void 0;
-
 var _react = _interopRequireDefault(require("react"));
-
-var _entry = require("react-pdf/dist/esm/entry.webpack");
-
 var _reactPdf = require("react-pdf");
-
 var _PdfReader = require("./PdfReader.styled");
-
 var _back = _interopRequireDefault(require("./../images/back.svg"));
-
 var _next = _interopRequireDefault(require("./../images/next.svg"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 _reactPdf.pdfjs.GlobalWorkerOptions.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/" + _reactPdf.pdfjs.version + "/pdf.worker.js";
-
-var PDFReader = function PDFReader(_ref) {
-  var fileReaderInfo = _ref.fileReaderInfo,
-      updateFileReaderInfo = _ref.updateFileReaderInfo,
-      onPageChange = _ref.onPageChange;
-
+const PDFReader = _ref => {
+  let {
+    fileReaderInfo,
+    updateFileReaderInfo,
+    onPageChange
+  } = _ref;
   function onRenderSuccess() {
-    var importPDFCanvas = document.querySelector('.import-pdf-page canvas');
-    var pdfAsImageSrc = importPDFCanvas.toDataURL();
+    const importPDFCanvas = document.querySelector('.import-pdf-page canvas');
+    const pdfAsImageSrc = importPDFCanvas.toDataURL();
     updateFileReaderInfo({
       currentPage: pdfAsImageSrc
     });
   }
-
   function onDocumentLoadSuccess(_ref2) {
-    var numPages = _ref2.numPages;
+    let {
+      numPages
+    } = _ref2;
     console.log('onDocumentLoadSuccess', numPages);
     updateFileReaderInfo({
       totalPages: numPages
     });
   }
-
   function changePage(offset) {
     onPageChange(fileReaderInfo.currentPageNumber + offset);
   }
-
-  var nextPage = function nextPage() {
-    return changePage(1);
-  };
-
-  var previousPage = function previousPage() {
-    return changePage(-1);
-  };
-
-  return /*#__PURE__*/_react.default.createElement(_PdfReader.PDFReaderS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.FileContainer, null, /*#__PURE__*/_react.default.createElement(_entry.Document, {
+  const nextPage = () => changePage(1);
+  const previousPage = () => changePage(-1);
+  return /*#__PURE__*/_react.default.createElement(_PdfReader.PDFReaderS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.FileContainer, null, /*#__PURE__*/_react.default.createElement(_reactPdf.Document, {
     file: fileReaderInfo.file,
     onLoadSuccess: onDocumentLoadSuccess,
-    onLoadProgress: function onLoadProgress(_ref3) {
-      var loaded = _ref3.loaded,
-          total = _ref3.total;
+    onLoadProgress: _ref3 => {
+      let {
+        loaded,
+        total
+      } = _ref3;
       return console.log('Loading a document: ' + loaded / total * 100 + '%');
     }
-  }, /*#__PURE__*/_react.default.createElement(_entry.Page, {
+  }, /*#__PURE__*/_react.default.createElement(_reactPdf.Page, {
     className: "import-pdf-page",
     onRenderSuccess: onRenderSuccess,
     pageNumber: fileReaderInfo.currentPageNumber
@@ -80,6 +66,4 @@ var PDFReader = function PDFReader(_ref) {
     alt: "Next"
   }))));
 };
-
-var _default = PDFReader;
-exports.default = _default;
+var _default = exports.default = PDFReader;
