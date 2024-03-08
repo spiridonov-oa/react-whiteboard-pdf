@@ -56,6 +56,7 @@ const Whiteboard = _ref => {
     settings,
     drawingSettings,
     fileInfo,
+    newUploadImage,
     onObjectAdded = defaultFunction,
     onObjectRemoved = defaultFunction,
     onObjectModified = defaultFunction,
@@ -123,6 +124,11 @@ const Whiteboard = _ref => {
     });
   }, [drawingSettings]);
   (0, _react.useEffect)(() => {
+    if (newUploadImage) {
+      FileChanger(newUploadImage);
+    }
+  }, [newUploadImage]);
+  (0, _react.useEffect)(() => {
     if (!board || !canvasConfig) return;
     board.setCanvasConfig(canvasConfig);
   }, [settings]);
@@ -181,6 +187,17 @@ const Whiteboard = _ref => {
     reader.addEventListener('load', () => {
       _fabric.fabric.Image.fromURL(reader.result, img => {
         img.scaleToHeight(board.canvas.height);
+        board.canvas.add(img);
+      });
+    });
+    reader.readAsDataURL(file);
+  }
+  function uploadImageFile(file) {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      _fabric.fabric.Image.fromURL(reader.result, img => {
+        var _board$canvas;
+        img.scaleToHeight(board == null || (_board$canvas = board.canvas) == null ? void 0 : _board$canvas.height);
         board.canvas.add(img);
       });
     });
@@ -308,6 +325,19 @@ const Whiteboard = _ref => {
       });
       setDocuments(prev => new Map(prev.set(file.name, file)));
       onPDFUploaded(file, event, board.canvas);
+    }
+  }
+  function FileChanger(file) {
+    if (file.type.includes('image/')) {
+      uploadImageFile(file);
+    } else if (file.type.includes('pdf')) {
+      saveCanvasState();
+      board.clearCanvas();
+      updateFileReaderInfo({
+        file: file,
+        currentPageNumber: 1
+      });
+      setDocuments(prev => new Map(prev.set(file.name, file)));
     }
   }
   function getPageJSON(_ref2) {
