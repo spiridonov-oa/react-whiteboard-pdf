@@ -2,7 +2,6 @@
 
 exports.__esModule = true;
 exports.default = void 0;
-var _default = {
+var _default = exports.default = {
   color: '#eee'
 };
-exports.default = _default;
