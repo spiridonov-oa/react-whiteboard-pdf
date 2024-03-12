@@ -65,7 +65,7 @@ const Whiteboard = ({
   settings,
   drawingSettings,
   fileInfo,
-  newUploadImage,
+  imageSlot,
   onObjectAdded = defaultFunction,
   onObjectRemoved = defaultFunction,
   onObjectModified = defaultFunction,
@@ -132,10 +132,10 @@ const Whiteboard = ({
     setCanvasDrawingSettings({ ...canvasDrawingSettings, ...drawingSettings });
   }, [drawingSettings]);
   useEffect(()=>{
-    if(newUploadImage){
-     FileChanger(newUploadImage)
+    if(imageSlot){
+     fileChanger(imageSlot)
     }
-  },[newUploadImage])
+  },[imageSlot])
 
   useEffect(() => {
     if (!board || !canvasConfig) return;
@@ -348,7 +348,7 @@ const Whiteboard = ({
       onPDFUploaded(file, event, board.canvas);
     }
   }
-  function FileChanger(file){
+  function fileChanger(file){
     
     if (file.type.includes('image/')) {
         uploadImageFile(file)
