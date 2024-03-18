@@ -65,7 +65,7 @@ const Whiteboard = ({
   settings,
   drawingSettings,
   fileInfo,
-  newUploadImage,
+  imageSlot,
   onObjectAdded = defaultFunction,
   onObjectRemoved = defaultFunction,
   onObjectModified = defaultFunction,
@@ -131,11 +131,11 @@ const Whiteboard = ({
   useEffect(() => {
     setCanvasDrawingSettings({ ...canvasDrawingSettings, ...drawingSettings });
   }, [drawingSettings]);
-  useEffect(()=>{
-    if(newUploadImage){
-     FileChanger(newUploadImage)
+  useEffect(() => {
+    if (imageSlot) {
+      fileChanger(imageSlot);
     }
-  },[newUploadImage])
+  }, [imageSlot]);
 
   useEffect(() => {
     if (!board || !canvasConfig) return;
@@ -154,7 +154,7 @@ const Whiteboard = ({
     const newBoard = new Board({
       drawingSettings: canvasDrawingSettings,
       canvasConfig: canvasConfig,
-      canvasRef: canvasRef,  // Sketch range limits
+      canvasRef: canvasRef, // Sketch range limits
     });
 
     setBoard(newBoard);
@@ -209,7 +209,7 @@ const Whiteboard = ({
 
     reader.readAsDataURL(file);
   }
-  function uploadImageFile(file){
+  function uploadImageFile(file) {
     const reader = new FileReader();
     reader.addEventListener('load', () => {
       fabric.Image.fromURL(reader.result, (img) => {
@@ -348,16 +348,14 @@ const Whiteboard = ({
       onPDFUploaded(file, event, board.canvas);
     }
   }
-  function FileChanger(file){
-    
+  function fileChanger(file) {
     if (file.type.includes('image/')) {
-        uploadImageFile(file)
+      uploadImageFile(file);
     } else if (file.type.includes('pdf')) {
       saveCanvasState();
       board.clearCanvas();
       updateFileReaderInfo({ file: file, currentPageNumber: 1 });
       setDocuments((prev) => new Map(prev.set(file.name, file)));
-      
     }
   }
 
