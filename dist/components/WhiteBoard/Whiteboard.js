@@ -56,7 +56,7 @@ const Whiteboard = _ref => {
     settings,
     drawingSettings,
     fileInfo,
-    newUploadImage,
+    imageSlot,
     onObjectAdded = defaultFunction,
     onObjectRemoved = defaultFunction,
     onObjectModified = defaultFunction,
@@ -124,10 +124,10 @@ const Whiteboard = _ref => {
     });
   }, [drawingSettings]);
   (0, _react.useEffect)(() => {
-    if (newUploadImage) {
-      FileChanger(newUploadImage);
+    if (imageSlot) {
+      fileChanger(imageSlot);
     }
-  }, [newUploadImage]);
+  }, [imageSlot]);
   (0, _react.useEffect)(() => {
     if (!board || !canvasConfig) return;
     board.setCanvasConfig(canvasConfig);
@@ -327,7 +327,7 @@ const Whiteboard = _ref => {
       onPDFUploaded(file, event, board.canvas);
     }
   }
-  function FileChanger(file) {
+  function fileChanger(file) {
     if (file.type.includes('image/')) {
       uploadImageFile(file);
     } else if (file.type.includes('pdf')) {
