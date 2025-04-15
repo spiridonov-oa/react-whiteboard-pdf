@@ -199,7 +199,7 @@ export const RangeInputS = styled.input`
     border-radius: 45px;
     height: ${({ value }) => value + 2 || 20}px;
     width: ${({ value }) => value + 2 || 20}px;
-    background: ${({ thumbColor }) => thumbColor || '#232323'};
+    background: ${({ thumbcolor }) => thumbcolor || '#232323'};
     cursor: pointer;
     margin-top: ${({ value }) => -value / 2 || -8}px;
     -webkit-appearance: none;
@@ -226,7 +226,7 @@ export const RangeInputS = styled.input`
     border-radius: 45px;
     height: ${({ value }) => value + 2 || 20}px;
     width: ${({ value }) => value + 2 || 20}px;
-    background: ${({ thumbColor }) => thumbColor || '#232323'};
+    background: ${({ thumbcolor }) => thumbcolor || '#232323'};
     cursor: pointer;
     margin-top: ${({ value }) => -value / 2 || -8}px;
   }

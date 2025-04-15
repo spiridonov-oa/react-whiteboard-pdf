@@ -1,4 +1,4 @@
-import { fabric } from 'fabric';
+import { Canvas, PencilBrush, Line, Rect, Ellipse, Triangle, Textbox, FabricImage } from 'fabric';
 import { getCursor } from './cursors';
 
 export const modes = {
@@ -19,6 +19,7 @@ export class Board {
   mouseDown = false;
   drawInstance = null;
   drawingSettings;
+  init = false;
   canvasConfig = {
     zoom: 1,
     contentJSON: null,
@@ -55,14 +56,24 @@ export class Board {
       windowHeight > this.sketchHeightLimit ? windowHeight : this.sketchHeightLimit;
 
     if (params) {
-      this.canvasRef = params.canvasRef;
+      this.canvasNode = params.canvasRef.current;
       this.drawingSettings = params.drawingSettings;
     }
-    this.canvas = this.initCanvas(this.canvasConfig);
+    this.canvas = this.initCanvas(params.canvasRef.current);
 
     this.canvas.once('after:render', () => {
-      this.applyCanvasConfig(params.canvasConfig);
+      // if (!this.init) {
+      //   this.init = true;
+      //   this.applyCanvasConfig(params.canvasConfig);
+      // }
     });
+
+    if (!this.canvas) {
+      console.error('Canvas initialization failed.');
+      return;
+    }
+
+    console.log('constructor', this.canvas);
 
     this.modes = modes;
     this.resetZoom();
@@ -70,8 +81,8 @@ export class Board {
     this.addZoomListeners();
   }
 
-  initCanvas() {
-    fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
+  initCanvas = (canvasNode) => {
+    Canvas.prototype.getItemByAttr = function (attr, name) {
       var object = null,
         objects = this.getObjects();
       for (var i = 0, len = this.size(); i < len; i++) {
@@ -83,40 +94,80 @@ export class Board {
       return object;
     };
 
-    const canvasElement = document.getElementById('canvas');
+    const canvasElement = canvasNode;
     if (!canvasElement) return;
 
     const parentElement = canvasElement.parentNode;
 
-    const canvas = new fabric.Canvas('canvas');
-    canvas.perPixelTargetFind = true;
+    // remove canvasElement from DOM to avoid flickering
+    this.canvas = new Canvas(canvasNode);
+
+    this.canvas.perPixelTargetFind = true;
 
     if (parentElement) {
-      this.element = this.handleResize(this.resizeCanvas(canvas, parentElement).bind(this));
+      this.element = this.handleResize(this.resizeCanvas(this.canvas, parentElement).bind(this));
       this.element.observe(parentElement);
     }
 
-    return canvas;
-  }
+    return this.canvas;
+  };
 
-  applyCanvasConfig(canvasConfig) {
+  applyCanvasConfig = (canvasConfig) => {
+    if (!this.canvas || !canvasConfig) {
+      return;
+    }
     this.canvasConfig = { ...this.canvasConfig, ...canvasConfig };
     if (this.canvasConfig.zoom) {
       this.canvas.setZoom(this.canvasConfig.zoom);
     }
-    if (this.canvasConfig.contentJSON) {
-      this.canvas.loadFromJSON(this.canvasConfig.contentJSON);
-    }
+
     if (this.canvasConfig.viewportTransform) {
       this.canvas.viewportTransform = this.canvasConfig.viewportTransform;
       this.changeZoom({ scale: 1 });
     }
-    this.canvas.requestRenderAll();
     console.log(this.canvas.getObjects());
-    this.canvas.fire('config:chnage');
-  }
+    this.canvas.fire('config:change');
+  };
 
-  addZoomListeners(params) {
+  applyJSON = (json) => {
+    if (!this.canvas) {
+      console.error('Canvas not initialized in applyJSON');
+      return;
+    }
+
+    try {
+      // Parse JSON if it's a string
+      const jsonData = typeof json === 'string' ? JSON.parse(json) : json;
+
+      // Clear the canvas first to prevent any conflicts
+      this.canvas.clear();
+
+      this.canvas.loadFromJSON(
+        jsonData,
+        () => {
+          // Process each object to ensure it's properly initialized
+          this.canvas.getObjects().forEach((obj) => {
+            obj.setCoords();
+          });
+
+          // Force a complete re-render
+          this.canvas.requestRenderAll();
+
+          // Notify listeners that canvas has changed
+          this.canvas.fire('canvas:change');
+          console.log('Canvas JSON loaded and rendered successfully');
+        },
+        (o, object) => {
+          // This optional progress callback allows custom handling per object
+          console.log('Loaded object: ', object.type);
+        },
+      );
+    } catch (error) {
+      console.error('Error applying JSON to canvas:', error);
+    }
+  };
+
+  addZoomListeners = (params) => {
     const canvas = this.canvas;
     const that = this;
     canvas.off('mouse:wheel');
@@ -149,35 +200,6 @@ export class Board {
           console.log(error);
         }
 
-        // const boundaries = that.getCanvasContentBoundaries();
-
-        // let scrolledX = vpt[4] + e.deltaX;
-        // let scrolledY = vpt[5] + e.deltaY;
-        // console.log('scrolled', scrolledX, scrolledY);
-        // console.log('boundaries', boundaries);
-
-        // const offset = 50;
-
-        // scrolledX =
-        //   scrolledX < -boundaries.maxX + offset
-        //     ? -boundaries.maxX + offset
-        //     : -scrolledX < boundaries.minX - canvas.width + offset
-        //     ? canvas.width - boundaries.minX - offset
-        //     : scrolledX;
-        // scrolledY =
-        //   scrolledY < -boundaries.maxY + offset
-        //     ? -boundaries.maxY + offset
-        //     : -scrolledY < boundaries.minY - canvas.height + offset
-        //     ? canvas.height - boundaries.minY - offset
-        //     : scrolledY;
-
-        // that.throttle(() => console.log('after', scrolledX, scrolledY));
-
-        // vpt[4] = scrolledX;
-        // vpt[5] = scrolledY;
-
-        // console.log(vpt);
-
         canvas.requestRenderAll();
       }
     });
@@ -209,18 +231,18 @@ export class Board {
           const scale = zoom;
 
           that.changeZoom({ point, scale });
-          canvas.renderAll();
+          canvas.requestRenderAll();
 
           prevDistance = newDistance;
         });
       }
     });
-  }
+  };
 
   // [Sketch range limits]
-  axisLimit({ scale, vpt, axis }) {
+  axisLimit = ({ scale, vpt, axis }) => {
     let result = vpt;
-    const containerElement = this.canvasRef.current;
+    const containerElement = this.canvasNode;
     if (!containerElement) {
       return vpt;
     }
@@ -250,22 +272,25 @@ export class Board {
     }
 
     return result;
-  }
+  };
 
-  setDrawingSettings(drawingSettings) {
+  setDrawingSettings = (drawingSettings) => {
     if (!drawingSettings) return;
 
     this.drawingSettings = { ...this.drawingSettings, ...drawingSettings };
     this.setDrawingMode(this.drawingSettings.currentMode);
-  }
+  };
 
-  setCanvasConfig(canvasConfig) {
+  setCanvasConfig = (canvasConfig) => {
     if (!canvasConfig) return;
-
+    console.log('---setCanvasConfig', canvasConfig);
     this.applyCanvasConfig(canvasConfig);
-  }
+  };
 
-  setDrawingMode(mode) {
+  setDrawingMode = (mode) => {
+    if (!this.canvas) {
+      return;
+    }
     this.drawingSettings.currentMode = mode;
     this.resetCanvas();
 
@@ -297,9 +322,12 @@ export class Board {
       default:
         this.draw();
     }
-  }
+  };
 
-  resetCanvas() {
+  resetCanvas = () => {
+    if (!this.canvas) {
+      return;
+    }
     const canvas = this.canvas;
 
     this.removeCanvasListener(canvas);
@@ -313,52 +341,52 @@ export class Board {
       this.editedTextObject.exitEditing();
       this.editedTextObject = null;
     }
-  }
+  };
 
-  throttle(f, delay = 300) {
+  throttle = (f, delay = 300) => {
     let timer = 0;
     return function (...args) {
       clearTimeout(timer);
       timer = setTimeout(() => f.apply(this, args), delay);
     };
-  }
+  };
 
-  handleResize(callback) {
+  handleResize = (callback) => {
     const resize_ob = new ResizeObserver(this.throttle(callback, 300));
     return resize_ob;
-  }
+  };
 
-  resizeCanvas(canvas, whiteboard) {
+  resizeCanvas = (canvas, whiteboard) => {
     return function () {
       const width = whiteboard.clientWidth;
       const height = whiteboard.clientHeight;
       this.changeZoom({ scale: 1 });
-      // const scale = width / canvas.getWidth();
-      // const zoom = canvas.getZoom() * scale;
       canvas.setDimensions({ width: width, height: height });
-      // canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
     };
-  }
+  };
 
-  removeCanvasListener() {
+  removeCanvasListener = () => {
+    if (!this.canvas) {
+      return;
+    }
     const canvas = this.canvas;
     canvas.off('mouse:down');
     canvas.off('mouse:move');
     canvas.off('mouse:up');
     canvas.off('mouse:over');
-  }
+  };
 
-  draw() {
+  draw = () => {
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
-    canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+    canvas.freeDrawingBrush = new PencilBrush(canvas);
     canvas.freeDrawingBrush.width = drawingSettings.brushWidth;
     canvas.freeDrawingBrush.color = drawingSettings.currentColor;
     canvas.isDrawingMode = true;
     canvas.freeDrawingCursor = this.cursorPencil;
-  }
+  };
 
-  createLine() {
+  createLine = () => {
     const canvas = this.canvas;
 
     canvas.on('mouse:down', this.startAddLine().bind(this));
@@ -367,17 +395,18 @@ export class Board {
 
     canvas.defaultCursor = this.cursorPencil;
     canvas.hoverCursor = this.cursorPencil;
-    canvas.discardActiveObject().requestRenderAll();
-  }
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+  };
 
-  startAddLine() {
+  startAddLine = () => {
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     return function ({ e }) {
       this.mouseDown = true;
 
-      let pointer = canvas.getPointer(e);
-      this.drawInstance = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+      let pointer = canvas.getScenePoint(e);
+      this.drawInstance = new Line([pointer.x, pointer.y, pointer.x, pointer.y], {
         strokeWidth: drawingSettings.brushWidth,
         stroke: drawingSettings.currentColor,
         selectable: false,
@@ -386,13 +415,13 @@ export class Board {
       canvas.add(this.drawInstance);
       canvas.requestRenderAll();
     };
-  }
+  };
 
-  startDrawingLine() {
+  startDrawingLine = () => {
     const canvas = this.canvas;
     return function ({ e }) {
       if (this.mouseDown) {
-        const pointer = canvas.getPointer(e);
+        const pointer = canvas.getScenePoint(e);
         this.drawInstance.set({
           x2: pointer.x,
           y2: pointer.y,
@@ -401,9 +430,9 @@ export class Board {
         canvas.requestRenderAll();
       }
     };
-  }
+  };
 
-  createRect() {
+  createRect = () => {
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
 
@@ -416,20 +445,21 @@ export class Board {
     canvas.hoverCursor = this.cursorPencil;
     canvas.isDrawingMode = false;
     canvas.getObjects().map((item) => item.set({ selectable: false }));
-    canvas.discardActiveObject().requestRenderAll();
-  }
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+  };
 
-  startAddRect() {
+  startAddRect = () => {
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     return function ({ e }) {
       this.mouseDown = true;
 
-      const pointer = canvas.getPointer(e);
+      const pointer = canvas.getScenePoint(e);
       this.origX = pointer.x;
       this.origY = pointer.y;
 
-      this.drawInstance = new fabric.Rect({
+      this.drawInstance = new Rect({
         stroke: drawingSettings.currentColor,
         strokeWidth: drawingSettings.brushWidth,
         fill: drawingSettings.fill ? drawingSettings.currentColor : 'transparent',
@@ -451,13 +481,13 @@ export class Board {
         }.bind(this),
       );
     };
-  }
+  };
 
-  startDrawingRect() {
+  startDrawingRect = () => {
     const canvas = this.canvas;
     return function ({ e }) {
       if (this.mouseDown) {
-        const pointer = canvas.getPointer(e);
+        const pointer = canvas.getScenePoint(e);
 
         if (pointer.x < this.origX) {
           this.drawInstance.set('left', pointer.x);
@@ -470,16 +500,16 @@ export class Board {
           height: Math.abs(pointer.y - this.origY),
         });
         this.drawInstance.setCoords();
-        canvas.renderAll();
+        canvas.requestRenderAll();
       }
     };
-  }
+  };
 
-  stopDrawing() {
+  stopDrawing = () => {
     this.mouseDown = false;
-  }
+  };
 
-  createEllipse() {
+  createEllipse = () => {
     //main
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
@@ -493,19 +523,20 @@ export class Board {
     canvas.hoverCursor = this.cursorPencil;
     canvas.isDrawingMode = false;
     canvas.getObjects().map((item) => item.set({ selectable: false }));
-    canvas.discardActiveObject().requestRenderAll();
-  }
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+  };
 
-  startAddEllipse() {
+  startAddEllipse = () => {
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     return function ({ e }) {
       this.mouseDown = true;
 
-      const pointer = canvas.getPointer(e);
+      const pointer = canvas.getScenePoint(e);
       this.origX = pointer.x;
       this.origY = pointer.y;
-      this.drawInstance = new fabric.Ellipse({
+      this.drawInstance = new Ellipse({
         stroke: drawingSettings.currentColor,
         strokeWidth: drawingSettings.brushWidth,
         fill: drawingSettings.fill ? drawingSettings.currentColor : 'transparent',
@@ -518,14 +549,14 @@ export class Board {
 
       canvas.add(this.drawInstance);
     };
-  }
+  };
 
-  startDrawingEllipse() {
+  startDrawingEllipse = () => {
     const canvas = this.canvas;
 
     return function ({ e }) {
       if (this.mouseDown) {
-        const pointer = canvas.getPointer(e);
+        const pointer = canvas.getScenePoint(e);
         if (pointer.x < this.origX) {
           this.drawInstance.set('left', pointer.x);
         }
@@ -537,12 +568,12 @@ export class Board {
           ry: Math.abs(pointer.y - this.origY) / 2,
         });
         this.drawInstance.setCoords();
-        canvas.renderAll();
+        canvas.requestRenderAll();
       }
     };
-  }
+  };
 
-  createTriangle() {
+  createTriangle = () => {
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
 
@@ -555,20 +586,21 @@ export class Board {
     canvas.hoverCursor = this.cursorPencil;
     canvas.isDrawingMode = false;
     canvas.getObjects().map((item) => item.set({ selectable: false }));
-    canvas.discardActiveObject().requestRenderAll();
-  }
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+  };
 
-  startAddTriangle() {
+  startAddTriangle = () => {
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     return function ({ e }) {
       this.mouseDown = true;
       drawingSettings.currentMode = this.modes.TRIANGLE;
 
-      const pointer = canvas.getPointer(e);
+      const pointer = canvas.getScenePoint(e);
       this.origX = pointer.x;
       this.origY = pointer.y;
-      this.drawInstance = new fabric.Triangle({
+      this.drawInstance = new Triangle({
         stroke: drawingSettings.currentColor,
         strokeWidth: drawingSettings.brushWidth,
         fill: drawingSettings.fill ? drawingSettings.currentColor : 'transparent',
@@ -581,13 +613,13 @@ export class Board {
 
       canvas.add(this.drawInstance);
     };
-  }
+  };
 
-  startDrawingTriangle() {
+  startDrawingTriangle = () => {
     const canvas = this.canvas;
     return function ({ e }) {
       if (this.mouseDown) {
-        const pointer = canvas.getPointer(e);
+        const pointer = canvas.getScenePoint(e);
         if (pointer.x < this.origX) {
           this.drawInstance.set('left', pointer.x);
         }
@@ -600,64 +632,122 @@ export class Board {
         });
 
         this.drawInstance.setCoords();
-        canvas.renderAll();
+        canvas.requestRenderAll();
       }
     };
-  }
+  };
 
-  createText() {
+  createText = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
-    canvas.isDrawingMode = true;
 
-    canvas.on('mouse:down', (e) => this.addText.call(this, e));
-
+    // Set text mode cursor
+    canvas.defaultCursor = 'text';
+    canvas.hoverCursor = 'text';
     canvas.isDrawingMode = false;
-  }
 
-  addText(e) {
+    // Make text objects selectable in text mode
+    canvas.getObjects().forEach((obj) => {
+      if (obj.type === 'textbox') {
+        obj.set('selectable', true);
+      } else {
+        obj.set('selectable', false);
+      }
+    });
+
+    // Clean up previous listeners
+    this.removeCanvasListener();
+
+    // Handle clicks to either add new text or edit existing text
+    canvas.on('mouse:down', (e) => {
+      // If clicked on an existing text object, enter edit mode
+      if (e.target && e.target.type === 'textbox') {
+        this.editText(e.target);
+      } else {
+        // Otherwise create new text at click position
+        this.addText(e);
+      }
+    });
+  };
+
+  addText = (e) => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
 
-    const pointer = canvas.getPointer(e);
-    this.origX = pointer.x;
-    this.origY = pointer.y;
-    const text = new fabric.Textbox('', {
-      left: this.origX - 10,
-      top: this.origY - 10,
+    const pointer = canvas.getPointer(e.e);
+
+    // Create a new textbox with appropriate settings
+    const text = new Textbox('', {
+      left: pointer.x,
+      top: pointer.y,
       fontSize: drawingSettings.brushWidth * 3 + 10,
       fill: drawingSettings.currentColor,
+      width: 200,
       editable: true,
+      selectable: true,
+      backgroundColor: 'rgba(255, 255, 255, 0.01)',
       perPixelTargetFind: false,
+      borderColor: drawingSettings.currentColor,
+      cornerColor: drawingSettings.currentColor,
       keysMap: {
-        13: 'exitEditing',
+        13: 'exitEditing', // Enter key to finish editing
       },
     });
 
     canvas.add(text);
-    canvas.renderAll();
+    canvas.setActiveObject(text);
+    canvas.requestRenderAll();
 
-    text.enterEditing();
+    // Start editing immediately
+    this.editText(text);
+  };
 
-    this.editedTextObject = text;
+  editText = (textObject) => {
+    if (!this.canvas) return;
+    const canvas = this.canvas;
 
+    // Store reference to current text being edited
+    this.editedTextObject = textObject;
+
+    // Disable mouse down event while editing
     canvas.off('mouse:down');
-    canvas.once(
-      'mouse:down',
-      function (e1) {
-        if (text.isEditing) {
-          text.exitEditing();
-          this.editedTextObject = null;
-          canvas.once('mouse:down', (e2) => {
-            this.addText.call(this, e2);
-          });
-        } else {
-          this.addText.call(this, e1);
-        }
-      }.bind(this),
-    );
-  }
 
-  eraserOn() {
+    // Enter edit mode
+    textObject.enterEditing();
+
+    // Make sure to focus the hidden textarea
+    setTimeout(() => {
+      textObject.hiddenTextarea?.focus();
+    }, 50);
+
+    // Function to handle when editing is finished
+    const exitEditingHandler = () => {
+      if (!this.editedTextObject) return;
+
+      // If text is empty, remove it
+      if (!this.editedTextObject.text || this.editedTextObject.text.trim() === '') {
+        canvas.remove(this.editedTextObject);
+      }
+
+      this.editedTextObject = null;
+
+      // Resume text mode
+      setTimeout(() => this.createText(), 0);
+    };
+
+    // Listen for editing exit events
+    textObject.on('editing:exited', exitEditingHandler);
+
+    // Also handle clicking outside the text to exit editing
+    canvas.once('mouse:down', (e) => {
+      if (textObject.isEditing && e.target !== textObject) {
+        textObject.exitEditing();
+      }
+    });
+  };
+
+  eraserOn = () => {
     const canvas = this.canvas;
     canvas.isDrawingMode = false;
 
@@ -696,9 +786,9 @@ export class Board {
 
     canvas.defaultCursor = getCursor('eraser');
     canvas.hoverCursor = getCursor('eraser');
-  }
+  };
 
-  onSelectMode() {
+  onSelectMode = () => {
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     drawingSettings.currentMode = '';
@@ -707,19 +797,17 @@ export class Board {
 
     canvas.getObjects().map((item) => item.set({ selectable: true }));
     canvas.hoverCursor = 'all-scroll';
-  }
+  };
 
-  clearCanvas() {
+  clearCanvas = () => {
     const canvas = this.canvas;
-    canvas.getObjects().forEach(function (item) {
-      if (item !== canvas.backgroundImage) {
-        canvas.remove(item);
-      }
-    });
-    canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
-  }
 
-  changeZoom({ point, scale }) {
+    canvas.set('backgroundImage', null);
+    canvas.requestRenderAll.bind(canvas);
+    canvas.clear();
+  };
+
+  changeZoom = ({ point, scale }) => {
     if (!point) {
       const width = this.canvas.width;
       const height = this.canvas.height;
@@ -734,51 +822,84 @@ export class Board {
 
     this.canvas.zoomToPoint(point, scale);
     this.onZoom({ point, scale });
+  };
 
-    // [Sketch range limits] Modified so that when the screen is reduced while reaching the end of the wall, it does not go beyond the border of the transparent wall that I set.
-    // if(scale < 1) {
-    //   const newVpt = this.canvas.viewportTransform;
-    //   newVpt[4] = this.axisLimit({ scale, vpt: this.nowX, axis: "x" });
-    //   newVpt[5] = this.axisLimit({ scale, vpt: this.nowY, axis: "y" });
-    // }
-  }
-
-  resetZoom() {
+  resetZoom = () => {
     const width = this.canvas.width;
     const height = this.canvas.height;
     const point = { x: width / 2, y: height / 2 };
     const scale = 1;
     this.canvas.zoomToPoint(point, scale);
     this.onZoom({ point, scale });
-  }
+  };
 
-  onZoom(params) {
+  onZoom = (params) => {
     this.addZoomListeners(params);
     this.canvas.fire('zoom:change', params);
-  }
+  };
 
-  openPage(page) {
-    const canvas = this.canvas;
-    const center = canvas.getCenter();
+  openPage = (page) => {
+    if (!this.canvas) return Promise.reject('Canvas not initialized');
 
-    fabric.Image.fromURL(page, (img) => {
-      if (img.width > img.height) {
-        img.scaleToWidth(canvas.width);
+    if (!page) {
+      console.log('No page provided to openPage');
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      // Create a URL from the blob
+      let blobUrl;
+      if (typeof page === 'string' && page.startsWith('data:image')) {
+        const byteString = atob(page.split(',')[1]);
+        const mimeString = page.split(',')[0].split(':')[1].split(';')[0];
+        const arrayBuffer = new Uint8Array(byteString.length);
+        for (let i = 0; i < byteString.length; i++) {
+          arrayBuffer[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([arrayBuffer], { type: mimeString });
+        blobUrl = URL.createObjectURL(blob);
       } else {
-        img.scaleToHeight(canvas.height - 100);
+        blobUrl = URL.createObjectURL(page);
       }
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-        top: center.top,
-        left: center.left,
-        originX: 'center',
-        originY: 'center',
-      });
 
-      canvas.renderAll();
+      const imgObj = new Image();
+      imgObj.src = blobUrl;
+      imgObj.onload = (imgValue) => {
+        // Revoke the URL to free memory
+
+        const img = new FabricImage(imgObj);
+        if (!img) {
+          reject('Failed to create fabric image');
+          return;
+        }
+
+        const canvasCenter = this.canvas.getCenter();
+
+        // Scale the image to fit the canvas while maintaining aspect ratio
+        if (img.width > img.height) {
+          img.scaleToWidth(this.canvas.width);
+        } else {
+          img.scaleToHeight(this.canvas.height - 100);
+        }
+
+        img.set({
+          selectable: false,
+          left: canvasCenter.left,
+          top: canvasCenter.top,
+          originX: 'center',
+          originY: 'center',
+        });
+        // Set the background image with proper positioning
+        this.canvas.set('backgroundImage', img);
+        this.canvas.requestRenderAll();
+        resolve(img);
+      };
+
+      imgObj.onerror = () => reject('Error loading image');
     });
-  }
+  };
 
-  getCanvasContentBoundaries() {
+  getCanvasContentBoundaries = () => {
     const canvas = this.canvas;
     const objects = canvas.getObjects();
 
@@ -804,55 +925,58 @@ export class Board {
     const height = maxY - minY;
 
     return { minX, minY, maxX, maxY, width, height };
-  }
+  };
 
-  removeBoard() {
+  /**
+   * Public method to process an image file and add it to the canvas
+   * @param {File} file - The image file to process
+   * @returns {Promise<Object>} - Promise resolving to the created image object
+   * @public
+   */
+  processImageFile = (file) => {
+    if (!this.canvas) return Promise.reject('Canvas not initialized');
+
+    if (!file || !file.type.includes('image/')) {
+      return Promise.reject('Invalid file type. Please select an image.');
+    }
+
+    return new Promise((resolve, reject) => {
+      var reader = new FileReader();
+      reader.onload = (event) => {
+        var imgObj = new Image();
+        imgObj.src = event.target.result;
+        imgObj.onload = () => {
+          const img = new FabricImage(imgObj);
+          if (!img) {
+            return;
+          }
+          const canvasCenter = this.canvas.getCenter();
+          img.set({
+            selectable: true,
+            left: canvasCenter.left,
+            top: canvasCenter.top,
+            originX: 'center',
+            originY: 'center',
+          });
+          img.setCoords();
+          img.scaleToHeight(this.canvas.height);
+          this.canvas.add(img);
+          this.canvas.requestRenderAll();
+          // Set to the center
+        };
+      };
+
+      reader.onerror = () => reject('Error reading file');
+      reader.readAsDataURL(file);
+    });
+  };
+
+  removeBoard = () => {
     this.element.disconnect();
     if (this.canvas) {
       this.canvas.off();
       this.canvas.dispose();
     }
     this.canvas = null;
-  }
-
-  // function drawBackground(canvas) {
-  //   const dotSize = 4; // Adjust the size of the dots as needed
-  //   const dotSvg = `
-  //       <svg xmlns="http://www.w3.org/2000/svg" width="${dotSize * 10}" height="${
-  //     dotSize * 10
-  //   }" viewBox="0 0 ${dotSize * 10} ${dotSize * 10}">
-  //         <circle cx="${dotSize / 2}" cy="${dotSize / 2}" r="${dotSize / 2}" fill="#00000010" />
-  //       </svg>
-  //     `;
-
-  //   let rect;
-
-  //   return new Promise((resolve) => {
-  //     const dotImage = new Image();
-  //     dotImage.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dotSvg);
-  //     dotImage.onload = function () {
-  //       const dotPattern = new fabric.Pattern({
-  //         source: dotImage,
-  //         repeat: 'repeat', // Adjust the repeat property to change the pattern repetition
-  //       });
-
-  //       const width = canvas.getWidth();
-  //       const height = canvas.getHeight();
-
-  //       const rect = new fabric.Rect({
-  //         itemId: 'background-id-rectangle',
-  //         width: width,
-  //         height: height,
-  //         fill: dotPattern,
-  //         selectable: false, // Prevent the dot from being selected
-  //         evented: false, // Prevent the dot from receiving events
-  //         lockMovementX: true, // Prevent horizontal movement of the dot
-  //         lockMovementY: true, // Prevent vertical movement of the dot
-  //       });
-
-  //       canvas.add(rect);
-  //       resolve(rect);
-  //     };
-  //   });
-  // }
+  };
 }

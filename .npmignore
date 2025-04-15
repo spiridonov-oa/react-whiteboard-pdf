@@ -1,0 +1,12 @@
+# Development files
+src/
+public/
+.github/
+.vscode/
+node_modules/
+/dist
+
+# Config files
+.eslintrc.js
+.babelrc
+jest.config.js

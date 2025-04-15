@@ -9,8 +9,15 @@ import {
 } from './PdfReader.styled';
 import BackIcon from './../images/back.svg';
 import NextIcon from './../images/next.svg';
+// Add these two imports for react-pdf text layer support
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+// Fix worker loading by using HTTPS and ensuring version compatibility
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange }) => {
   function onRenderSuccess() {

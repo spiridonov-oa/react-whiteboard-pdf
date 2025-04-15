@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import theme from '../../theme';
 
 export const PDFReaderS = styled.div`
   width: 100%;
@@ -7,6 +6,7 @@ export const PDFReaderS = styled.div`
   font-size: 14px;
   justify-content: center;
   align-items: center;
+  background-color: 'red';
 `;
 
 export const FileContainer = styled.div`
