@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
 import {
   PDFReaderS,
@@ -19,21 +19,50 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange }) => {
+const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => {} }) => {
+  const [currentPageNumber, setCurrentPageNumber] = React.useState(
+    fileReaderInfo.currentPageNumber,
+  );
+  const [totalPages, setTotalPages] = React.useState(fileReaderInfo.totalPages);
+  const [file, setFile] = React.useState(fileReaderInfo.file);
+
+  useEffect(() => {
+    if (fileReaderInfo) {
+      setCurrentPageNumber(fileReaderInfo.currentPageNumber);
+      setTotalPages(fileReaderInfo.totalPages);
+      setFile(fileReaderInfo.file);
+    }
+  }, [fileReaderInfo]);
+
   function onRenderSuccess() {
     const importPDFCanvas = document.querySelector('.import-pdf-page canvas');
     const pdfAsImageSrc = importPDFCanvas.toDataURL();
 
-    updateFileReaderInfo({ currentPage: pdfAsImageSrc });
+    updateFileReaderInfo({
+      currentPage: pdfAsImageSrc,
+      file: file,
+      totalPages,
+      currentPageNumber: currentPageNumber,
+    });
   }
 
   function onDocumentLoadSuccess({ numPages }) {
     console.log('onDocumentLoadSuccess', numPages);
-    updateFileReaderInfo({ totalPages: numPages });
+    setTotalPages(numPages);
+    setCurrentPageNumber(1);
+    setFile(fileReaderInfo.file);
+    updateFileReaderInfo({ totalPages: numPages, currentPageNumber: 1, file });
   }
 
   function changePage(offset) {
-    onPageChange(fileReaderInfo.currentPageNumber + offset);
+    if (currentPageNumber + offset < 1) {
+      return;
+    }
+    if (currentPageNumber + offset > totalPages) {
+      return;
+    }
+    setCurrentPageNumber(currentPageNumber + offset);
+    onPageChange(currentPageNumber + offset);
   }
 
   const nextPage = () => changePage(1);
@@ -42,7 +71,7 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange }) => {
     <PDFReaderS>
       <FileContainer>
         <Document
-          file={fileReaderInfo.file}
+          file={file}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadProgress={({ loaded, total }) =>
             console.log('Loading a document: ' + (loaded / total) * 100 + '%')
@@ -51,26 +80,21 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange }) => {
           <Page
             className="import-pdf-page"
             onRenderSuccess={onRenderSuccess}
-            pageNumber={fileReaderInfo.currentPageNumber}
+            pageNumber={currentPageNumber}
           />
         </Document>
       </FileContainer>
-      {fileReaderInfo.totalPages > 1 && (
+      {totalPages > 1 && (
         <PageInfoS>
-          <NavigationButton
-            type="button"
-            disabled={fileReaderInfo.currentPageNumber <= 1}
-            onClick={previousPage}
-          >
+          <NavigationButton type="button" disabled={currentPageNumber <= 1} onClick={previousPage}>
             <img src={BackIcon} alt="Back" />
           </NavigationButton>
           <PageInfoDetails>
-            Page&nbsp;<b>{fileReaderInfo.currentPageNumber}</b>&nbsp;of{' '}
-            {fileReaderInfo.totalPages || '--'}
+            Page&nbsp;<b>{currentPageNumber}</b>&nbsp;of {totalPages || '--'}
           </PageInfoDetails>
           <NavigationButton
             type="button"
-            disabled={fileReaderInfo.currentPageNumber >= fileReaderInfo.totalPages}
+            disabled={currentPageNumber >= totalPages}
             onClick={nextPage}
           >
             <img src={NextIcon} alt="Next" />

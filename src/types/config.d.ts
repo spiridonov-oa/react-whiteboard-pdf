@@ -18,7 +18,6 @@ export interface DrawingSettings {
 export interface CanvasSettings {
   zoom: number;
   viewportTransform: number[];
-  contentJSON: any;
 }
 
 export interface TabState {

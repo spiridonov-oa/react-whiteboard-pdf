@@ -73,8 +73,6 @@ export class Board {
       return;
     }
 
-    console.log('constructor', this.canvas);
-
     this.modes = modes;
     this.resetZoom();
     this.setDrawingMode(this.drawingSettings.currentMode);
@@ -105,7 +103,21 @@ export class Board {
     this.canvas.perPixelTargetFind = true;
 
     if (parentElement) {
-      this.element = this.handleResize(this.resizeCanvas(this.canvas, parentElement).bind(this));
+      const resizeCallback = this.resizeCanvas(this.canvas, parentElement).bind(this);
+
+      // Add your custom logic to be executed after resize
+      const onResizeComplete = () => {
+        console.log('Canvas resized:', this.canvas.width, this.canvas.height);
+        // Any other custom logic you want to perform after resize
+
+        // For example, you might want to fire a custom event
+        this.canvas.fire('canvas:resized', {
+          width: this.canvas.width,
+          height: this.canvas.height,
+        });
+      };
+
+      this.element = this.handleResize(resizeCallback, onResizeComplete);
       this.element.observe(parentElement);
     }
 
@@ -142,29 +154,40 @@ export class Board {
       // Clear the canvas first to prevent any conflicts
       this.canvas.clear();
 
-      this.canvas.loadFromJSON(
-        jsonData,
-        () => {
-          // Process each object to ensure it's properly initialized
-          this.canvas.getObjects().forEach((obj) => {
-            obj.setCoords();
-          });
+      const callback = this.debounce(() => {
+        if (!this.canvas) return;
+        // Process each object to ensure it's properly initialized
+        this.canvas.getObjects().forEach((obj) => {
+          obj.setCoords();
+        });
 
-          // Force a complete re-render
-          this.canvas.requestRenderAll();
+        // Force a complete re-render
+        this.canvas.requestRenderAll();
 
-          // Notify listeners that canvas has changed
-          this.canvas.fire('canvas:change');
-          console.log('Canvas JSON loaded and rendered successfully');
-        },
-        (o, object) => {
-          // This optional progress callback allows custom handling per object
-          console.log('Loaded object: ', object.type);
-        },
-      );
+        // Notify listeners that canvas has changed
+        this.canvas.fire('canvas:change');
+      }, 100)();
+
+      this.canvas.loadFromJSON(jsonData, callback, (o, object) => {
+        // This optional progress callback allows custom handling per object
+        console.log('Loaded object: ', object.type);
+      });
     } catch (error) {
       console.error('Error applying JSON to canvas:', error);
     }
+  };
+
+  // Add a proper debounce utility method to the Board class
+  debounce = (func, wait = 100) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
   };
 
   addZoomListeners = (params) => {
@@ -283,7 +306,6 @@ export class Board {
 
   setCanvasConfig = (canvasConfig) => {
     if (!canvasConfig) return;
-    console.log('---setCanvasConfig', canvasConfig);
     this.applyCanvasConfig(canvasConfig);
   };
 
@@ -351,8 +373,18 @@ export class Board {
     };
   };
 
-  handleResize = (callback) => {
-    const resize_ob = new ResizeObserver(this.throttle(callback, 300));
+  handleResize = (callback, customCallback = null) => {
+    const wrappedCallback = (...args) => {
+      // Execute the original resize logic
+      callback(...args);
+
+      // Execute the custom callback if provided
+      if (typeof customCallback === 'function') {
+        customCallback(...args);
+      }
+    };
+
+    const resize_ob = new ResizeObserver(this.throttle(wrappedCallback, 300));
     return resize_ob;
   };
 
@@ -866,7 +898,7 @@ export class Board {
       imgObj.src = blobUrl;
       imgObj.onload = (imgValue) => {
         // Revoke the URL to free memory
-
+        if (!this.canvas || !imgObj) return;
         const img = new FabricImage(imgObj);
         if (!img) {
           reject('Failed to create fabric image');
@@ -943,6 +975,7 @@ export class Board {
     return new Promise((resolve, reject) => {
       var reader = new FileReader();
       reader.onload = (event) => {
+        if (!this.canvas) return;
         var imgObj = new Image();
         imgObj.src = event.target.result;
         imgObj.onload = () => {

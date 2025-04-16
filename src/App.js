@@ -33,6 +33,7 @@ const App = () => {
       <AppS>
         <MainS>
           <Whiteboard
+            contentJSON={canvasSettings.contentJSON}
             canvasSettings={canvasSettings}
             onObjectAdded={(data) => defaultFunction('onObjectAdded', data)}
             onObjectRemoved={(data) => defaultFunction('onObjectRemoved', data)}

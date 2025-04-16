@@ -4,7 +4,6 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
 import {
-  WrapperS,
   WhiteBoardS,
   ButtonS,
   ToolbarS,
@@ -46,13 +45,16 @@ interface WhiteboardProps {
     [key: string]: any;
   };
   fileInfo: FileInfo;
+  contentJSON?: string;
+  canvasRefLink: { canvas: HTMLCanvasElement | null };
   drawingSettings: DrawingSettings;
   canvasSettings: CanvasSettings;
   imageSlot?: File;
   documents?: Map<string, File>;
   activeTabIndex?: number;
+  style: React.CSSProperties;
   onFileAdded?: (file: File) => void;
-  onTabStateChange?: (state: Partial<TabState>) => void;
+  onTabStateChange?: (state: Partial<TabState>, currentJSON: string, pageNumber: number) => void;
   onObjectAdded?: (data: any, event: any, canvas: any) => void;
   onObjectRemoved?: (data: any, event: any, canvas: any) => void;
   onObjectModified?: (data: any, event: any, canvas: any) => void;
@@ -62,20 +64,23 @@ interface WhiteboardProps {
   onImageUploaded?: (file: File, event: any, canvas: any) => void;
   onPDFUploaded?: (file: File, event: any, canvas: any) => void;
   onPDFUpdated?: (fileInfo: FileInfo, event: any, canvas: any) => void;
-  onPageChange?: (state: Partial<TabState>, event: any, canvas: any) => void;
+  onPageChange?: (data: FileInfo) => void;
   onOptionsChange?: (options: DrawingSettings, event: any, canvas: any) => void;
   onSaveCanvasAsImage?: (blob: Blob, event: any, canvas: any) => void;
   onConfigChange?: (settings: CanvasSettings, event: any, canvas: any) => void;
 }
 
-const Whiteboard = ({
+const WhiteboardCore = ({
   controls,
   fileInfo,
+  contentJSON,
   drawingSettings,
+  canvasRefLink,
   canvasSettings,
   imageSlot,
   documents,
   activeTabIndex,
+  style,
   onFileAdded,
   onTabStateChange,
   onObjectAdded = defaultFunction,
@@ -87,20 +92,20 @@ const Whiteboard = ({
   onImageUploaded = defaultFunction,
   onPDFUploaded = defaultFunction,
   onPDFUpdated = defaultFunction,
-  onPageChange = defaultFunction,
+  onPageChange,
   onOptionsChange = defaultFunction,
   onSaveCanvasAsImage = defaultFunction,
   onConfigChange = defaultFunction,
 }: WhiteboardProps) => {
   const [canvasSaveData, setCanvasSaveData] = useState([]);
   const boardRef = useRef(null);
+  const [resizedCount, setResizedCount] = useState(1);
   // const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
   const [zoom, setZoom] = useState(canvasSettings.zoom);
   const canvasRef = useRef(null);
   const whiteboardRef = useRef(null);
   const uploadPdfRef = useRef(null);
 
-  console.log({ canvasSettings, drawingSettings, fileInfo });
   const enabledControls = useMemo(
     function () {
       return {
@@ -130,6 +135,20 @@ const Whiteboard = ({
     [controls],
   );
 
+  const applyJSON = () => {
+    if (!boardRef.current) return;
+    let json = contentJSON;
+    if (json) {
+      if (typeof json === 'string') {
+        json = JSON.parse(json);
+      }
+      boardRef.current.applyJSON(json);
+    } else {
+      boardRef.current.clearCanvas();
+    }
+    boardRef.current.canvas.requestRenderAll();
+  };
+
   useEffect(() => {
     if (imageSlot) {
       fileChanger(imageSlot);
@@ -144,6 +163,7 @@ const Whiteboard = ({
       canvasConfig: canvasSettings,
       canvasRef: canvasRef,
     });
+    canvasRefLink.canvas = newBoard.canvas;
 
     boardRef.current = newBoard;
     boardRef.current.setCanvasConfig(canvasSettings);
@@ -158,49 +178,52 @@ const Whiteboard = ({
   }, []);
 
   useEffect(() => {
-    if (!boardRef.current) return;
-    // boardRef.current.setCanvasConfig(canvasSettings);
+    if (!boardRef.current || !resizedCount) return;
+    boardRef.current.setCanvasConfig(canvasSettings);
 
     onConfigChange(canvasSettings, null, boardRef.current.canvas);
-  }, [canvasSettings]);
+  }, [canvasSettings, resizedCount]);
 
   useEffect(() => {
-    if (!boardRef.current || !drawingSettings) return;
+    if (!boardRef.current || !resizedCount || !drawingSettings) return;
 
     boardRef.current?.setDrawingSettings(drawingSettings);
-  }, [drawingSettings, boardRef.current]);
+  }, [drawingSettings, boardRef.current, resizedCount]);
 
+  const openPageTimer = useRef(null);
   useEffect(() => {
-    if (!boardRef.current) {
-      return;
-    }
+    if (!boardRef.current || !resizedCount) return;
 
     if (fileInfo.currentPage) {
-      boardRef.current.openPage(fileInfo.currentPage);
+      if (openPageTimer.current) {
+        clearTimeout(openPageTimer.current);
+      }
+      openPageTimer.current = setTimeout(() => {
+        if (!boardRef.current) return;
+        boardRef.current.openPage(fileInfo.currentPage);
+
+        boardRef.current.canvas.requestRenderAll();
+      }, 100);
     }
-  }, [fileInfo.file?.name, fileInfo.currentPage]);
+  }, [fileInfo.file?.name, fileInfo.currentPage, resizedCount]);
 
   useEffect(() => {
-    if (!boardRef.current) return;
+    if (!boardRef.current || !resizedCount) return;
 
     boardRef.current.canvas.setViewportTransform(canvasSettings.viewportTransform);
-    boardRef.current.canvas.setZoom(canvasSettings.zoom);
-  }, [canvasSettings.viewportTransform, canvasSettings.zoom]);
+  }, [canvasSettings.viewportTransform, resizedCount]);
 
   useEffect(() => {
-    if (!boardRef.current) return;
+    if (!boardRef.current || !resizedCount) return;
 
-    console.log('++- canvasSettings.contentJSON', canvasSettings.contentJSON);
-    let json = canvasSettings.contentJSON;
-    if (json) {
-      if (typeof json === 'string') {
-        json = JSON.parse(json);
-      }
-      boardRef.current.applyJSON(json);
-    } else {
-      boardRef.current.clearCanvas();
-    }
-  }, [canvasSettings.contentJSON]);
+    boardRef.current.canvas.setZoom(canvasSettings.zoom);
+  }, [canvasSettings.zoom, resizedCount]);
+
+  useEffect(() => {
+    if (!boardRef.current || !resizedCount) return;
+
+    applyJSON();
+  }, [contentJSON, resizedCount]);
 
   /**
    * Handles image upload process and error handling
@@ -223,7 +246,8 @@ const Whiteboard = ({
 
   const addListeners = (canvas) => {
     canvas.on('after:render', (e) => {
-      const data = getFullData(canvas);
+      const data = boardRef.current.canvas.toJSON();
+
       onCanvasRender(data, e, canvas);
     });
 
@@ -247,6 +271,10 @@ const Whiteboard = ({
       onObjectModified(event.target.toJSON(), event, canvas);
       onCanvasChange(event.target.toJSON(), event, canvas);
     });
+
+    canvas.on('canvas:resized', (event) => {
+      setResizedCount((p) => p + 1);
+    });
   };
 
   const handleSaveCanvasState = () => {
@@ -262,55 +290,14 @@ const Whiteboard = ({
     }
   };
 
-  const getFullData = (canvas) => {
-    return {
-      canvasSettings: canvasSettings,
-      drawingSettings: drawingSettings,
-      fileInfo: fileInfo,
-    };
-  };
-
   const getCurrentCanvasSettings = () => {
-    const currentJSON = boardRef.current.canvas.toJSON();
     const viewportTransform = boardRef.current.canvas.viewportTransform;
 
     return {
-      contentJSON: currentJSON,
       viewportTransform: viewportTransform,
       zoom: boardRef.current.canvas.getZoom(),
     };
   };
-
-  // const saveCanvasState = (fileInfo, settings) => {
-  //   console.log('saveCanvasState', { fileInfo });
-  //   if (!boardRef.current) return;
-
-  //   if (!fileInfo || !fileInfo?.file?.name) {
-  //     fileInfo = fileReaderInfo;
-  //   }
-  //   const pageNumber = fileInfo?.currentPageNumber || 1;
-  //   const name = fileInfo?.file?.name;
-  //   if (name) {
-  //     if (!canvasGlobalState.has(name)) {
-  //       canvasGlobalState.set(name, {});
-  //     }
-  //     if (!canvasGlobalState.get(name)[pageNumber]) {
-  //       canvasGlobalState.get(name)[pageNumber] = {};
-  //     }
-  //     canvasGlobalState.get(name)[pageNumber].fileInfo = fileInfo;
-  //     canvasGlobalState.get(name)[pageNumber].settings = {
-  //       contentJSON: settings?.contentJSON || boardRef.current.canvas.toJSON(),
-  //       viewportTransform: settings?.viewportTransform || boardRef.current.canvas.viewportTransform,
-  //     };
-  //     onSaveCanvasState(canvasGlobalState.get(name), null, boardRef.current.canvas);
-
-  //     // Update parent container with the new state
-  //     onTabStateChange({
-  //       fileInfo: fileInfo,
-  //       canvasState: canvasGlobalState.get(name),
-  //     });
-  //   }
-  // };
 
   const changeBrushWidth = (e) => {
     const intValue = parseInt(e.target.value);
@@ -351,13 +338,6 @@ const Whiteboard = ({
     boardRef.current.nowY = 0;
   };
 
-  const saveCanvasState = () => {
-    const newCanvasSettings = getCurrentCanvasSettings();
-    onTabStateChange({
-      canvasSettings: newCanvasSettings,
-    });
-  };
-
   const onFileChange = (event) => {
     const file = event.target?.files?.[0];
     if (!file) return;
@@ -367,8 +347,6 @@ const Whiteboard = ({
       onImageUploaded(file, event, boardRef.current.canvas);
     } else if (file.type.includes('pdf')) {
       // Pass to parent component to handle document addition
-      saveCanvasState();
-      boardRef.current.clearCanvas();
       onFileAdded(file);
       onPDFUploaded(file, event, boardRef.current.canvas);
     }
@@ -379,37 +357,21 @@ const Whiteboard = ({
       uploadImageFile(file);
     } else if (file.type.includes('pdf')) {
       // Pass to parent component to handle document addition
-      saveCanvasState();
-      boardRef.current.clearCanvas();
       onFileAdded(file);
     }
   };
-
-  const updateFileInfo = (data) => {
-    if (!data) return;
-    const newFileData = { ...fileInfo, ...data };
-
-    // Update parent with new file info
-    onTabStateChange({
-      fileInfo: newFileData,
-    });
-    onPDFUpdated(newFileData, null, boardRef.current.canvas);
+  const getJSONContent = () => {
+    if (!boardRef.current) return;
+    const json = boardRef.current.canvas.toJSON();
+    return JSON.stringify(json);
   };
 
-  const handlePageChange = (page: string) => {
-    // const newPage = canvasGlobalState.get(fileReaderInfo.file.name)[page];
-    // const newFileData = { ...newPage.fileInfo, currentPageNumber: page };
-    // boardRef.current.clearCanvas();
-    // setFileReaderInfo(newFileData);
-    // saveCanvasState(newFileData);
-    const newCanvasSettings = getCurrentCanvasSettings();
-    const newState = {
-      fileInfo: { ...fileInfo, currentPage: page },
-      canvasSettings: newCanvasSettings,
-    };
-    onTabStateChange(newState);
-    boardRef.current.clearCanvas();
-    onPageChange(newState, null, boardRef.current.canvas);
+  const updateFileInfo = (data: FileInfo) => {
+    if (!data) return;
+
+    console.log('-- updateFileInfo data--', data);
+    // Update the file info state
+    onPageChange && onPageChange(data);
   };
 
   const handleZoomIn = () => {
@@ -461,154 +423,152 @@ const Whiteboard = ({
   };
 
   return (
-    <WrapperS>
-      <WhiteBoardS ref={whiteboardRef}>
-        <ToolbarHolderS>
-          <ColorBarS>
-            {!!enabledControls.COLOR_PICKER && (
-              <ToolbarItemS>
-                <ColorPicker
-                  size={28}
-                  color={drawingSettings.currentColor}
-                  onChange={(color) => changeCurrentColor(color, null)}
-                ></ColorPicker>
-              </ToolbarItemS>
-            )}
-            {!!enabledControls.BRUSH && (
-              <ToolbarItemS>
-                <RangeInputS
-                  type="range"
-                  min={1}
-                  max={30}
-                  step={1}
-                  style={{ '--thumb-color': drawingSettings.currentColor } as React.CSSProperties}
-                  value={drawingSettings.brushWidth}
-                  onChange={changeBrushWidth}
-                />
-              </ToolbarItemS>
-            )}
-            {!!enabledControls.DEFAULT_COLORS && (
-              <>{getColorButtons(['#6161ff', '#ff4f4f', '#3fd18d', '#ec70ff', '#000000'])}</>
-            )}
-            {!!enabledControls.FILL && (
-              <ButtonS
-                type="button"
-                className={drawingSettings.fill ? 'selected' : ''}
-                onClick={changeFill}
-              >
-                <img src={FillIcon} alt="Delete" />
+    <WhiteBoardS ref={whiteboardRef} style={style}>
+      <ToolbarHolderS>
+        <ColorBarS>
+          {!!enabledControls.COLOR_PICKER && (
+            <ToolbarItemS>
+              <ColorPicker
+                size={28}
+                color={drawingSettings.currentColor}
+                onChange={(color) => changeCurrentColor(color, null)}
+              ></ColorPicker>
+            </ToolbarItemS>
+          )}
+          {!!enabledControls.BRUSH && (
+            <ToolbarItemS>
+              <RangeInputS
+                type="range"
+                min={1}
+                max={30}
+                step={1}
+                style={{ '--thumb-color': drawingSettings.currentColor } as React.CSSProperties}
+                value={drawingSettings.brushWidth}
+                onChange={changeBrushWidth}
+              />
+            </ToolbarItemS>
+          )}
+          {!!enabledControls.DEFAULT_COLORS && (
+            <>{getColorButtons(['#6161ff', '#ff4f4f', '#3fd18d', '#ec70ff', '#000000'])}</>
+          )}
+          {!!enabledControls.FILL && (
+            <ButtonS
+              type="button"
+              className={drawingSettings.fill ? 'selected' : ''}
+              onClick={changeFill}
+            >
+              <img src={FillIcon} alt="Delete" />
+            </ButtonS>
+          )}
+        </ColorBarS>
+        <ToolbarS>
+          {getControls()}
+
+          {!!enabledControls.CLEAR && (
+            <ButtonS type="button" onClick={() => boardRef.current.clearCanvas()}>
+              <img src={DeleteIcon} alt="Delete" />
+            </ButtonS>
+          )}
+
+          <SeparatorS />
+
+          {!!enabledControls.FILES && (
+            <ToolbarItemS>
+              <input
+                ref={uploadPdfRef}
+                hidden
+                accept="image/*,.pdf"
+                type="file"
+                onChange={onFileChange}
+              />
+              <ButtonS onClick={() => uploadPdfRef.current.click()}>
+                <img src={UploadIcon} alt="Delete" />
               </ButtonS>
-            )}
-          </ColorBarS>
-          <ToolbarS>
-            {getControls()}
+            </ToolbarItemS>
+          )}
 
-            {!!enabledControls.CLEAR && (
-              <ButtonS type="button" onClick={() => boardRef.current.clearCanvas()}>
-                <img src={DeleteIcon} alt="Delete" />
+          {!!enabledControls.SAVE_AS_IMAGE && (
+            <ToolbarItemS>
+              <ButtonS onClick={handleSaveCanvasAsImage}>
+                <img src={DownloadIcon} alt="Download" />
               </ButtonS>
-            )}
+            </ToolbarItemS>
+          )}
 
-            <SeparatorS />
+          {!!enabledControls.GO_TO_START && (
+            <ToolbarItemS>
+              <ButtonS onClick={bringControlTOStartPosition}>
+                <img src={Recenter} alt="Recenter" />
+              </ButtonS>
+            </ToolbarItemS>
+          )}
 
-            {!!enabledControls.FILES && (
-              <ToolbarItemS>
-                <input
-                  ref={uploadPdfRef}
-                  hidden
-                  accept="image/*,.pdf"
-                  type="file"
-                  onChange={onFileChange}
-                />
-                <ButtonS onClick={() => uploadPdfRef.current.click()}>
-                  <img src={UploadIcon} alt="Delete" />
-                </ButtonS>
-              </ToolbarItemS>
-            )}
+          {!!enabledControls.SAVE_AND_LOAD && (
+            <ToolbarItemS>
+              <ButtonS type="button" onClick={handleSaveCanvasState}>
+                Save
+              </ButtonS>
+            </ToolbarItemS>
+          )}
 
-            {!!enabledControls.SAVE_AS_IMAGE && (
-              <ToolbarItemS>
-                <ButtonS onClick={handleSaveCanvasAsImage}>
-                  <img src={DownloadIcon} alt="Download" />
-                </ButtonS>
-              </ToolbarItemS>
-            )}
+          {!!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && (
+            <ToolbarItemS>
+              <ButtonS onClick={() => handleLoadCanvasState(canvasSaveData[0])}>Load</ButtonS>
+            </ToolbarItemS>
+          )}
+        </ToolbarS>
+        <ZoomBarS>
+          {!!enabledControls.ZOOM && (
+            <ToolbarItemS>
+              <ButtonS onClick={handleZoomIn} title="Zoom In">
+                <img src={ZoomInIcon} alt="Zoom In" />
+              </ButtonS>
+            </ToolbarItemS>
+          )}
 
-            {!!enabledControls.GO_TO_START && (
-              <ToolbarItemS>
-                <ButtonS onClick={bringControlTOStartPosition}>
-                  <img src={Recenter} alt="Recenter" />
-                </ButtonS>
-              </ToolbarItemS>
-            )}
+          {!!enabledControls.ZOOM && (
+            <ToolbarItemS>
+              <ButtonS onClick={handleResetZoom} title="Reset Zoom">
+                <span style={{ fontSize: '11px' }}>{Math.floor(zoom * 100)}%</span>
+              </ButtonS>
+            </ToolbarItemS>
+          )}
 
-            {!!enabledControls.SAVE_AND_LOAD && (
-              <ToolbarItemS>
-                <ButtonS type="button" onClick={handleSaveCanvasState}>
-                  Save
-                </ButtonS>
-              </ToolbarItemS>
-            )}
+          {!!enabledControls.ZOOM && (
+            <ToolbarItemS>
+              <ButtonS onClick={handleZoomOut} title="Zoom Out">
+                <img src={ZoomOutIcon} alt="Zoom Out" />
+              </ButtonS>
+            </ToolbarItemS>
+          )}
+        </ZoomBarS>
+      </ToolbarHolderS>
 
-            {!!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && (
-              <ToolbarItemS>
-                <ButtonS onClick={() => handleLoadCanvasState(canvasSaveData[0])}>Load</ButtonS>
-              </ToolbarItemS>
-            )}
-          </ToolbarS>
-          <ZoomBarS>
-            {!!enabledControls.ZOOM && (
-              <ToolbarItemS>
-                <ButtonS onClick={handleZoomIn} title="Zoom In">
-                  <img src={ZoomInIcon} alt="Zoom In" />
-                </ButtonS>
-              </ToolbarItemS>
-            )}
+      {!!fileInfo?.file?.name && (
+        <PDFWrapperS>
+          <PdfReader
+            fileReaderInfo={fileInfo}
+            //onPageChange={handlePageChange}
+            updateFileReaderInfo={updateFileInfo}
+          />
+        </PDFWrapperS>
+      )}
 
-            {!!enabledControls.ZOOM && (
-              <ToolbarItemS>
-                <ButtonS onClick={handleResetZoom} title="Reset Zoom">
-                  <span style={{ fontSize: '11px' }}>{Math.floor(zoom * 100)}%</span>
-                </ButtonS>
-              </ToolbarItemS>
-            )}
-
-            {!!enabledControls.ZOOM && (
-              <ToolbarItemS>
-                <ButtonS onClick={handleZoomOut} title="Zoom Out">
-                  <img src={ZoomOutIcon} alt="Zoom Out" />
-                </ButtonS>
-              </ToolbarItemS>
-            )}
-          </ZoomBarS>
-        </ToolbarHolderS>
-
-        {!!fileInfo?.file?.name && (
-          <PDFWrapperS>
-            <PdfReader
-              fileReaderInfo={fileInfo}
-              onPageChange={handlePageChange}
-              updateFileReaderInfo={updateFileInfo}
-            />
-          </PDFWrapperS>
-        )}
-
-        <canvas
-          style={{
-            zIndex: 1,
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-          }}
-          className="canvas"
-          ref={canvasRef}
-          id="canvas"
-        />
-      </WhiteBoardS>
-    </WrapperS>
+      <canvas
+        style={{
+          zIndex: 1,
+          width: '100%',
+          height: '100%',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+        }}
+        className="canvas"
+        ref={canvasRef}
+        id="canvas"
+      />
+    </WhiteBoardS>
   );
 };
 
-export default Whiteboard;
+export default WhiteboardCore;

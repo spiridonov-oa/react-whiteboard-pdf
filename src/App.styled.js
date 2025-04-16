@@ -16,5 +16,6 @@ export const AppS = styled.div`
 
 export const MainS = styled.main`
   height: 100%;
+  font-family: 'Arial', Helvetica, sans-serif;
   margin: 0 auto;
 `;
