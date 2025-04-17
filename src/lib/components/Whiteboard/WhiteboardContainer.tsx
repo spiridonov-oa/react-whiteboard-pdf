@@ -397,6 +397,8 @@ const WhiteboardContainer = (props) => {
                       setActiveTabIndex(newActiveTabIndex);
                       setSelectedTabState(stateRefMap.get(newActiveTabIndex));
                       loadPageState(newActiveTabIndex);
+                    } else {
+                      setSelectedTabState({ ...stateRefMap.get(activeTabIndex) });
                     }
                   }}
                   style={{
