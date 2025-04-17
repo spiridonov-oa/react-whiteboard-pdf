@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, use } from 'react';
 import WhiteboardCore from './WhiteboardCore';
-import { TabsS, TabS, WrapperS } from './Whiteboard.styled.js';
+import { TabsS, TabS, WrapperS } from './Whiteboard.styled';
 import { FileInfo, DrawingSettings, TabState, PageData } from '../../../types/config';
+import { throttle } from './utils';
 
 interface WhiteboardContainerProps {
   activeTabIndex?: number;
@@ -102,30 +103,6 @@ const WhiteboardContainer = (props) => {
   const getCanvas = (tabIndex: number) => {
     const index = tabIndex;
     return stateRefMap.get(index).fileInfo.canvas;
-  };
-
-  const throttle = (func: (...args: any[]) => void, limit: number): ((...args: any[]) => void) => {
-    let lastFunc: NodeJS.Timeout | null;
-    let lastRan: number | null = null;
-
-    return function (...args: any[]) {
-      const context = this;
-
-      if (!lastRan) {
-        func.apply(context, args);
-        lastRan = Date.now();
-      } else {
-        if (lastFunc) {
-          clearTimeout(lastFunc);
-        }
-        lastFunc = setTimeout(() => {
-          if (Date.now() - (lastRan as number) >= limit) {
-            func.apply(context, args);
-            lastRan = Date.now();
-          }
-        }, limit - (Date.now() - (lastRan as number)));
-      }
-    };
   };
 
   useEffect(() => {

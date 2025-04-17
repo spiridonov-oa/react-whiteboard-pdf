@@ -15,11 +15,11 @@ import {
   SeparatorS,
   ToolbarHolderS,
   PDFWrapperS,
-} from './Whiteboard.styled.js';
-import { PdfReader } from '../PdfReader/index.jsx';
+} from './Whiteboard.styled';
+import { PdfReader } from '../PdfReader/index';
 import { saveAs } from 'file-saver';
-import { Board, modes } from './Board.Class.js';
-import { ColorPicker } from '../ColorPicker/index.jsx';
+import { Board, modes } from './Board.Class';
+import { ColorPicker } from '../ColorPicker';
 
 import SelectIcon from './../images/cursor.svg';
 import EraserIcon from './../images/eraser.svg';
@@ -37,6 +37,7 @@ import UploadIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
 import Recenter from './../images/focus.svg';
 import { FileInfo, DrawingSettings, TabState, PageData } from '../../../types/config';
+import { Canvas as FabricCanvas } from 'fabric';
 
 const fn: any = () => {};
 const defaultFunction = (data, event, canvas) => {};
@@ -48,7 +49,7 @@ interface WhiteboardProps {
   fileInfo: FileInfo;
   activeTabState: TabState;
   contentJSON?: string;
-  canvasRefLink: { canvas: HTMLCanvasElement | null };
+  canvasRefLink: { canvas: FabricCanvas | null };
   drawingSettings: DrawingSettings;
   pageData: PageData;
   imageSlot?: File;
@@ -167,7 +168,7 @@ const WhiteboardCore = ({
       canvasConfig: canvasSettings,
       canvasRef: canvasRef,
     });
-    canvasRefLink.canvas = newBoard.canvas;
+    canvasRefLink.canvas = newBoard.canvas as FabricCanvas;
 
     boardRef.current = newBoard;
     boardRef.current.setCanvasConfig(canvasSettings);

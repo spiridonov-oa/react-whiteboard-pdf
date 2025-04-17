@@ -1,8 +1,14 @@
-import React, { useRef } from 'react';
-import { ColorPickerS, ColorLabelS } from './ColorPicker.styled.js';
+import React, { useRef, ChangeEvent } from 'react';
+import { ColorPickerS, ColorLabelS } from './ColorPicker.styled';
 
-function ColorPicker({ size = 34, color, onChange = (e) => {} }) {
-  const inputRef = useRef(null);
+interface ColorPickerProps {
+  size?: number;
+  color?: string;
+  onChange?: (color: string) => void;
+}
+
+function ColorPicker({ size = 34, color, onChange = () => {} }: ColorPickerProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const emitClick = () => {
     if (inputRef.current) {
@@ -19,7 +25,7 @@ function ColorPicker({ size = 34, color, onChange = (e) => {} }) {
         type="color"
         name="color"
         id="color"
-        onChange={(e) => onChange(e.target.value, e)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
       />
     </ColorPickerS>
   );

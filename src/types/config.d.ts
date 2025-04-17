@@ -1,3 +1,5 @@
+import { Canvas as FabricCanvas } from 'fabric';
+
 export interface FileInfo {
   file: {
     name: string;
@@ -7,7 +9,7 @@ export interface FileInfo {
   totalPages: number;
   currentPageNumber: number;
   currentPage: string;
-  canvas: FabricCanvas;
+  canvas: FabricCanvas | null;
   pages: PageData[];
 }
 

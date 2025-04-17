@@ -170,7 +170,13 @@ export const ColorButtonS = styled.button`
   cursor: pointer;
 `;
 
-export const RangeInputS = styled.input`
+interface RangeInputProps {
+  value?: number;
+  thumbcolor?: string;
+  thumbColor?: string;
+}
+
+export const RangeInputS = styled.input<RangeInputProps>`
   & {
     margin: 10px 0;
     transform: rotate(180deg);
@@ -198,8 +204,8 @@ export const RangeInputS = styled.input`
     box-shadow: 0px 1px 4px rgb(0 0 0 / 0.5);
     border: 1px solid #fff;
     border-radius: 45px;
-    height: ${({ value }) => value + 2 || 20}px;
-    width: ${({ value }) => value + 2 || 20}px;
+    height: ${({ value }) => (Number(value) || 18) + 2}px;
+    width: ${({ value }) => (Number(value) || 18) + 2}px;
     background: ${({ thumbcolor }) => thumbcolor || '#232323'};
     cursor: pointer;
     margin-top: ${({ value }) => -value / 2 || -8}px;
@@ -261,7 +267,7 @@ export const RangeInputS = styled.input`
     border-radius: 45px;
     height: ${({ value }) => value + 2 || 20}px;
     width: ${({ value }) => value + 2 || 20}px;
-    background: ${({ thumbColor }) => thumbColor || '#232323'};
+    background: ${({ thumbcolor }) => thumbcolor || '#232323'};
     cursor: pointer;
     margin-top: ${({ value }) => -value / 2 || -8}px;
   }

@@ -8,6 +8,7 @@
   "sideEffects": false,
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
   "keywords": [
     "react",
     "react-whiteboard",
@@ -41,6 +42,16 @@
     "react-dom": ">=18"
   },
   "devDependencies": {
+    "@babel/cli": "^7.23.9",
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.3",
+    "@babel/preset-typescript": "^7.23.3",
+    "@babel/plugin-transform-runtime": "^7.23.9",
+    "@babel/plugin-transform-class-properties": "^7.23.3",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.23.4",
+    "@babel/plugin-transform-optional-chaining": "^7.23.4",
+    "@babel/plugin-transform-numeric-separator": "^7.23.4",
     "@types/file-saver": "^2.0.7",
     "@types/react": "^19.1.1",
     "@types/react-dom": "^19.1.2",
@@ -58,7 +69,7 @@
     "build": "react-scripts build",
     "dev": "react-scripts start",
     "prepublishOnly": "npm run build-npm",
-    "build-npm": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files --presets=@babel/preset-env && NODE_ENV=production BABEL_ENV=esm babel src/lib --out-dir dist/esm --copy-files && mv dist/esm/index.js dist/index.esm.js && rm -rf dist/esm",
+    "build-npm": "rm -rf dist && tsc --project tsconfig.build.json --declaration --emitDeclarationOnly && NODE_ENV=production babel src/lib --out-dir dist --extensions '.js,.jsx,.ts,.tsx' --copy-files --presets=@babel/preset-env && NODE_ENV=production BABEL_ENV=esm babel src/lib --out-dir dist/esm --extensions '.js,.jsx,.ts,.tsx' --copy-files && mv dist/esm/index.js dist/index.esm.js && rm -rf dist/esm",
     "update-version": "npm version ${npm_config_version:-patch} && npm i && npm run build && npm run build-npm && git add . && git commit -m 'Update build' && git push && npm publish",
     "test": "react-scripts test"
   },

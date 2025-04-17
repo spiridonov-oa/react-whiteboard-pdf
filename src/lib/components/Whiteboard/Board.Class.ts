@@ -1,5 +1,6 @@
 import { Canvas, PencilBrush, Line, Rect, Ellipse, Triangle, Textbox, FabricImage } from 'fabric';
 import { getCursor } from './cursors';
+import { throttle } from './utils';
 
 export const modes = {
   PENCIL: 'PENCIL',
@@ -14,12 +15,16 @@ export const modes = {
 
 export class Board {
   canvas;
+  canvasNode: HTMLElement | null = null;
   modes;
   cursorPencil = getCursor('pencil');
   mouseDown = false;
   drawInstance = null;
   drawingSettings;
   init = false;
+  element: ResizeObserver | null = null;
+  editedTextObject: Textbox | null = null;
+
   canvasConfig = {
     zoom: 1,
     contentJSON: null,
@@ -80,7 +85,7 @@ export class Board {
   }
 
   initCanvas = (canvasNode) => {
-    Canvas.prototype.getItemByAttr = function (attr, name) {
+    (Canvas as any).prototype.getItemByAttr = function (attr, name) {
       var object = null,
         objects = this.getObjects();
       for (var i = 0, len = this.size(); i < len; i++) {
@@ -178,7 +183,7 @@ export class Board {
 
   // Add a proper debounce utility method to the Board class
   debounce = (func, wait = 100) => {
-    let timeout;
+    let timeout: ReturnType<typeof setTimeout>;
     return function executedFunction(...args) {
       const later = () => {
         clearTimeout(timeout);
@@ -189,7 +194,7 @@ export class Board {
     };
   };
 
-  addZoomListeners = (params) => {
+  addZoomListeners = (params?: { scale: number }) => {
     const canvas = this.canvas;
     const that = this;
     canvas.off('mouse:wheel');
@@ -238,7 +243,7 @@ export class Board {
           y: event.e.touches[1].clientY,
         };
 
-        const prevDistance = canvas.getPointerDistance(point1, point2);
+        let prevDistance = canvas.getPointerDistance(point1, point2);
 
         canvas.on('touch:gesture', (event) => {
           console.log('2 touch:gesture');
@@ -301,6 +306,40 @@ export class Board {
 
     this.drawingSettings = { ...this.drawingSettings, ...drawingSettings };
     this.setDrawingMode(this.drawingSettings.currentMode);
+
+    if (this.canvas) {
+      // If we're not in a specific drawing mode, update all selected objects with the new color
+      if (!this.drawingSettings.currentMode || this.drawingSettings.currentMode === this.modes.SELECT) {
+        const activeObjects = this.canvas.getActiveObjects();
+        
+        if (activeObjects && activeObjects.length > 0) {
+          activeObjects.forEach((item) => {
+            // Different object types need different color settings
+            if (item.type === 'textbox') {
+              // For text, we only set the fill (text color)
+              item.set({ fill: this.drawingSettings.currentColor });
+            } else if (item.type === 'path' || item.type === 'line') {
+              // For paths and lines, we set the stroke
+              item.set({ stroke: this.drawingSettings.currentColor });
+            } else {
+              // For shapes like rectangles, triangles, and ellipses
+              item.set({ 
+                stroke: this.drawingSettings.currentColor,
+                fill: this.drawingSettings.fill ? this.drawingSettings.currentColor : 'transparent'
+              });
+            }
+          });
+
+          // Update the canvas to reflect the changes
+          this.canvas.requestRenderAll();
+        }
+      }
+      
+      // Fire event to notify any listeners about the settings change
+      this.canvas.fire('drawingSettings:change', {
+        drawingSettings: this.drawingSettings,
+      });
+    }
   };
 
   setCanvasConfig = (canvasConfig) => {
@@ -313,7 +352,7 @@ export class Board {
       return;
     }
     this.drawingSettings.currentMode = mode;
-    this.resetCanvas();
+    this.resetCanvas(this.canvas);
 
     switch (mode) {
       case this.modes.PENCIL:
@@ -345,31 +384,14 @@ export class Board {
     }
   };
 
-  resetCanvas = () => {
-    if (!this.canvas) {
-      return;
-    }
-    const canvas = this.canvas;
-
+  resetCanvas = (canvas) => {
+    if (!canvas) return;
     this.removeCanvasListener(canvas);
     canvas.selection = false;
     canvas.isDrawingMode = false;
     canvas.defaultCursor = 'auto';
     canvas.hoverCursor = 'auto';
     canvas.getObjects().map((item) => item.set({ selectable: false }));
-
-    if (this.editedTextObject) {
-      this.editedTextObject.exitEditing();
-      this.editedTextObject = null;
-    }
-  };
-
-  throttle = (f, delay = 300) => {
-    let timer = 0;
-    return function (...args) {
-      clearTimeout(timer);
-      timer = setTimeout(() => f.apply(this, args), delay);
-    };
   };
 
   handleResize = (callback, customCallback = null) => {
@@ -383,7 +405,7 @@ export class Board {
       }
     };
 
-    const resize_ob = new ResizeObserver(this.throttle(wrappedCallback, 300));
+    const resize_ob = new ResizeObserver(throttle(wrappedCallback, 300));
     return resize_ob;
   };
 
@@ -396,11 +418,10 @@ export class Board {
     };
   };
 
-  removeCanvasListener = () => {
-    if (!this.canvas) {
+  removeCanvasListener = (canvas) => {
+    if (!canvas) {
       return;
     }
-    const canvas = this.canvas;
     canvas.off('mouse:down');
     canvas.off('mouse:move');
     canvas.off('mouse:up');
@@ -450,6 +471,7 @@ export class Board {
 
   startDrawingLine = () => {
     const canvas = this.canvas;
+
     return function ({ e }) {
       if (this.mouseDown) {
         const pointer = canvas.getScenePoint(e);
@@ -672,6 +694,10 @@ export class Board {
     if (!this.canvas) return;
     const canvas = this.canvas;
 
+    if (this.drawingSettings.currentMode !== this.modes.TEXT) {
+      return;
+    }
+
     // Set text mode cursor
     canvas.defaultCursor = 'text';
     canvas.hoverCursor = 'text';
@@ -687,7 +713,7 @@ export class Board {
     });
 
     // Clean up previous listeners
-    this.removeCanvasListener();
+    this.removeCanvasListener(this.canvas);
 
     // Handle clicks to either add new text or edit existing text
     canvas.on('mouse:down', (e) => {
@@ -764,7 +790,9 @@ export class Board {
       this.editedTextObject = null;
 
       // Resume text mode
-      setTimeout(() => this.createText(), 0);
+      setTimeout(() => {
+        this.createText();
+      }, 0);
     };
 
     // Listen for editing exit events
@@ -776,6 +804,13 @@ export class Board {
         textObject.exitEditing();
       }
     });
+  };
+
+  cancelTextEditing = () => {
+    if (this.editedTextObject) {
+      this.editedTextObject.exitEditing();
+      this.editedTextObject = null;
+    }
   };
 
   eraserOn = () => {
@@ -827,6 +862,34 @@ export class Board {
 
     canvas.getObjects().map((item) => item.set({ selectable: true }));
     canvas.hoverCursor = 'all-scroll';
+
+    // Remove previous event listeners to prevent duplicates
+    canvas.off('mouse:down');
+    canvas.off('object:selected');
+
+    // Add click handler directly to mouse:down event for more reliable detection
+    canvas.on('mouse:down', (e) => {
+      if (!e.target) return;
+
+      const obj = e.target;
+
+      // Toggle the object's position in the stack
+      if (obj.data?.layeringState === 'top') {
+        // Object is at top, send it to bottom
+        canvas.sendObjectToBack(obj);
+        obj.data = { ...obj.data, layeringState: 'bottom' };
+      } else {
+        // Object is either at bottom or has no state yet, bring it to front
+        canvas.bringObjectToFront(obj);
+        obj.data = { ...obj.data, layeringState: 'top' };
+      }
+
+      // Ensure the canvas is refreshed
+      canvas.requestRenderAll();
+
+      // Keep the object selected after changing its position
+      canvas.setActiveObject(obj);
+    });
   };
 
   clearCanvas = () => {
@@ -837,7 +900,7 @@ export class Board {
     canvas.clear();
   };
 
-  changeZoom = ({ point, scale }) => {
+  changeZoom = ({ point, scale }: { point?: { x: number; y: number }; scale: number }) => {
     if (!point) {
       const width = this.canvas.width;
       const height = this.canvas.height;
@@ -963,19 +1026,19 @@ export class Board {
    * @returns {Promise<Object>} - Promise resolving to the created image object
    * @public
    */
-  processImageFile = (file) => {
+  processImageFile = (file: File): Promise<void> => {
     if (!this.canvas) return Promise.reject('Canvas not initialized');
 
     if (!file || !file.type.includes('image/')) {
       return Promise.reject('Invalid file type. Please select an image.');
     }
 
-    return new Promise((resolve, reject) => {
-      var reader = new FileReader();
+    return new Promise((_, reject) => {
+      const reader = new FileReader();
       reader.onload = (event) => {
         if (!this.canvas) return;
-        var imgObj = new Image();
-        imgObj.src = event.target.result;
+        const imgObj = new Image();
+        imgObj.src = event.target?.result as string;
         imgObj.onload = () => {
           const img = new FabricImage(imgObj);
           if (!img) {
@@ -993,7 +1056,6 @@ export class Board {
           img.scaleToHeight(this.canvas.height);
           this.canvas.add(img);
           this.canvas.requestRenderAll();
-          // Set to the center
         };
       };
 

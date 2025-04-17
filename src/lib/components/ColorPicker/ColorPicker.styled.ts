@@ -1,6 +1,15 @@
 import styled from 'styled-components';
 
-export const ColorPickerS = styled.div`
+interface ColorPickerProps {
+  size?: number;
+}
+
+interface ColorLabelProps {
+  size?: number;
+  color?: string;
+}
+
+export const ColorPickerS = styled.div<ColorPickerProps>`
   position: relative;
   display: flex;
   justify-content: center;
@@ -20,7 +29,7 @@ export const ColorPickerS = styled.div`
   }
 `;
 
-export const ColorLabelS = styled.div`
+export const ColorLabelS = styled.div<ColorLabelProps>`
   border-radius: ${({ size }) => size - 4 || 28}px;
   height: ${({ size }) => size - 4 || 28}px;
   width: ${({ size }) => size - 4 || 28}px;

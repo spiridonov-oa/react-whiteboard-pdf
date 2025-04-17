@@ -19,7 +19,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => {} }) => {
+const PDFReader = ({
+  fileReaderInfo,
+  updateFileReaderInfo,
+  onPageChange = (pageNumber: number) => {},
+}) => {
   const [currentPageNumber, setCurrentPageNumber] = useState(
     fileReaderInfo?.currentPageNumber || 0,
   );
@@ -37,7 +41,7 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
 
   const onRenderSuccess = useCallback(() => {
     try {
-      const importPDFCanvas = document.querySelector('.import-pdf-page canvas');
+      const importPDFCanvas: HTMLCanvasElement = document.querySelector('.import-pdf-page canvas');
       if (!importPDFCanvas) {
         console.error('PDF canvas element not found');
         return;
@@ -112,7 +116,6 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
             scale={1.0}
             renderTextLayer={false}
             renderAnnotationLayer={false}
-            renderInteractiveForms={false}
             error={<div>An error occurred while rendering the page.</div>}
           />
         </Document>
