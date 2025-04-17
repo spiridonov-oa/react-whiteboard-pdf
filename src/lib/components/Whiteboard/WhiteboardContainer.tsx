@@ -354,7 +354,15 @@ const WhiteboardContainer = (props) => {
       // page.contentJSON = json;
       //canvasObjects.current[tabIndex][newState.fileInfo.currentPageNumber || 1] = json;
 
-      props.onCanvasRender(json, stateRefMap, canvas);
+      props.onCanvasRender(
+        json,
+        {
+          tabIndex: activeTabIndex,
+          pageNumber: stateRefMap.get(activeTabIndex).fileInfo.currentPageNumber,
+          state: stateRefMap,
+        },
+        canvas,
+      );
     }
   }, 300);
 
