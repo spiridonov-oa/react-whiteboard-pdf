@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { pdfjs, Document, Page } from 'react-pdf';
 import {
   PDFReaderS,
@@ -20,11 +20,12 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => {} }) => {
-  const [currentPageNumber, setCurrentPageNumber] = React.useState(
-    fileReaderInfo.currentPageNumber,
+  const [currentPageNumber, setCurrentPageNumber] = useState(
+    fileReaderInfo?.currentPageNumber || 0,
   );
-  const [totalPages, setTotalPages] = React.useState(fileReaderInfo.totalPages);
-  const [file, setFile] = React.useState(fileReaderInfo.file);
+  const [totalPages, setTotalPages] = useState(fileReaderInfo?.totalPages || 0);
+  const [file, setFile] = useState(fileReaderInfo?.file || null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     if (fileReaderInfo) {
@@ -34,35 +35,61 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
     }
   }, [fileReaderInfo]);
 
-  function onRenderSuccess() {
-    const importPDFCanvas = document.querySelector('.import-pdf-page canvas');
-    const pdfAsImageSrc = importPDFCanvas.toDataURL();
+  const onRenderSuccess = useCallback(() => {
+    try {
+      const importPDFCanvas = document.querySelector('.import-pdf-page canvas');
+      if (!importPDFCanvas) {
+        console.error('PDF canvas element not found');
+        return;
+      }
 
-    updateFileReaderInfo({
-      currentPage: pdfAsImageSrc,
-      file: file,
-      totalPages,
-      currentPageNumber: currentPageNumber,
-    });
-  }
+      const pdfAsImageSrc = importPDFCanvas.toDataURL();
 
-  function onDocumentLoadSuccess({ numPages }) {
-    setTotalPages(numPages);
-    setCurrentPageNumber(0);
-    setFile(fileReaderInfo.file);
-    updateFileReaderInfo({ totalPages: numPages, currentPageNumber: 0, file });
-  }
-
-  function changePage(offset) {
-    if (currentPageNumber + offset < 0 || currentPageNumber + offset >= totalPages) {
-      return;
+      updateFileReaderInfo({
+        currentPage: pdfAsImageSrc,
+        file,
+        totalPages,
+        currentPageNumber,
+      });
+    } catch (error) {
+      console.error('Error converting PDF to image:', error);
     }
-    setCurrentPageNumber(currentPageNumber + offset);
-    onPageChange(currentPageNumber + offset);
-  }
+  }, [file, totalPages, currentPageNumber, updateFileReaderInfo]);
 
-  const nextPage = () => changePage(1);
-  const previousPage = () => changePage(-1);
+  const onDocumentLoadSuccess = useCallback(
+    ({ numPages }) => {
+      setTotalPages(numPages);
+      setCurrentPageNumber(0);
+      setFile(fileReaderInfo.file);
+      updateFileReaderInfo({
+        totalPages: numPages,
+        currentPageNumber: 0,
+        file: fileReaderInfo.file,
+      });
+    },
+    [fileReaderInfo, updateFileReaderInfo],
+  );
+
+  const changePage = useCallback(
+    (offset) => {
+      const newPageNumber = currentPageNumber + offset;
+      if (newPageNumber < 0 || newPageNumber >= totalPages) {
+        return;
+      }
+      setCurrentPageNumber(newPageNumber);
+      onPageChange(newPageNumber);
+    },
+    [currentPageNumber, totalPages, onPageChange],
+  );
+
+  const nextPage = useCallback(() => changePage(1), [changePage]);
+  const previousPage = useCallback(() => changePage(-1), [changePage]);
+
+  const handleLoadProgress = useCallback(({ loaded, total }) => {
+    const progress = Math.round((loaded / total) * 100);
+    setLoadingProgress(progress);
+    console.log(`Loading document: ${progress}%`);
+  }, []);
 
   if (!fileReaderInfo || !fileReaderInfo.file) {
     return <div></div>;
@@ -74,9 +101,9 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
         <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
-          onLoadProgress={({ loaded, total }) =>
-            console.log('Loading a document: ' + (loaded / total) * 100 + '%')
-          }
+          onLoadProgress={handleLoadProgress}
+          error={<div>An error occurred while loading the PDF.</div>}
+          loading={<div>Loading PDF... {loadingProgress}%</div>}
         >
           <Page
             className="import-pdf-page"
@@ -86,12 +113,18 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
             renderTextLayer={false}
             renderAnnotationLayer={false}
             renderInteractiveForms={false}
+            error={<div>An error occurred while rendering the page.</div>}
           />
         </Document>
       </FileContainer>
       {totalPages > 1 && (
         <PageInfoS>
-          <NavigationButton type="button" disabled={currentPageNumber <= 0} onClick={previousPage}>
+          <NavigationButton
+            type="button"
+            disabled={currentPageNumber <= 0}
+            onClick={previousPage}
+            aria-label="Previous page"
+          >
             <img src={BackIcon} alt="Back" />
           </NavigationButton>
           <PageInfoDetails>
@@ -101,6 +134,7 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
             type="button"
             disabled={currentPageNumber + 1 >= totalPages}
             onClick={nextPage}
+            aria-label="Next page"
           >
             <img src={NextIcon} alt="Next" />
           </NavigationButton>
