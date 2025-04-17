@@ -49,7 +49,7 @@ export declare class Board {
     setDrawingSettings: (drawingSettings: any) => void;
     setCanvasConfig: (canvasConfig: any) => void;
     setDrawingMode: (mode: any) => void;
-    resetCanvas: () => void;
+    resetCanvas: (canvas: any) => void;
     handleResize: (callback: any, customCallback?: any) => ResizeObserver;
     resizeCanvas: (canvas: any, whiteboard: any) => () => void;
     removeCanvasListener: (canvas: any) => void;
@@ -86,6 +86,7 @@ export declare class Board {
     createText: () => void;
     addText: (e: any) => void;
     editText: (textObject: any) => void;
+    cancelTextEditing: () => void;
     eraserOn: () => void;
     onSelectMode: () => void;
     clearCanvas: () => void;
