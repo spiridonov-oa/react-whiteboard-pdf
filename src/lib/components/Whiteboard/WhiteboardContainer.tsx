@@ -454,6 +454,7 @@ const WhiteboardContainer = (props) => {
         if (!tabState) {
           return null; // Skip rendering if the tab was removed
         }
+
         const pageNumber = tabState.fileInfo.currentPageNumber || 0;
         const page = getPage(tabIndex, pageNumber);
         stateRefMap.get(tabIndex).fileInfo.canvas = getCanvas(tabIndex) || null;
