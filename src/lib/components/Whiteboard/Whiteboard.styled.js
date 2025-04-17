@@ -17,6 +17,7 @@ export const TabsS = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 `;
 
 export const TabS = styled.div`
@@ -25,7 +26,6 @@ export const TabS = styled.div`
   padding: 1em 1em;
   padding-right: 2em;
   border-right: 1px solid rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   max-width: 200px;
   background: rgba(0, 0, 0, 0.1);
   box-shadow: inset 0px -2px 2px -4px rgba(0, 0, 0, 0.2);
