@@ -137,7 +137,6 @@ export class Board {
       this.canvas.viewportTransform = this.canvasConfig.viewportTransform;
       this.changeZoom({ scale: 1 });
     }
-    console.log(this.canvas.getObjects());
     this.canvas.fire('config:change');
   };
 
@@ -797,7 +796,6 @@ export class Board {
 
     canvas.on('mouse:over', (event) => {
       const hoveredObject = event.target;
-      console.log(hoveredObject);
       if (hoveredObject) {
         hoveredObject.set({
           opacity: 0.2,

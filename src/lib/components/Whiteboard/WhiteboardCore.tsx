@@ -36,8 +36,9 @@ import DownloadIcon from './../images/download.svg';
 import UploadIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
 import Recenter from './../images/focus.svg';
-import { FileInfo, DrawingSettings, CanvasSettings, TabState } from '../../../types/config';
+import { FileInfo, DrawingSettings, TabState, PageData } from '../../../types/config';
 
+const fn: any = () => {};
 const defaultFunction = (data, event, canvas) => {};
 interface WhiteboardProps {
   controls?: {
@@ -45,10 +46,11 @@ interface WhiteboardProps {
     [key: string]: any;
   };
   fileInfo: FileInfo;
+  activeTabState: TabState;
   contentJSON?: string;
   canvasRefLink: { canvas: HTMLCanvasElement | null };
   drawingSettings: DrawingSettings;
-  canvasSettings: CanvasSettings;
+  pageData: PageData;
   imageSlot?: File;
   documents?: Map<string, File>;
   activeTabIndex?: number;
@@ -58,7 +60,7 @@ interface WhiteboardProps {
   onObjectAdded?: (data: any, event: any, canvas: any) => void;
   onObjectRemoved?: (data: any, event: any, canvas: any) => void;
   onObjectModified?: (data: any, event: any, canvas: any) => void;
-  onCanvasRender?: (data: any, event: any, canvas: any) => void;
+  onCanvasRender?: (event: any, canvas: any) => void;
   onCanvasChange?: (data: any, event: any, canvas: any) => void;
   onZoom?: (data: any, event: any, canvas: any) => void;
   onImageUploaded?: (file: File, event: any, canvas: any) => void;
@@ -67,16 +69,17 @@ interface WhiteboardProps {
   onPageChange?: (data: FileInfo) => void;
   onOptionsChange?: (options: DrawingSettings, event: any, canvas: any) => void;
   onSaveCanvasAsImage?: (blob: Blob, event: any, canvas: any) => void;
-  onConfigChange?: (settings: CanvasSettings, event: any, canvas: any) => void;
+  onConfigChange?: (settings: PageData, event: any, canvas: any) => void;
 }
 
 const WhiteboardCore = ({
   controls,
   fileInfo,
+  activeTabState,
   contentJSON,
   drawingSettings,
   canvasRefLink,
-  canvasSettings,
+  pageData,
   imageSlot,
   documents,
   activeTabIndex,
@@ -86,7 +89,7 @@ const WhiteboardCore = ({
   onObjectAdded = defaultFunction,
   onObjectRemoved = defaultFunction,
   onObjectModified = defaultFunction,
-  onCanvasRender = defaultFunction,
+  onCanvasRender = fn,
   onCanvasChange = defaultFunction,
   onZoom = defaultFunction,
   onImageUploaded = defaultFunction,
@@ -101,6 +104,7 @@ const WhiteboardCore = ({
   const boardRef = useRef(null);
   const [resizedCount, setResizedCount] = useState(1);
   // const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
+  const canvasSettings = pageData;
   const [zoom, setZoom] = useState(canvasSettings.zoom);
   const canvasRef = useRef(null);
   const whiteboardRef = useRef(null);
@@ -205,19 +209,19 @@ const WhiteboardCore = ({
         boardRef.current.canvas.requestRenderAll();
       }, 100);
     }
-  }, [fileInfo.file?.name, fileInfo.currentPage, resizedCount]);
+  }, [fileInfo.fileName, fileInfo.currentPage, resizedCount]);
 
   useEffect(() => {
-    if (!boardRef.current || !resizedCount) return;
+    if (!boardRef.current || !resizedCount || !pageData.viewportTransform) return;
 
-    boardRef.current.canvas.setViewportTransform(canvasSettings.viewportTransform);
-  }, [canvasSettings.viewportTransform, resizedCount]);
+    boardRef.current.canvas.setViewportTransform(pageData.viewportTransform);
+  }, [pageData.viewportTransform, resizedCount]);
 
   useEffect(() => {
-    if (!boardRef.current || !resizedCount) return;
+    if (!boardRef.current || !resizedCount || !pageData.zoom) return;
 
-    boardRef.current.canvas.setZoom(canvasSettings.zoom);
-  }, [canvasSettings.zoom, resizedCount]);
+    boardRef.current.canvas.setZoom(pageData.zoom);
+  }, [pageData.zoom, resizedCount]);
 
   useEffect(() => {
     if (!boardRef.current || !resizedCount) return;
@@ -246,9 +250,7 @@ const WhiteboardCore = ({
 
   const addListeners = (canvas) => {
     canvas.on('after:render', (e) => {
-      const data = boardRef.current.canvas.toJSON();
-
-      onCanvasRender(data, e, canvas);
+      onCanvasRender(e, canvas);
     });
 
     canvas.on('zoom:change', function (data) {
@@ -290,15 +292,6 @@ const WhiteboardCore = ({
     }
   };
 
-  const getCurrentCanvasSettings = () => {
-    const viewportTransform = boardRef.current.canvas.viewportTransform;
-
-    return {
-      viewportTransform: viewportTransform,
-      zoom: boardRef.current.canvas.getZoom(),
-    };
-  };
-
   const changeBrushWidth = (e) => {
     const intValue = parseInt(e.target.value);
     boardRef.current.canvas.freeDrawingBrush.width = intValue;
@@ -325,7 +318,7 @@ const WhiteboardCore = ({
 
   const handleSaveCanvasAsImage = () => {
     canvasRef.current.toBlob(function (blob) {
-      saveAs(blob, `${fileInfo.file.name}-${fileInfo.currentPageNumber ? '_page-' : ''}.png`);
+      saveAs(blob, `${fileInfo.fileName}-${fileInfo.currentPageNumber ? '_page-' : ''}.png`);
       onSaveCanvasAsImage(blob, null, boardRef.current.canvas);
     });
   };
@@ -360,17 +353,10 @@ const WhiteboardCore = ({
       onFileAdded(file);
     }
   };
-  const getJSONContent = () => {
-    if (!boardRef.current) return;
-    const json = boardRef.current.canvas.toJSON();
-    return JSON.stringify(json);
-  };
 
   const updateFileInfo = (data: FileInfo) => {
     if (!data) return;
 
-    console.log('-- updateFileInfo data--', data);
-    // Update the file info state
     onPageChange && onPageChange(data);
   };
 
@@ -544,15 +530,13 @@ const WhiteboardCore = ({
         </ZoomBarS>
       </ToolbarHolderS>
 
-      {!!fileInfo?.file?.name && (
-        <PDFWrapperS>
-          <PdfReader
-            fileReaderInfo={fileInfo}
-            //onPageChange={handlePageChange}
-            updateFileReaderInfo={updateFileInfo}
-          />
-        </PDFWrapperS>
-      )}
+      <PDFWrapperS>
+        <PdfReader
+          fileReaderInfo={fileInfo}
+          //onPageChange={handlePageChange}
+          updateFileReaderInfo={updateFileInfo}
+        />
+      </PDFWrapperS>
 
       <canvas
         style={{

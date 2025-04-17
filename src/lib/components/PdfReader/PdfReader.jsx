@@ -47,18 +47,14 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
   }
 
   function onDocumentLoadSuccess({ numPages }) {
-    console.log('onDocumentLoadSuccess', numPages);
     setTotalPages(numPages);
-    setCurrentPageNumber(1);
+    setCurrentPageNumber(0);
     setFile(fileReaderInfo.file);
-    updateFileReaderInfo({ totalPages: numPages, currentPageNumber: 1, file });
+    updateFileReaderInfo({ totalPages: numPages, currentPageNumber: 0, file });
   }
 
   function changePage(offset) {
-    if (currentPageNumber + offset < 1) {
-      return;
-    }
-    if (currentPageNumber + offset > totalPages) {
+    if (currentPageNumber + offset < 0 || currentPageNumber + offset >= totalPages) {
       return;
     }
     setCurrentPageNumber(currentPageNumber + offset);
@@ -67,6 +63,11 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
 
   const nextPage = () => changePage(1);
   const previousPage = () => changePage(-1);
+
+  if (!fileReaderInfo || !fileReaderInfo.file) {
+    return <div></div>;
+  }
+
   return (
     <PDFReaderS>
       <FileContainer>
@@ -80,21 +81,25 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange = () => 
           <Page
             className="import-pdf-page"
             onRenderSuccess={onRenderSuccess}
-            pageNumber={currentPageNumber}
+            pageNumber={currentPageNumber + 1}
+            scale={1.0}
+            renderTextLayer={false}
+            renderAnnotationLayer={false}
+            renderInteractiveForms={false}
           />
         </Document>
       </FileContainer>
       {totalPages > 1 && (
         <PageInfoS>
-          <NavigationButton type="button" disabled={currentPageNumber <= 1} onClick={previousPage}>
+          <NavigationButton type="button" disabled={currentPageNumber <= 0} onClick={previousPage}>
             <img src={BackIcon} alt="Back" />
           </NavigationButton>
           <PageInfoDetails>
-            Page&nbsp;<b>{currentPageNumber}</b>&nbsp;of {totalPages || '--'}
+            Page&nbsp;<b>{currentPageNumber + 1}</b>&nbsp;of {totalPages || '--'}
           </PageInfoDetails>
           <NavigationButton
             type="button"
-            disabled={currentPageNumber >= totalPages}
+            disabled={currentPageNumber + 1 >= totalPages}
             onClick={nextPage}
           >
             <img src={NextIcon} alt="Next" />

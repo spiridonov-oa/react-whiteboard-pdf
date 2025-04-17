@@ -3,9 +3,18 @@ export interface FileInfo {
     name: string;
     [key: string]: any;
   };
+  fileName: string;
   totalPages: number;
   currentPageNumber: number;
   currentPage: string;
+  canvas: FabricCanvas;
+  pages: PageData[];
+}
+
+export interface PageData {
+  contentJSON: string;
+  zoom: number;
+  viewportTransform: number[];
 }
 
 export interface DrawingSettings {
@@ -15,13 +24,7 @@ export interface DrawingSettings {
   fill: boolean;
 }
 
-export interface CanvasSettings {
-  zoom: number;
-  viewportTransform: number[];
-}
-
 export interface TabState {
   fileInfo: FileInfo;
   drawingSettings: DrawingSettings;
-  canvasSettings: CanvasSettings;
 }
