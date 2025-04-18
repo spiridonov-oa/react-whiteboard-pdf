@@ -44,7 +44,7 @@ const Whiteboard = props => {
     ...getInitFileInfo('Document'),
     ...props.fileInfo
   };
-  const [documents, setDocuments] = (0, _react.useState)(new Map().set(initFileInfo.fileName, initFileInfo.file));
+  const [documents, setDocuments] = _react.default.useState(new Map().set(initFileInfo.fileName, initFileInfo.file));
   const initTabIndex = props.activeTabIndex || 0;
   const initTabState = {
     drawingSettings: {
@@ -57,8 +57,8 @@ const Whiteboard = props => {
     }
   };
   const stateRefMap = (0, _react.useRef)(new Map([[initTabIndex, initTabState]])).current;
-  const [prevTabIndex, setPrevTabIndex] = (0, _react.useState)(null);
-  const [activeTabIndex, setActiveTabIndex] = (0, _react.useState)(initTabIndex);
+  const [prevTabIndex, setPrevTabIndex] = _react.default.useState(null);
+  const [activeTabIndex, setActiveTabIndex] = _react.default.useState(initTabIndex);
   const [selectedTabState, setSelectedTabState] = (0, _react.useState)(initTabState);
   const [contentJSON, setContentJSON] = (0, _react.useState)((selectedTabState === null || selectedTabState === void 0 || (_selectedTabState$fil = selectedTabState.fileInfo) === null || _selectedTabState$fil === void 0 || (_selectedTabState$fil = _selectedTabState$fil.pages) === null || _selectedTabState$fil === void 0 || (_selectedTabState$fil = _selectedTabState$fil[activeTabIndex]) === null || _selectedTabState$fil === void 0 ? void 0 : _selectedTabState$fil.contentJSON) || '');
   // const contentJSON = currentTabState?.fileInfo?.currentPage
@@ -66,7 +66,7 @@ const Whiteboard = props => {
   //   : '';
 
   (0, _react.useEffect)(() => {
-    if (props.state) {
+    if (props !== null && props !== void 0 && props.state) {
       const {
         json,
         tabIndex,
@@ -99,7 +99,7 @@ const Whiteboard = props => {
       setActiveTabIndex(tabIndex);
       setSelectedTabState(stateRefMap.get(tabIndex));
     }
-  }, [props.state]);
+  }, [props === null || props === void 0 ? void 0 : props.state]);
   const getCurrentWhiteboardState = activeTabIndex => {
     var _currentState$fileInf;
     const currentState = stateRefMap.get(activeTabIndex);
