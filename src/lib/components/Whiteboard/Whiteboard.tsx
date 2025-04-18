@@ -96,18 +96,23 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       }
 
       if (tabsState) {
-        tabsState.forEach((state, index) => {
-          const canvas = stateRefMap.get(index).fileInfo.canvas;
+        tabsState.forEach((state: TabState, index: number) => {
           const itemState = stateRefMap.get(index);
-          stateRefMap.set(index, {
-            drawingSettings: { ...itemState?.drawingSettings, ...state?.drawingSettings },
-            fileInfo: {
-              ...itemState?.fileInfo,
-              ...state.fileInfo,
-              canvas: canvas,
-              pages: state.fileInfo.pages,
-            },
-          });
+          if (!itemState) {
+            const canvas = null;
+            stateRefMap.set(index, { ...state, fileInfo: { ...state.fileInfo, canvas: canvas } });
+          } else {
+            const canvas = stateRefMap.get(index)?.fileInfo?.canvas;
+            stateRefMap.set(index, {
+              drawingSettings: { ...itemState?.drawingSettings, ...state?.drawingSettings },
+              fileInfo: {
+                ...itemState?.fileInfo,
+                ...state.fileInfo,
+                canvas: canvas,
+                pages: state.fileInfo.pages,
+              },
+            });
+          }
         });
         setDocuments(
           new Map(
