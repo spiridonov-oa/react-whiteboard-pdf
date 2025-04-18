@@ -32,8 +32,11 @@ const App = () => {
         <MainS>
           <Whiteboard
             state={{
-              json: canvasSettings.contentJSON,
-              viewportTransform: canvasSettings.viewportTransform,
+              tabIndex: 0,
+              content: {
+                json: canvasSettings.contentJSON,
+                pageNumber: 0,
+              },
             }}
             onObjectAdded={(data) => defaultFunction('onObjectAdded', data)}
             onObjectRemoved={(data) => defaultFunction('onObjectRemoved', data)}
