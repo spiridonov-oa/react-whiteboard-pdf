@@ -8,7 +8,10 @@ interface WhiteboardContainerProps {
     fileInfo?: FileInfo;
     controls?: any;
     onDocumentChanged?: (fileInfo: FileInfo, state: WhiteboardState) => void;
-    onFileAdded?: (file: File) => void;
+    onFileAdded?: (fileData: {
+        tabIndex: number;
+        file: File;
+    }) => void;
     onTabStateChange?: (state: WhiteboardState) => void;
     onObjectAdded?: (data: any, event: any, canvas: any) => void;
     onObjectRemoved?: (data: any, event: any, canvas: any) => void;

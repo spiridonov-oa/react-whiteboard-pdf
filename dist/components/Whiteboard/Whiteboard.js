@@ -70,7 +70,8 @@ const Whiteboard = props => {
         tabIndex,
         pageNumber,
         page,
-        tabsState
+        tabsState,
+        file
       } = props.state;
       if (!(0, _utils.isNumber)(tabIndex)) {
         console.error('tabIndex is undefined in props.state');
@@ -105,7 +106,6 @@ const Whiteboard = props => {
             });
           }
         });
-        setDocuments(new Map(Array.from(tabsState.values()).map((state, index) => [index, state.fileInfo.file])));
       }
       setTabsList(Array.from(stateRefMap.keys()));
       setActiveTabIndex(tabIndex);
@@ -114,7 +114,7 @@ const Whiteboard = props => {
       }
       if (content !== null && content !== void 0 && content.json) {
         try {
-          if ((0, _utils.isNumber)(content.pageNumber)) {
+          if ((0, _utils.isNumber)(content === null || content === void 0 ? void 0 : content.pageNumber)) {
             const parsedJSON = JSON.stringify(content.json);
             stateRefMap.get(tabIndex).fileInfo.pages[content.pageNumber].contentJSON = parsedJSON;
             setContentJSON(parsedJSON);
@@ -123,18 +123,23 @@ const Whiteboard = props => {
           console.error('Error parsing JSON:', error);
         }
       } else {
-        const pageNum = (0, _utils.isNumber)(content.pageNumber) ? content.pageNumber : pageNumber;
+        const pageNum = (0, _utils.isNumber)(content === null || content === void 0 ? void 0 : content.pageNumber) ? content.pageNumber : pageNumber;
         if ((0, _utils.isNumber)(pageNum) && stateRefMap.get(tabIndex)) {
-          stateRefMap.get(tabIndex).fileInfo.currentPageNumber = pageNum;
-          const pageContent = stateRefMap.get(tabIndex).fileInfo.pages[pageNum].contentJSON;
+          var _stateRefMap$get2;
+          if (stateRefMap.get(tabIndex).fileInfo.currentPageNumber) {
+            stateRefMap.get(tabIndex).fileInfo.currentPageNumber = pageNum;
+          }
+          const pageContent = (_stateRefMap$get2 = stateRefMap.get(tabIndex)) === null || _stateRefMap$get2 === void 0 || (_stateRefMap$get2 = _stateRefMap$get2.fileInfo) === null || _stateRefMap$get2 === void 0 || (_stateRefMap$get2 = _stateRefMap$get2.pages) === null || _stateRefMap$get2 === void 0 || (_stateRefMap$get2 = _stateRefMap$get2[pageNum]) === null || _stateRefMap$get2 === void 0 ? void 0 : _stateRefMap$get2.contentJSON;
           setContentJSON(pageContent);
         }
       }
       if ((_props$state = props.state) !== null && _props$state !== void 0 && _props$state.fileInfo) {
         const canvas = stateRefMap.get(tabIndex).fileInfo.canvas;
+        const file = stateRefMap.get(tabIndex).fileInfo.file;
         const newFileInfo = {
           ...stateRefMap.get(tabIndex).fileInfo,
           ...props.state.fileInfo,
+          file: file,
           canvas: canvas
         };
         stateRefMap.get(tabIndex).fileInfo = newFileInfo;
@@ -156,6 +161,18 @@ const Whiteboard = props => {
           pageLink.zoom = page.pageData.zoom || pageLink.zoom;
           pageLink.viewportTransform = page.pageData.viewportTransform || pageLink.viewportTransform;
         }
+      }
+      if (tabIndex && file) {
+        var _stateRefMap$get3;
+        const fileInfo = (_stateRefMap$get3 = stateRefMap.get(tabIndex)) === null || _stateRefMap$get3 === void 0 ? void 0 : _stateRefMap$get3.fileInfo;
+        if (!!fileInfo && !!file) {
+          fileInfo.file = file;
+          stateRefMap.set(tabIndex, {
+            ...stateRefMap.get(tabIndex),
+            fileInfo
+          });
+        }
+        setDocuments(new Map(Array.from(stateRefMap.values()).map((state, index) => [index, state.fileInfo.file])));
       }
     }
   }, [props.state]);
@@ -362,16 +379,20 @@ const Whiteboard = props => {
     const stateResponse = getCurrentWhiteboardState(newTabIndex);
     if (!stateResponse) {
       console.error('State not found for nextIndex:', newTabIndex);
-      return;
+      return newTabIndex;
     }
     if (props.onDocumentChanged) {
       props.onDocumentChanged(stateRefMap.get(newTabIndex).fileInfo, stateResponse);
     }
+    return newTabIndex;
   };
   const handleAddDocument = file => {
-    createNewTab(file.name || 'File', file);
+    const newTabIndex = createNewTab(file.name || 'File', file);
     if (props.onFileAdded) {
-      props.onFileAdded(file);
+      props.onFileAdded({
+        tabIndex: newTabIndex,
+        file
+      });
     }
   };
   const handleDrawingSettingsChange = (tabIndex, newSettings) => {
