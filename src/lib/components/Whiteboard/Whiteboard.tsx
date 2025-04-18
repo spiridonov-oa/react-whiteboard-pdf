@@ -67,7 +67,7 @@ const initDrawingSettings = {
 const Whiteboard = (props: WhiteboardContainerProps) => {
   const initFileInfo = { ...getInitFileInfo('Document'), ...props.fileInfo };
 
-  const [documents, setDocuments] = React.useState(
+  const [documents, setDocuments] = useState(
     new Map().set(initFileInfo.fileName, initFileInfo.file),
   );
 
@@ -79,29 +79,31 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
 
   const stateRefMap = useRef(new Map([[initTabIndex, initTabState]])).current;
 
-  const [prevTabIndex, setPrevTabIndex] = React.useState(null);
-  const [activeTabIndex, setActiveTabIndex] = React.useState(initTabIndex);
+  const [prevTabIndex, setPrevTabIndex] = useState(null);
+  const [activeTabIndex, setActiveTabIndex] = useState(initTabIndex);
   const [selectedTabState, setSelectedTabState] = useState(initTabState);
 
   const [contentJSON, setContentJSON] = useState(
     selectedTabState?.fileInfo?.pages?.[activeTabIndex]?.contentJSON || '',
   );
-  // const contentJSON = currentTabState?.fileInfo?.currentPage
-  //   ? canvasObjects.current[activeTabIndex][currentTabState.fileInfo.currentPageNumber]
-  //   : '';
 
   useEffect(() => {
-    if (props?.state) {
-      const { json, tabIndex, pageNumber, tabsState } = props.state;
+    if (props.state) {
+      const { content, tabIndex, pageNumber, page, tabsState }: WhiteboardState = props.state;
+      if (!tabsState) {
+        console.error('Tabs state not found in props:', props.state);
+        return;
+      }
       tabsState.forEach((state, index) => {
+        const canvas = stateRefMap.get(index).fileInfo.canvas;
+        const itemState = stateRefMap.get(index);
         stateRefMap.set(index, {
-          drawingSettings: state.drawingSettings,
+          drawingSettings: { ...itemState?.drawingSettings, ...state?.drawingSettings },
           fileInfo: {
+            ...itemState?.fileInfo,
             ...state.fileInfo,
-            pages: state.fileInfo.pages.map((page) => ({
-              ...page,
-              contentJSON: page.contentJSON || '',
-            })),
+            canvas: canvas,
+            pages: state.fileInfo.pages,
           },
         });
       });
@@ -109,19 +111,45 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
         new Map(Array.from(tabsState.values()).map((state, index) => [index, state.fileInfo.file])),
       );
       setActiveTabIndex(tabIndex);
-      if (json) {
+      if (content) {
         try {
-          const parsedJSON = JSON.stringify(json);
-          stateRefMap.get(tabIndex).fileInfo.pages[pageNumber].contentJSON = parsedJSON;
-          setContentJSON(parsedJSON);
+          if (content.pageNumber) {
+            const parsedJSON = JSON.stringify(content.json);
+            stateRefMap.get(tabIndex).fileInfo.pages[content.pageNumber].contentJSON = parsedJSON;
+            setContentJSON(parsedJSON);
+          }
         } catch (error) {
           console.error('Error parsing JSON:', error);
         }
       }
-      setActiveTabIndex(tabIndex);
-      setSelectedTabState(stateRefMap.get(tabIndex));
+
+      if (props.state?.fileInfo) {
+        const canvas = stateRefMap.get(tabIndex).fileInfo.canvas;
+        const newFileInfo = {
+          ...stateRefMap.get(tabIndex).fileInfo,
+          ...props.state.fileInfo,
+          canvas: canvas,
+        };
+        stateRefMap.get(tabIndex).fileInfo = newFileInfo;
+        setSelectedTabState(stateRefMap.get(tabIndex));
+      } else {
+        setSelectedTabState(stateRefMap.get(tabIndex));
+      }
+
+      if (pageNumber) {
+        stateRefMap.get(tabIndex).fileInfo.currentPageNumber = pageNumber;
+      }
+      if (page) {
+        const pageLink = stateRefMap.get(tabIndex).fileInfo.pages[page.pageNumber];
+        if (pageLink) {
+          pageLink.contentJSON = page.pageData.contentJSON || pageLink.contentJSON;
+          pageLink.zoom = page.pageData.zoom || pageLink.zoom;
+          pageLink.viewportTransform =
+            page.pageData.viewportTransform || pageLink.viewportTransform;
+        }
+      }
     }
-  }, [props?.state]);
+  }, [props.state]);
 
   const getCurrentWhiteboardState = (activeTabIndex): WhiteboardState => {
     const currentState = stateRefMap.get(activeTabIndex);
@@ -140,8 +168,18 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       return null;
     }
     const pageNumber = currentState.fileInfo.currentPageNumber;
+    const pageData = currentState.fileInfo.pages[pageNumber];
 
-    return { json, tabIndex: activeTabIndex, pageNumber, tabsState: stateRefMap };
+    return {
+      content: {
+        json: json,
+        pageNumber: pageNumber,
+      },
+      pageNumber: pageNumber,
+      tabIndex: activeTabIndex,
+      page: { pageNumber, pageData },
+      tabsState: stateRefMap,
+    };
   };
 
   const getPage = (tabIndex?: number, pageNumber?: number): PageData => {

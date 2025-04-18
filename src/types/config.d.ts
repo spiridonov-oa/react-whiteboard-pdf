@@ -1,10 +1,18 @@
 import { Canvas as FabricCanvas } from 'fabric';
 
 interface WhiteboardState {
-  json: JSON;
+  content?: {
+    json?: JSON;
+    pageNumber?: number;
+  };
   tabIndex: number;
-  pageNumber: number;
-  tabsState: Map<number, TabState>;
+  pageNumber?: number;
+  fileInfo?: FileInfo;
+  page?: {
+    pageNumber: number;
+    pageData: PageData;
+  };
+  tabsState?: Map<number, TabState>;
 }
 
 export interface FileInfo {
