@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.throttle = void 0;
+exports.throttle = exports.isString = exports.isNumber = void 0;
 const throttle = (func, limit) => {
   let lastFunc;
   let lastRan = null;
@@ -29,3 +29,11 @@ const throttle = (func, limit) => {
   };
 };
 exports.throttle = throttle;
+const isNumber = value => {
+  return typeof value === 'number' && !isNaN(value);
+};
+exports.isNumber = isNumber;
+const isString = value => {
+  return typeof value === 'string';
+};
+exports.isString = isString;
