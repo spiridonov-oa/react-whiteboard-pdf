@@ -11,7 +11,7 @@ require("react-pdf/dist/esm/Page/AnnotationLayer.css");
 var _Whiteboard = require("./Whiteboard.styled");
 var _index = require("../PdfReader/index");
 var _fileSaver = require("file-saver");
-var _Board = require("./Board.Class");
+var _Board = require("../Board/Board.Class");
 var _ColorPicker = require("../ColorPicker");
 var _cursor = _interopRequireDefault(require("./../images/cursor.svg"));
 var _eraser = _interopRequireDefault(require("./../images/eraser.svg"));
@@ -37,18 +37,16 @@ const defaultFunction = (data, event, canvas) => {};
 const WhiteboardCore = _ref => {
   let {
     controls,
-    fileInfo,
     activeTabState,
+    activeTabIndex,
+    fileInfo,
     contentJSON,
     drawingSettings,
     canvasRefLink,
     pageData,
     imageSlot,
-    documents,
-    activeTabIndex,
     style,
     onFileAdded,
-    onTabStateChange,
     onObjectAdded = defaultFunction,
     onObjectRemoved = defaultFunction,
     onObjectModified = defaultFunction,

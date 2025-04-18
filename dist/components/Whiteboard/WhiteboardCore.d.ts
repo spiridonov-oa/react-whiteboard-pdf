@@ -8,8 +8,9 @@ interface WhiteboardProps {
         TABS?: boolean;
         [key: string]: any;
     };
+    activeTabState?: TabState;
+    activeTabIndex?: number;
     fileInfo: FileInfo;
-    activeTabState: TabState;
     contentJSON?: string;
     canvasRefLink: {
         canvas: FabricCanvas | null;
@@ -17,11 +18,8 @@ interface WhiteboardProps {
     drawingSettings: DrawingSettings;
     pageData: PageData;
     imageSlot?: File;
-    documents?: Map<string, File>;
-    activeTabIndex?: number;
     style: React.CSSProperties;
     onFileAdded?: (file: File) => void;
-    onTabStateChange?: (state: Partial<TabState>, currentJSON: string, pageNumber: number) => void;
     onObjectAdded?: (data: any, event: any, canvas: any) => void;
     onObjectRemoved?: (data: any, event: any, canvas: any) => void;
     onObjectModified?: (data: any, event: any, canvas: any) => void;
@@ -36,5 +34,5 @@ interface WhiteboardProps {
     onSaveCanvasAsImage?: (blob: Blob, event: any, canvas: any) => void;
     onConfigChange?: (settings: PageData, event: any, canvas: any) => void;
 }
-declare const WhiteboardCore: ({ controls, fileInfo, activeTabState, contentJSON, drawingSettings, canvasRefLink, pageData, imageSlot, documents, activeTabIndex, style, onFileAdded, onTabStateChange, onObjectAdded, onObjectRemoved, onObjectModified, onCanvasRender, onCanvasChange, onZoom, onImageUploaded, onPDFUploaded, onPDFUpdated, onPageChange, onOptionsChange, onSaveCanvasAsImage, onConfigChange, }: WhiteboardProps) => React.JSX.Element;
+declare const WhiteboardCore: ({ controls, activeTabState, activeTabIndex, fileInfo, contentJSON, drawingSettings, canvasRefLink, pageData, imageSlot, style, onFileAdded, onObjectAdded, onObjectRemoved, onObjectModified, onCanvasRender, onCanvasChange, onZoom, onImageUploaded, onPDFUploaded, onPDFUpdated, onPageChange, onOptionsChange, onSaveCanvasAsImage, onConfigChange, }: WhiteboardProps) => React.JSX.Element;
 export default WhiteboardCore;

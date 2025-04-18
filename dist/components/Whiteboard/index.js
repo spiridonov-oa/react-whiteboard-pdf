@@ -5,5 +5,5 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _WhiteboardContainer = _interopRequireDefault(require("./WhiteboardContainer"));
-var _default = exports.default = _WhiteboardContainer.default;
+var _Whiteboard = _interopRequireDefault(require("./Whiteboard"));
+var _default = exports.default = _Whiteboard.default;
