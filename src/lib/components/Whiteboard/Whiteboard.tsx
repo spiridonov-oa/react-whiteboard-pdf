@@ -141,7 +141,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
         }
       } else {
         const pageNum = isNumber(content.pageNumber) ? content.pageNumber : pageNumber;
-        if (isNumber(pageNum)) {
+        if (isNumber(pageNum) && stateRefMap.get(tabIndex)) {
           stateRefMap.get(tabIndex).fileInfo.currentPageNumber = pageNum;
           const pageContent = stateRefMap.get(tabIndex).fileInfo.pages[pageNum].contentJSON;
           setContentJSON(pageContent);
