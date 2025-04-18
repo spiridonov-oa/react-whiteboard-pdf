@@ -77,20 +77,32 @@ const Whiteboard = props => {
       }
       if (tabsState) {
         tabsState.forEach((state, index) => {
-          const canvas = stateRefMap.get(index).fileInfo.canvas;
           const itemState = stateRefMap.get(index);
-          stateRefMap.set(index, {
-            drawingSettings: {
-              ...(itemState === null || itemState === void 0 ? void 0 : itemState.drawingSettings),
-              ...(state === null || state === void 0 ? void 0 : state.drawingSettings)
-            },
-            fileInfo: {
-              ...(itemState === null || itemState === void 0 ? void 0 : itemState.fileInfo),
-              ...state.fileInfo,
-              canvas: canvas,
-              pages: state.fileInfo.pages
-            }
-          });
+          if (!itemState) {
+            const canvas = null;
+            stateRefMap.set(index, {
+              ...state,
+              fileInfo: {
+                ...state.fileInfo,
+                canvas: canvas
+              }
+            });
+          } else {
+            var _stateRefMap$get;
+            const canvas = (_stateRefMap$get = stateRefMap.get(index)) === null || _stateRefMap$get === void 0 || (_stateRefMap$get = _stateRefMap$get.fileInfo) === null || _stateRefMap$get === void 0 ? void 0 : _stateRefMap$get.canvas;
+            stateRefMap.set(index, {
+              drawingSettings: {
+                ...(itemState === null || itemState === void 0 ? void 0 : itemState.drawingSettings),
+                ...(state === null || state === void 0 ? void 0 : state.drawingSettings)
+              },
+              fileInfo: {
+                ...(itemState === null || itemState === void 0 ? void 0 : itemState.fileInfo),
+                ...state.fileInfo,
+                canvas: canvas,
+                pages: state.fileInfo.pages
+              }
+            });
+          }
         });
         setDocuments(new Map(Array.from(tabsState.values()).map((state, index) => [index, state.fileInfo.file])));
       }
