@@ -122,6 +122,13 @@ const Whiteboard = props => {
         } catch (error) {
           console.error('Error parsing JSON:', error);
         }
+      } else {
+        const pageNum = (0, _utils.isNumber)(content.pageNumber) ? content.pageNumber : pageNumber;
+        if ((0, _utils.isNumber)(pageNum)) {
+          stateRefMap.get(tabIndex).fileInfo.currentPageNumber = pageNum;
+          const pageContent = stateRefMap.get(tabIndex).fileInfo.pages[pageNum].contentJSON;
+          setContentJSON(pageContent);
+        }
       }
       if ((_props$state = props.state) !== null && _props$state !== void 0 && _props$state.fileInfo) {
         const canvas = stateRefMap.get(tabIndex).fileInfo.canvas;
@@ -405,7 +412,7 @@ const Whiteboard = props => {
       // page.contentJSON = json;
       //canvasObjects.current[tabIndex][newState.fileInfo.currentPageNumber || 1] = json;
 
-      props.onCanvasRender(getCurrentWhiteboardState(tabIndex));
+      props.onCanvasRender && props.onCanvasRender(getCurrentWhiteboardState(tabIndex));
     }
   }, 300);
   return /*#__PURE__*/_react.default.createElement(_Whiteboard.WrapperS, null, ((_props$controls = props.controls) === null || _props$controls === void 0 ? void 0 : _props$controls.TABS) !== false && /*#__PURE__*/_react.default.createElement(_Whiteboard.TabsS, null, tabsList.map(tabIndex => {
