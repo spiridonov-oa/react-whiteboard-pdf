@@ -139,6 +139,13 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
         } catch (error) {
           console.error('Error parsing JSON:', error);
         }
+      } else {
+        const pageNum = isNumber(content.pageNumber) ? content.pageNumber : pageNumber;
+        if (isNumber(pageNum)) {
+          stateRefMap.get(tabIndex).fileInfo.currentPageNumber = pageNum;
+          const pageContent = stateRefMap.get(tabIndex).fileInfo.pages[pageNum].contentJSON;
+          setContentJSON(pageContent);
+        }
       }
 
       if (props.state?.fileInfo) {
@@ -447,7 +454,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       // page.contentJSON = json;
       //canvasObjects.current[tabIndex][newState.fileInfo.currentPageNumber || 1] = json;
 
-      props.onCanvasRender(getCurrentWhiteboardState(tabIndex));
+      props.onCanvasRender && props.onCanvasRender(getCurrentWhiteboardState(tabIndex));
     }
   }, 300);
 
