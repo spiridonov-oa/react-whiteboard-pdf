@@ -22,10 +22,8 @@ const App = () => {
   }, []);
 
   const defaultFunction = (name, data) => {
-    return;
     console.log(name, data);
   };
-  // const defaultFunction = (data) => {
 
   return (
     <>
@@ -33,6 +31,7 @@ const App = () => {
       <AppS>
         <MainS>
           <Whiteboard
+            state={null}
             contentJSON={canvasSettings.contentJSON}
             canvasSettings={canvasSettings}
             onObjectAdded={(data) => defaultFunction('onObjectAdded', data)}

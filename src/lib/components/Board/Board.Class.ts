@@ -1,6 +1,6 @@
 import { Canvas, PencilBrush, Line, Rect, Ellipse, Triangle, Textbox, FabricImage } from 'fabric';
-import { getCursor } from './cursors';
-import { throttle } from './utils';
+import { getCursor } from '../Whiteboard/cursors';
+import { throttle } from '../Whiteboard/utils';
 
 export const modes = {
   PENCIL: 'PENCIL',
@@ -309,9 +309,12 @@ export class Board {
 
     if (this.canvas) {
       // If we're not in a specific drawing mode, update all selected objects with the new color
-      if (!this.drawingSettings.currentMode || this.drawingSettings.currentMode === this.modes.SELECT) {
+      if (
+        !this.drawingSettings.currentMode ||
+        this.drawingSettings.currentMode === this.modes.SELECT
+      ) {
         const activeObjects = this.canvas.getActiveObjects();
-        
+
         if (activeObjects && activeObjects.length > 0) {
           activeObjects.forEach((item) => {
             // Different object types need different color settings
@@ -323,9 +326,9 @@ export class Board {
               item.set({ stroke: this.drawingSettings.currentColor });
             } else {
               // For shapes like rectangles, triangles, and ellipses
-              item.set({ 
+              item.set({
                 stroke: this.drawingSettings.currentColor,
-                fill: this.drawingSettings.fill ? this.drawingSettings.currentColor : 'transparent'
+                fill: this.drawingSettings.fill ? this.drawingSettings.currentColor : 'transparent',
               });
             }
           });
@@ -334,7 +337,7 @@ export class Board {
           this.canvas.requestRenderAll();
         }
       }
-      
+
       // Fire event to notify any listeners about the settings change
       this.canvas.fire('drawingSettings:change', {
         drawingSettings: this.drawingSettings,

@@ -18,7 +18,7 @@ import {
 } from './Whiteboard.styled';
 import { PdfReader } from '../PdfReader/index';
 import { saveAs } from 'file-saver';
-import { Board, modes } from './Board.Class';
+import { Board, modes } from '../Board/Board.Class';
 import { ColorPicker } from '../ColorPicker';
 
 import SelectIcon from './../images/cursor.svg';
@@ -46,18 +46,16 @@ interface WhiteboardProps {
     TABS?: boolean;
     [key: string]: any;
   };
+  activeTabState?: TabState;
+  activeTabIndex?: number;
   fileInfo: FileInfo;
-  activeTabState: TabState;
   contentJSON?: string;
   canvasRefLink: { canvas: FabricCanvas | null };
   drawingSettings: DrawingSettings;
   pageData: PageData;
   imageSlot?: File;
-  documents?: Map<string, File>;
-  activeTabIndex?: number;
   style: React.CSSProperties;
   onFileAdded?: (file: File) => void;
-  onTabStateChange?: (state: Partial<TabState>, currentJSON: string, pageNumber: number) => void;
   onObjectAdded?: (data: any, event: any, canvas: any) => void;
   onObjectRemoved?: (data: any, event: any, canvas: any) => void;
   onObjectModified?: (data: any, event: any, canvas: any) => void;
@@ -75,18 +73,16 @@ interface WhiteboardProps {
 
 const WhiteboardCore = ({
   controls,
-  fileInfo,
   activeTabState,
+  activeTabIndex,
+  fileInfo,
   contentJSON,
   drawingSettings,
   canvasRefLink,
   pageData,
   imageSlot,
-  documents,
-  activeTabIndex,
   style,
   onFileAdded,
-  onTabStateChange,
   onObjectAdded = defaultFunction,
   onObjectRemoved = defaultFunction,
   onObjectModified = defaultFunction,

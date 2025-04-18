@@ -1,2 +1,2 @@
-import WhiteboardContainer from './WhiteboardContainer';
-export default WhiteboardContainer;
+import Whiteboard from './Whiteboard';
+export default Whiteboard;
