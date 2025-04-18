@@ -56,6 +56,7 @@ const Whiteboard = props => {
       ...props.fileInfo
     }
   };
+  const [tabsList, setTabsList] = (0, _react.useState)([0]);
   const stateRefMap = (0, _react.useRef)(new Map([[initTabIndex, initTabState]])).current;
   const [prevTabIndex, setPrevTabIndex] = (0, _react.useState)(null);
   const [activeTabIndex, setActiveTabIndex] = (0, _react.useState)(initTabIndex);
@@ -106,6 +107,7 @@ const Whiteboard = props => {
         });
         setDocuments(new Map(Array.from(tabsState.values()).map((state, index) => [index, state.fileInfo.file])));
       }
+      setTabsList(Array.from(stateRefMap.keys()));
       setActiveTabIndex(tabIndex);
       if (activeTabIndex !== tabIndex) {
         setPrevTabIndex(activeTabIndex);
@@ -157,15 +159,9 @@ const Whiteboard = props => {
       console.error('Current state not found for activeTabIndex:', activeTabIndex);
       return null;
     }
-    const json = (_currentState$fileInf = currentState.fileInfo.canvas) === null || _currentState$fileInf === void 0 ? void 0 : _currentState$fileInf.toJSON();
+    const json = ((_currentState$fileInf = currentState.fileInfo) === null || _currentState$fileInf === void 0 || (_currentState$fileInf = _currentState$fileInf.canvas) === null || _currentState$fileInf === void 0 ? void 0 : _currentState$fileInf.toJSON()) || '';
     if (!json) {
-      console.error('Canvas JSON not found for activeTabIndex:', activeTabIndex);
-      return null;
-    }
-    const state = stateRefMap.get(activeTabIndex);
-    if (!state) {
-      console.error('State not found for activeTabIndex:', activeTabIndex);
-      return null;
+      console.error(`Canvas JSON not found for tab ${activeTabIndex}:`, activeTabIndex);
     }
     const pageNumber = currentState.fileInfo.currentPageNumber;
     const pageData = currentState.fileInfo.pages[pageNumber];
@@ -305,6 +301,7 @@ const Whiteboard = props => {
     };
     stateRefMap.set(tabIndex, updatedState);
     setSelectedTabState(updatedState);
+    setTabsList(Array.from(stateRefMap.keys()));
     if (props.onTabStateChange) {
       props.onTabStateChange(getCurrentWhiteboardState(tabIndex));
     }
@@ -398,7 +395,7 @@ const Whiteboard = props => {
       drawingSettings: tabState.drawingSettings
     });
     loadPageState(tabIndex, data.currentPageNumber);
-    props.onPageChange && props.onPageChange(newFileData, getCurrentWhiteboardState(tabIndex));
+    props.onPageChange && props.onPageChange(getCurrentWhiteboardState(tabIndex));
   };
   const handleCanvasRender = (0, _utils.throttle)(tabIndex => {
     const canvas = getCanvas(tabIndex);
@@ -408,10 +405,10 @@ const Whiteboard = props => {
       // page.contentJSON = json;
       //canvasObjects.current[tabIndex][newState.fileInfo.currentPageNumber || 1] = json;
 
-      props.onCanvasRender(json, getCurrentWhiteboardState(tabIndex), canvas);
+      props.onCanvasRender(getCurrentWhiteboardState(tabIndex));
     }
   }, 300);
-  return /*#__PURE__*/_react.default.createElement(_Whiteboard.WrapperS, null, ((_props$controls = props.controls) === null || _props$controls === void 0 ? void 0 : _props$controls.TABS) !== false && /*#__PURE__*/_react.default.createElement(_Whiteboard.TabsS, null, Array.from(stateRefMap.keys()).map(tabIndex => {
+  return /*#__PURE__*/_react.default.createElement(_Whiteboard.WrapperS, null, ((_props$controls = props.controls) === null || _props$controls === void 0 ? void 0 : _props$controls.TABS) !== false && /*#__PURE__*/_react.default.createElement(_Whiteboard.TabsS, null, tabsList.map(tabIndex => {
     const tabState = stateRefMap.get(tabIndex);
 
     // Skip rendering if the tab was removed
@@ -483,7 +480,7 @@ const Whiteboard = props => {
       alignItems: 'center',
       boxShadow: 'none'
     }
-  }, "+")), Array.from(stateRefMap.keys()).map((documentName, tabIndex) => {
+  }, "+")), tabsList.map(tabIndex => {
     const tabState = stateRefMap.get(tabIndex);
     if (!tabState) {
       return null; // Skip rendering if the tab was removed
@@ -491,10 +488,6 @@ const Whiteboard = props => {
     const pageNumber = tabState.fileInfo.currentPageNumber || 0;
     const page = getPage(tabIndex, pageNumber);
     stateRefMap.get(tabIndex).fileInfo.canvas = getCanvas(tabIndex) || null;
-    const canvasSettings = {
-      viewportTransform: page === null || page === void 0 ? void 0 : page.viewportTransform,
-      zoom: page === null || page === void 0 ? void 0 : page.zoom
-    };
     return /*#__PURE__*/_react.default.createElement(_WhiteboardCore.default, (0, _extends2.default)({}, props, {
       style: {
         display: tabIndex === activeTabIndex ? 'block' : 'none'
