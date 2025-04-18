@@ -13,13 +13,16 @@ interface WhiteboardState {
     pageData: PageData;
   };
   tabsState?: Map<number, TabState>;
+  file?: File;
 }
 
 export interface FileInfo {
-  file: {
-    name: string;
-    [key: string]: any;
-  };
+  file:
+    | File
+    | {
+        name: string;
+        [key: string]: any;
+      };
   fileName: string;
   totalPages: number;
   currentPageNumber: number;
