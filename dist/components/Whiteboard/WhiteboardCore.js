@@ -41,9 +41,9 @@ const WhiteboardCore = _ref => {
     activeTabIndex,
     documents,
     fileInfo,
+    canvasList,
     contentJSON,
     drawingSettings,
-    canvasRefLink,
     pageData,
     imageSlot,
     style,
@@ -120,7 +120,7 @@ const WhiteboardCore = _ref => {
       canvasConfig: canvasSettings,
       canvasRef: canvasRef
     });
-    canvasRefLink.canvas = newBoard.canvas;
+    canvasList.current.set(activeTabIndex, newBoard.canvas);
     boardRef.current = newBoard;
     boardRef.current.setCanvasConfig(canvasSettings);
     addListeners(newBoard.canvas);

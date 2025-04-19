@@ -2,7 +2,7 @@ import React from 'react';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import { FileInfo, DrawingSettings, TabState, PageData } from '../../../types/config';
-import { Canvas as FabricCanvas } from 'fabric';
+import { Canvas } from 'fabric';
 interface WhiteboardProps {
     controls?: {
         TABS?: boolean;
@@ -12,10 +12,8 @@ interface WhiteboardProps {
     activeTabIndex?: number;
     documents?: Map<number, File>;
     fileInfo: FileInfo;
+    canvasList?: React.RefObject<Map<number, Canvas>>;
     contentJSON?: string;
-    canvasRefLink: {
-        canvas: FabricCanvas | null;
-    };
     drawingSettings: DrawingSettings;
     pageData: PageData;
     imageSlot?: File;
@@ -35,5 +33,5 @@ interface WhiteboardProps {
     onSaveCanvasAsImage?: (blob: Blob, event: any, canvas: any) => void;
     onConfigChange?: (settings: PageData, event: any, canvas: any) => void;
 }
-declare const WhiteboardCore: ({ controls, activeTabState, activeTabIndex, documents, fileInfo, contentJSON, drawingSettings, canvasRefLink, pageData, imageSlot, style, onFileAdded, onObjectAdded, onObjectRemoved, onObjectModified, onCanvasRender, onCanvasChange, onZoom, onImageUploaded, onPDFUploaded, onPDFUpdated, onPageChange, onOptionsChange, onSaveCanvasAsImage, onConfigChange, }: WhiteboardProps) => React.JSX.Element;
+declare const WhiteboardCore: ({ controls, activeTabState, activeTabIndex, documents, fileInfo, canvasList, contentJSON, drawingSettings, pageData, imageSlot, style, onFileAdded, onObjectAdded, onObjectRemoved, onObjectModified, onCanvasRender, onCanvasChange, onZoom, onImageUploaded, onPDFUploaded, onPDFUpdated, onPageChange, onOptionsChange, onSaveCanvasAsImage, onConfigChange, }: WhiteboardProps) => React.JSX.Element;
 export default WhiteboardCore;

@@ -69,9 +69,6 @@ class Board {
 
         // Add your custom logic to be executed after resize
         const onResizeComplete = () => {
-          console.log('Canvas resized:', this.canvas.width, this.canvas.height);
-          // Any other custom logic you want to perform after resize
-
           // For example, you might want to fire a custom event
           this.canvas.fire('canvas:resized', {
             width: this.canvas.width,
