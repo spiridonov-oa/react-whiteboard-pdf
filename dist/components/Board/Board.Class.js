@@ -151,6 +151,7 @@ class Board {
       };
     });
     (0, _defineProperty2.default)(this, "addZoomListeners", params => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       const that = this;
       canvas.off('mouse:wheel');
@@ -387,15 +388,14 @@ class Board {
       };
     });
     (0, _defineProperty2.default)(this, "removeCanvasListener", canvas => {
-      if (!canvas) {
-        return;
-      }
+      if (!this.canvas) return;
       canvas.off('mouse:down');
       canvas.off('mouse:move');
       canvas.off('mouse:up');
       canvas.off('mouse:over');
     });
     (0, _defineProperty2.default)(this, "draw", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       const drawingSettings = this.drawingSettings;
       canvas.freeDrawingBrush = new _fabric.PencilBrush(canvas);
@@ -405,6 +405,7 @@ class Board {
       canvas.freeDrawingCursor = this.cursorPencil;
     });
     (0, _defineProperty2.default)(this, "createLine", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       canvas.on('mouse:down', this.startAddLine().bind(this));
       canvas.on('mouse:move', this.startDrawingLine().bind(this));
@@ -415,6 +416,7 @@ class Board {
       canvas.requestRenderAll();
     });
     (0, _defineProperty2.default)(this, "startAddLine", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       const drawingSettings = this.drawingSettings;
       return function (_ref2) {
@@ -433,6 +435,7 @@ class Board {
       };
     });
     (0, _defineProperty2.default)(this, "startDrawingLine", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       return function (_ref3) {
         let {
@@ -450,6 +453,7 @@ class Board {
       };
     });
     (0, _defineProperty2.default)(this, "createRect", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       canvas.isDrawingMode = true;
       canvas.on('mouse:down', this.startAddRect().bind(this));
@@ -466,6 +470,7 @@ class Board {
       canvas.requestRenderAll();
     });
     (0, _defineProperty2.default)(this, "startAddRect", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       const drawingSettings = this.drawingSettings;
       return function (_ref4) {
@@ -495,6 +500,7 @@ class Board {
       };
     });
     (0, _defineProperty2.default)(this, "startDrawingRect", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       return function (_ref5) {
         let {
@@ -521,6 +527,7 @@ class Board {
       this.mouseDown = false;
     });
     (0, _defineProperty2.default)(this, "createEllipse", () => {
+      if (!this.canvas) return;
       //main
       const canvas = this.canvas;
       canvas.isDrawingMode = true;
@@ -538,6 +545,7 @@ class Board {
       canvas.requestRenderAll();
     });
     (0, _defineProperty2.default)(this, "startAddEllipse", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       const drawingSettings = this.drawingSettings;
       return function (_ref6) {
@@ -562,6 +570,7 @@ class Board {
       };
     });
     (0, _defineProperty2.default)(this, "startDrawingEllipse", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       return function (_ref7) {
         let {
@@ -601,6 +610,7 @@ class Board {
       canvas.requestRenderAll();
     });
     (0, _defineProperty2.default)(this, "startAddTriangle", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       const drawingSettings = this.drawingSettings;
       return function (_ref8) {
@@ -626,6 +636,7 @@ class Board {
       };
     });
     (0, _defineProperty2.default)(this, "startDrawingTriangle", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       return function (_ref9) {
         let {
@@ -765,6 +776,7 @@ class Board {
       }
     });
     (0, _defineProperty2.default)(this, "eraserOn", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       canvas.isDrawingMode = false;
       canvas.on('mouse:down', event => {
@@ -798,6 +810,7 @@ class Board {
       canvas.hoverCursor = (0, _cursors.getCursor)('eraser');
     });
     (0, _defineProperty2.default)(this, "onSelectMode", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       const drawingSettings = this.drawingSettings;
       drawingSettings.currentMode = '';
@@ -843,6 +856,7 @@ class Board {
       });
     });
     (0, _defineProperty2.default)(this, "clearCanvas", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       canvas.set('backgroundImage', null);
       canvas.requestRenderAll.bind(canvas);
@@ -853,6 +867,7 @@ class Board {
         point,
         scale
       } = _ref10;
+      if (!this.canvas) return;
       if (!point) {
         const width = this.canvas.width;
         const height = this.canvas.height;
@@ -872,6 +887,7 @@ class Board {
       });
     });
     (0, _defineProperty2.default)(this, "resetZoom", () => {
+      if (!this.canvas) return;
       const width = this.canvas.width;
       const height = this.canvas.height;
       const point = {
@@ -886,6 +902,7 @@ class Board {
       });
     });
     (0, _defineProperty2.default)(this, "onZoom", params => {
+      if (!this.canvas) return;
       this.addZoomListeners(params);
       this.canvas.fire('zoom:change', params);
     });
@@ -946,6 +963,7 @@ class Board {
       });
     });
     (0, _defineProperty2.default)(this, "getCanvasContentBoundaries", () => {
+      if (!this.canvas) return;
       const canvas = this.canvas;
       const objects = canvas.getObjects();
 
