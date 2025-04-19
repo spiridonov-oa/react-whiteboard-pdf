@@ -21,6 +21,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 const PDFReader = ({
   fileReaderInfo,
+  file,
   updateFileReaderInfo,
   onPageChange = (pageNumber: number) => {},
 }) => {
@@ -28,14 +29,12 @@ const PDFReader = ({
     fileReaderInfo?.currentPageNumber || 0,
   );
   const [totalPages, setTotalPages] = useState(fileReaderInfo?.totalPages || 0);
-  const [file, setFile] = useState(fileReaderInfo?.file || null);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     if (fileReaderInfo) {
       setCurrentPageNumber(fileReaderInfo.currentPageNumber);
       setTotalPages(fileReaderInfo.totalPages);
-      setFile(fileReaderInfo.file);
     }
   }, [fileReaderInfo]);
 
@@ -64,11 +63,10 @@ const PDFReader = ({
     ({ numPages }) => {
       setTotalPages(numPages);
       setCurrentPageNumber(0);
-      setFile(fileReaderInfo.file);
       updateFileReaderInfo({
         totalPages: numPages,
         currentPageNumber: 0,
-        file: fileReaderInfo.file,
+        file: file,
       });
     },
     [fileReaderInfo, updateFileReaderInfo],
@@ -95,7 +93,7 @@ const PDFReader = ({
     console.log(`Loading document: ${progress}%`);
   }, []);
 
-  if (!fileReaderInfo || !fileReaderInfo.file) {
+  if (!file) {
     return <div></div>;
   }
 

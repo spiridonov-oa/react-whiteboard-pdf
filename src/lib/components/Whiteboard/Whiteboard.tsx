@@ -99,6 +99,10 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       if (tabsState) {
         tabsState.forEach((state: TabState, index: number) => {
           const itemState = stateRefMap.get(index);
+          if (state === null) {
+            stateRefMap.set(index, null);
+            return;
+          }
           if (!itemState) {
             const canvas = null;
             stateRefMap.set(index, { ...state, fileInfo: { ...state.fileInfo, canvas: canvas } });
@@ -182,11 +186,8 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
           fileInfo.file = file;
           stateRefMap.set(tabIndex, { ...stateRefMap.get(tabIndex), fileInfo });
         }
-        setDocuments(
-          new Map(
-            Array.from(stateRefMap.values()).map((state, index) => [index, state.fileInfo.file]),
-          ),
-        );
+        documents.set(tabIndex, file);
+        setDocuments(new Map(documents));
       }
 
       updateTabState(tabIndex, stateRefMap.get(tabIndex));
@@ -586,6 +587,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
               display: tabIndex === activeTabIndex ? 'block' : 'none',
             }}
             pageData={page}
+            documents={documents}
             activeTabState={selectedTabState}
             onCanvasRender={(canvas, e) => handleCanvasRender(tabIndex, canvas, e)}
             contentJSON={contentJSON}

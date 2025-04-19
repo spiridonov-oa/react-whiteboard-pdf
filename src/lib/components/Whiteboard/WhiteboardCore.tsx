@@ -48,6 +48,7 @@ interface WhiteboardProps {
   };
   activeTabState?: TabState;
   activeTabIndex?: number;
+  documents?: Map<number, File>;
   fileInfo: FileInfo;
   contentJSON?: string;
   canvasRefLink: { canvas: FabricCanvas | null };
@@ -75,6 +76,7 @@ const WhiteboardCore = ({
   controls,
   activeTabState,
   activeTabIndex,
+  documents,
   fileInfo,
   contentJSON,
   drawingSettings,
@@ -530,6 +532,7 @@ const WhiteboardCore = ({
       <PDFWrapperS>
         <PdfReader
           fileReaderInfo={fileInfo}
+          file={documents.get(activeTabIndex)}
           //onPageChange={handlePageChange}
           updateFileReaderInfo={updateFileInfo}
         />
