@@ -39,6 +39,8 @@ import Recenter from './../images/focus.svg';
 import { FileInfo, DrawingSettings, TabState, PageData } from '../../../types/config';
 import { Canvas as FabricCanvas } from 'fabric';
 
+import { Canvas } from 'fabric';
+
 const fn: any = () => {};
 const defaultFunction = (data, event, canvas) => {};
 interface WhiteboardProps {
@@ -50,8 +52,8 @@ interface WhiteboardProps {
   activeTabIndex?: number;
   documents?: Map<number, File>;
   fileInfo: FileInfo;
+  canvasList?: React.RefObject<Map<number, Canvas>>;
   contentJSON?: string;
-  canvasRefLink: { canvas: FabricCanvas | null };
   drawingSettings: DrawingSettings;
   pageData: PageData;
   imageSlot?: File;
@@ -78,9 +80,9 @@ const WhiteboardCore = ({
   activeTabIndex,
   documents,
   fileInfo,
+  canvasList,
   contentJSON,
   drawingSettings,
-  canvasRefLink,
   pageData,
   imageSlot,
   style,
@@ -166,7 +168,8 @@ const WhiteboardCore = ({
       canvasConfig: canvasSettings,
       canvasRef: canvasRef,
     });
-    canvasRefLink.canvas = newBoard.canvas as FabricCanvas;
+
+    canvasList.current.set(activeTabIndex, newBoard.canvas);
 
     boardRef.current = newBoard;
     boardRef.current.setCanvasConfig(canvasSettings);
