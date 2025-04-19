@@ -17,12 +17,6 @@ interface WhiteboardState {
 }
 
 export interface FileInfo {
-  file:
-    | File
-    | {
-        name: string;
-        [key: string]: any;
-      };
   fileName: string;
   totalPages: number;
   currentPageNumber: number;
