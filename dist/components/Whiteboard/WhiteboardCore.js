@@ -39,6 +39,7 @@ const WhiteboardCore = _ref => {
     controls,
     activeTabState,
     activeTabIndex,
+    documents,
     fileInfo,
     contentJSON,
     drawingSettings,
@@ -433,7 +434,8 @@ const WhiteboardCore = _ref => {
     src: _zoomOut.default,
     alt: "Zoom Out"
   }))))), /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_index.PdfReader, {
-    fileReaderInfo: fileInfo
+    fileReaderInfo: fileInfo,
+    file: documents.get(activeTabIndex)
     //onPageChange={handlePageChange}
     ,
     updateFileReaderInfo: updateFileInfo

@@ -10,6 +10,7 @@ interface WhiteboardProps {
     };
     activeTabState?: TabState;
     activeTabIndex?: number;
+    documents?: Map<number, File>;
     fileInfo: FileInfo;
     contentJSON?: string;
     canvasRefLink: {
@@ -34,5 +35,5 @@ interface WhiteboardProps {
     onSaveCanvasAsImage?: (blob: Blob, event: any, canvas: any) => void;
     onConfigChange?: (settings: PageData, event: any, canvas: any) => void;
 }
-declare const WhiteboardCore: ({ controls, activeTabState, activeTabIndex, fileInfo, contentJSON, drawingSettings, canvasRefLink, pageData, imageSlot, style, onFileAdded, onObjectAdded, onObjectRemoved, onObjectModified, onCanvasRender, onCanvasChange, onZoom, onImageUploaded, onPDFUploaded, onPDFUpdated, onPageChange, onOptionsChange, onSaveCanvasAsImage, onConfigChange, }: WhiteboardProps) => React.JSX.Element;
+declare const WhiteboardCore: ({ controls, activeTabState, activeTabIndex, documents, fileInfo, contentJSON, drawingSettings, canvasRefLink, pageData, imageSlot, style, onFileAdded, onObjectAdded, onObjectRemoved, onObjectModified, onCanvasRender, onCanvasChange, onZoom, onImageUploaded, onPDFUploaded, onPDFUpdated, onPageChange, onOptionsChange, onSaveCanvasAsImage, onConfigChange, }: WhiteboardProps) => React.JSX.Element;
 export default WhiteboardCore;

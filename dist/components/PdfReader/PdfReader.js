@@ -21,18 +21,17 @@ _reactPdf.pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.wo
 const PDFReader = _ref => {
   let {
     fileReaderInfo,
+    file,
     updateFileReaderInfo,
     onPageChange = pageNumber => {}
   } = _ref;
   const [currentPageNumber, setCurrentPageNumber] = (0, _react.useState)((fileReaderInfo === null || fileReaderInfo === void 0 ? void 0 : fileReaderInfo.currentPageNumber) || 0);
   const [totalPages, setTotalPages] = (0, _react.useState)((fileReaderInfo === null || fileReaderInfo === void 0 ? void 0 : fileReaderInfo.totalPages) || 0);
-  const [file, setFile] = (0, _react.useState)((fileReaderInfo === null || fileReaderInfo === void 0 ? void 0 : fileReaderInfo.file) || null);
   const [loadingProgress, setLoadingProgress] = (0, _react.useState)(0);
   (0, _react.useEffect)(() => {
     if (fileReaderInfo) {
       setCurrentPageNumber(fileReaderInfo.currentPageNumber);
       setTotalPages(fileReaderInfo.totalPages);
-      setFile(fileReaderInfo.file);
     }
   }, [fileReaderInfo]);
   const onRenderSuccess = (0, _react.useCallback)(() => {
@@ -59,11 +58,10 @@ const PDFReader = _ref => {
     } = _ref2;
     setTotalPages(numPages);
     setCurrentPageNumber(0);
-    setFile(fileReaderInfo.file);
     updateFileReaderInfo({
       totalPages: numPages,
       currentPageNumber: 0,
-      file: fileReaderInfo.file
+      file: file
     });
   }, [fileReaderInfo, updateFileReaderInfo]);
   const changePage = (0, _react.useCallback)(offset => {
@@ -85,7 +83,7 @@ const PDFReader = _ref => {
     setLoadingProgress(progress);
     console.log(`Loading document: ${progress}%`);
   }, []);
-  if (!fileReaderInfo || !fileReaderInfo.file) {
+  if (!file) {
     return /*#__PURE__*/_react.default.createElement("div", null);
   }
   return /*#__PURE__*/_react.default.createElement(_PdfReader.PDFReaderS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.FileContainer, null, /*#__PURE__*/_react.default.createElement(_reactPdf.Document, {

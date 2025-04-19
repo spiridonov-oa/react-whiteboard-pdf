@@ -12,9 +12,8 @@ var _Whiteboard = require("./Whiteboard.styled");
 var _utils = require("./utils");
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
-const getInitFileInfo = (name, file) => {
+const getInitFileInfo = name => {
   return {
-    file: file,
     fileName: name || 'New Document',
     totalPages: 1,
     currentPageNumber: 0,
@@ -44,7 +43,7 @@ const Whiteboard = props => {
     ...getInitFileInfo('Document'),
     ...props.fileInfo
   };
-  const [documents, setDocuments] = (0, _react.useState)(new Map().set(initFileInfo.fileName, initFileInfo.file));
+  const [documents, setDocuments] = (0, _react.useState)(new Map());
   const initTabIndex = props.activeTabIndex || 0;
   const initTabState = {
     drawingSettings: {
@@ -64,13 +63,14 @@ const Whiteboard = props => {
   const [contentJSON, setContentJSON] = (0, _react.useState)((selectedTabState === null || selectedTabState === void 0 || (_selectedTabState$fil = selectedTabState.fileInfo) === null || _selectedTabState$fil === void 0 || (_selectedTabState$fil = _selectedTabState$fil.pages) === null || _selectedTabState$fil === void 0 || (_selectedTabState$fil = _selectedTabState$fil[activeTabIndex]) === null || _selectedTabState$fil === void 0 ? void 0 : _selectedTabState$fil.contentJSON) || '');
   (0, _react.useEffect)(() => {
     if (props.state) {
-      var _props$state;
+      var _stateRefMap$get4;
       let {
         content,
         tabIndex,
         pageNumber,
         page,
         tabsState,
+        fileInfo,
         file
       } = props.state;
       if (!(0, _utils.isNumber)(tabIndex)) {
@@ -80,6 +80,10 @@ const Whiteboard = props => {
       if (tabsState) {
         tabsState.forEach((state, index) => {
           const itemState = stateRefMap.get(index);
+          if (state === null) {
+            stateRefMap.set(index, null);
+            return;
+          }
           if (!itemState) {
             const canvas = null;
             stateRefMap.set(index, {
@@ -136,47 +140,30 @@ const Whiteboard = props => {
           setContentJSON(pageContent);
         }
       }
-      if ((_props$state = props.state) !== null && _props$state !== void 0 && _props$state.fileInfo) {
+      if (fileInfo) {
         const canvas = stateRefMap.get(tabIndex).fileInfo.canvas;
-        const file = stateRefMap.get(tabIndex).fileInfo.file;
         const newFileInfo = {
           ...stateRefMap.get(tabIndex).fileInfo,
-          ...props.state.fileInfo,
-          file: file,
+          ...fileInfo,
           canvas: canvas
         };
         stateRefMap.get(tabIndex).fileInfo = newFileInfo;
-        setSelectedTabState({
-          ...stateRefMap.get(tabIndex)
-        });
-      } else {
-        setSelectedTabState({
-          ...stateRefMap.get(tabIndex)
-        });
       }
-      if (pageNumber) {
+      if (tabIndex && file) {
+        documents.set(tabIndex, file);
+        setDocuments(new Map(documents));
+      }
+      if ((0, _utils.isNumber)(pageNumber) && (_stateRefMap$get4 = stateRefMap.get(tabIndex)) !== null && _stateRefMap$get4 !== void 0 && _stateRefMap$get4.fileInfo) {
         stateRefMap.get(tabIndex).fileInfo.currentPageNumber = pageNumber;
       }
       if (page) {
-        var _stateRefMap$get4;
-        const pageLink = (_stateRefMap$get4 = stateRefMap.get(tabIndex)) === null || _stateRefMap$get4 === void 0 || (_stateRefMap$get4 = _stateRefMap$get4.fileInfo) === null || _stateRefMap$get4 === void 0 ? void 0 : _stateRefMap$get4.pages[page.pageNumber];
+        var _stateRefMap$get5;
+        const pageLink = (_stateRefMap$get5 = stateRefMap.get(tabIndex)) === null || _stateRefMap$get5 === void 0 || (_stateRefMap$get5 = _stateRefMap$get5.fileInfo) === null || _stateRefMap$get5 === void 0 ? void 0 : _stateRefMap$get5.pages[page.pageNumber];
         if (pageLink) {
           pageLink.contentJSON = page.pageData.contentJSON || pageLink.contentJSON;
           pageLink.zoom = page.pageData.zoom || pageLink.zoom;
           pageLink.viewportTransform = page.pageData.viewportTransform || pageLink.viewportTransform;
         }
-      }
-      if (tabIndex && file) {
-        var _stateRefMap$get5;
-        const fileInfo = (_stateRefMap$get5 = stateRefMap.get(tabIndex)) === null || _stateRefMap$get5 === void 0 ? void 0 : _stateRefMap$get5.fileInfo;
-        if (!!fileInfo && !!file) {
-          fileInfo.file = file;
-          stateRefMap.set(tabIndex, {
-            ...stateRefMap.get(tabIndex),
-            fileInfo
-          });
-        }
-        setDocuments(new Map(Array.from(stateRefMap.values()).map((state, index) => [index, state.fileInfo.file])));
       }
       updateTabState(tabIndex, stateRefMap.get(tabIndex));
     }
@@ -378,24 +365,25 @@ const Whiteboard = props => {
     setPrevTabIndex(activeTabIndex);
     setActiveTabIndex(newTabIndex);
     updateTabState(newTabIndex, {
-      fileInfo: getInitFileInfo(name, file)
+      fileInfo: getInitFileInfo(name)
     });
     loadPageState(newTabIndex, 0);
     const stateResponse = getCurrentWhiteboardState(newTabIndex);
-    if (!stateResponse) {
-      console.error('State not found for nextIndex:', newTabIndex);
-      return newTabIndex;
-    }
-    if (props.onDocumentChanged) {
+    if (stateResponse && props.onDocumentChanged) {
       props.onDocumentChanged(stateRefMap.get(newTabIndex).fileInfo, stateResponse);
+    } else {
+      console.error('State not found for newTabIndex:', newTabIndex);
     }
-    return newTabIndex;
+    return {
+      tabIndex: newTabIndex,
+      fileInfo: stateRefMap.get(newTabIndex).fileInfo
+    };
   };
   const handleAddDocument = file => {
-    const newTabIndex = createNewTab(file.name || 'File', file);
+    const data = createNewTab(file.name || 'File', file);
     if (props.onFileAdded) {
       props.onFileAdded({
-        tabIndex: newTabIndex,
+        ...data,
         file
       });
     }
@@ -526,6 +514,7 @@ const Whiteboard = props => {
         display: tabIndex === activeTabIndex ? 'block' : 'none'
       },
       pageData: page,
+      documents: documents,
       activeTabState: selectedTabState,
       onCanvasRender: (canvas, e) => handleCanvasRender(tabIndex, canvas, e),
       contentJSON: contentJSON,
