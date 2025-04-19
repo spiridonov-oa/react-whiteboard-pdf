@@ -195,6 +195,7 @@ export class Board {
   };
 
   addZoomListeners = (params?: { scale: number }) => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const that = this;
     canvas.off('mouse:wheel');
@@ -422,9 +423,8 @@ export class Board {
   };
 
   removeCanvasListener = (canvas) => {
-    if (!canvas) {
-      return;
-    }
+    if (!this.canvas) return;
+
     canvas.off('mouse:down');
     canvas.off('mouse:move');
     canvas.off('mouse:up');
@@ -432,6 +432,7 @@ export class Board {
   };
 
   draw = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     canvas.freeDrawingBrush = new PencilBrush(canvas);
@@ -442,6 +443,7 @@ export class Board {
   };
 
   createLine = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
 
     canvas.on('mouse:down', this.startAddLine().bind(this));
@@ -455,6 +457,7 @@ export class Board {
   };
 
   startAddLine = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     return function ({ e }) {
@@ -473,6 +476,7 @@ export class Board {
   };
 
   startDrawingLine = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
 
     return function ({ e }) {
@@ -489,6 +493,7 @@ export class Board {
   };
 
   createRect = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
 
@@ -506,6 +511,7 @@ export class Board {
   };
 
   startAddRect = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     return function ({ e }) {
@@ -540,6 +546,7 @@ export class Board {
   };
 
   startDrawingRect = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     return function ({ e }) {
       if (this.mouseDown) {
@@ -566,6 +573,7 @@ export class Board {
   };
 
   createEllipse = () => {
+    if (!this.canvas) return;
     //main
     const canvas = this.canvas;
     canvas.isDrawingMode = true;
@@ -584,6 +592,7 @@ export class Board {
   };
 
   startAddEllipse = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     return function ({ e }) {
@@ -608,6 +617,7 @@ export class Board {
   };
 
   startDrawingEllipse = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
 
     return function ({ e }) {
@@ -647,6 +657,7 @@ export class Board {
   };
 
   startAddTriangle = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     return function ({ e }) {
@@ -672,6 +683,7 @@ export class Board {
   };
 
   startDrawingTriangle = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     return function ({ e }) {
       if (this.mouseDown) {
@@ -817,6 +829,7 @@ export class Board {
   };
 
   eraserOn = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     canvas.isDrawingMode = false;
 
@@ -857,6 +870,7 @@ export class Board {
   };
 
   onSelectMode = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
     drawingSettings.currentMode = '';
@@ -896,6 +910,7 @@ export class Board {
   };
 
   clearCanvas = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
 
     canvas.set('backgroundImage', null);
@@ -904,6 +919,7 @@ export class Board {
   };
 
   changeZoom = ({ point, scale }: { point?: { x: number; y: number }; scale: number }) => {
+    if (!this.canvas) return;
     if (!point) {
       const width = this.canvas.width;
       const height = this.canvas.height;
@@ -921,6 +937,7 @@ export class Board {
   };
 
   resetZoom = () => {
+    if (!this.canvas) return;
     const width = this.canvas.width;
     const height = this.canvas.height;
     const point = { x: width / 2, y: height / 2 };
@@ -930,6 +947,7 @@ export class Board {
   };
 
   onZoom = (params) => {
+    if (!this.canvas) return;
     this.addZoomListeners(params);
     this.canvas.fire('zoom:change', params);
   };
@@ -996,6 +1014,7 @@ export class Board {
   };
 
   getCanvasContentBoundaries = () => {
+    if (!this.canvas) return;
     const canvas = this.canvas;
     const objects = canvas.getObjects();
 

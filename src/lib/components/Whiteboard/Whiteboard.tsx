@@ -128,8 +128,10 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
         try {
           if (isNumber(content?.pageNumber)) {
             const parsedJSON = JSON.stringify(content.json);
-            stateRefMap.get(tabIndex).fileInfo.pages[content.pageNumber].contentJSON = parsedJSON;
-            setContentJSON(parsedJSON);
+            if (stateRefMap.get(tabIndex)?.fileInfo?.pages?.[content.pageNumber]) {
+              stateRefMap.get(tabIndex).fileInfo.pages[content.pageNumber].contentJSON = parsedJSON;
+              setContentJSON(parsedJSON);
+            }
           }
         } catch (error) {
           console.error('Error parsing JSON:', error);
@@ -163,8 +165,9 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       if (pageNumber) {
         stateRefMap.get(tabIndex).fileInfo.currentPageNumber = pageNumber;
       }
+
       if (page) {
-        const pageLink = stateRefMap.get(tabIndex).fileInfo.pages[page.pageNumber];
+        const pageLink = stateRefMap.get(tabIndex)?.fileInfo?.pages[page.pageNumber];
         if (pageLink) {
           pageLink.contentJSON = page.pageData.contentJSON || pageLink.contentJSON;
           pageLink.zoom = page.pageData.zoom || pageLink.zoom;
@@ -185,6 +188,8 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
           ),
         );
       }
+
+      updateTabState(tabIndex, stateRefMap.get(tabIndex));
     }
   }, [props.state]);
 
@@ -354,7 +359,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
 
   const changeTab = (nextIndex) => {
     if (nextIndex === activeTabIndex) return;
-    if (nextIndex < 0 || nextIndex >= documents.size) return;
+    if (nextIndex < 0 || nextIndex >= tabsList.length) return;
 
     // Save current tab's canvas state
     const currentTabState = stateRefMap.get(activeTabIndex);
@@ -393,7 +398,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       fileInfo: selectedTabState.fileInfo,
     });
 
-    const newTabIndex = documents.size;
+    const newTabIndex = tabsList.length;
     const updatedDocuments = new Map(documents);
     updatedDocuments.set(newTabIndex, file);
     setDocuments(updatedDocuments);
