@@ -127,22 +127,6 @@ const WhiteboardCore = _ref => {
     if (!boardRef.current || !resizedCount || !drawingSettings) return;
     (_boardRef$current = boardRef.current) === null || _boardRef$current === void 0 || _boardRef$current.setDrawingSettings(drawingSettings);
   }, [drawingSettings, boardRef.current, resizedCount]);
-  const openPageTimer = (0, _react.useRef)(null);
-  const setBackgroundPage = page => {
-    if (!boardRef.current || !resizedCount) return;
-    page = page || fileInfo.currentPage;
-    if (fileInfo.currentPage) {
-      if (openPageTimer.current) {
-        clearTimeout(openPageTimer.current);
-      }
-      openPageTimer.current = setTimeout(() => {
-        if (!boardRef.current) return;
-        //boardRef.current.openPage(fileInfo.currentPage);
-
-        boardRef.current.canvas.requestRenderAll();
-      }, 100);
-    }
-  };
   const applyJSON = contentJSON => {
     if (!boardRef.current) return;
     let json = contentJSON;
@@ -156,9 +140,6 @@ const WhiteboardCore = _ref => {
       boardRef.current.applyJSON(json);
     } else {
       boardRef.current.clearCanvas();
-    }
-    if (fileInfo.currentPage) {
-      setBackgroundPage(fileInfo.currentPage);
     }
     boardRef.current.canvas.requestRenderAll();
   };
@@ -422,7 +403,16 @@ const WhiteboardCore = _ref => {
     },
     src: _colorFill.default,
     alt: "Delete"
-  }))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarS, null, getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarS, null, getControls(), !!enabledControls.GO_TO_START && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+    onClick: bringControlTOStartPosition
+  }, /*#__PURE__*/_react.default.createElement("img", {
+    style: {
+      width: '22px',
+      height: '22px'
+    },
+    src: _centerFocus.default,
+    alt: "Recenter"
+  }))), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     type: "button",
     onClick: () => boardRef.current.clearCanvas()
   }, /*#__PURE__*/_react.default.createElement("img", {
@@ -456,18 +446,7 @@ const WhiteboardCore = _ref => {
     },
     src: _download.default,
     alt: "Download"
-  }))), !!enabledControls.GO_TO_START && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
-    onClick: bringControlTOStartPosition
-  }, /*#__PURE__*/_react.default.createElement("img", {
-    style: {
-      width: '22px',
-      height: '22px'
-    },
-    src: _centerFocus.default,
-    alt: "Recenter"
-  }))), !!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
-    onClick: () => handleLoadCanvasState(canvasSaveData[0])
-  }, "Load"))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  })))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleZoomIn,
     title: "Zoom In"
   }, /*#__PURE__*/_react.default.createElement("img", {
@@ -494,7 +473,7 @@ const WhiteboardCore = _ref => {
     },
     src: _zoomOut.default,
     alt: "Zoom Out"
-  }))))), documents.get(activeTabIndex) && /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_index.PdfReader, {
+  }))))), /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_index.PdfReader, {
     fileReaderInfo: fileInfo,
     viewportTransform: viewportTransform,
     file: documents.get(activeTabIndex)
