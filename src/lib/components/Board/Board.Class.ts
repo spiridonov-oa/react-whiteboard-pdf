@@ -245,7 +245,6 @@ export class Board {
     });
 
     canvas.on('touch:gesture', (event) => {
-      console.log('1 touch:gesture');
       if (event.e.touches && event.e.touches.length === 2) {
         const point1 = {
           x: event.e.touches[0].clientX,
@@ -259,7 +258,6 @@ export class Board {
         let prevDistance = canvas.getPointerDistance(point1, point2);
 
         canvas.on('touch:gesture', (event) => {
-          console.log('2 touch:gesture');
           const newDistance = canvas.getPointerDistance(point1, point2);
           const zoom = newDistance / prevDistance;
 

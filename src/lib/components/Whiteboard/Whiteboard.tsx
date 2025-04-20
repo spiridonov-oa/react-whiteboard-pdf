@@ -24,7 +24,7 @@ interface WhiteboardContainerProps {
   onObjectRemoved?: (data: any, event: any, canvas: any) => void;
   onObjectModified?: (data: any, event: any, canvas: any) => void;
   onCanvasRender?: (state: WhiteboardState) => void;
-  onCanvasChange?: (data: any, event: any, canvas: any) => void;
+  onCanvasChange?: (state: WhiteboardState) => void;
   onZoom?: (data: any, event: any, canvas: any) => void;
   onImageUploaded?: (file: File, event: any, canvas: any) => void;
   onPDFUploaded?: (file: File, event: any, canvas: any) => void;
@@ -502,21 +502,27 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
   };
 
   const handleCanvasRender = throttle((tabIndex) => {
-    const canvas = getCanvas(tabIndex);
-    if (canvas) {
-      // const json = getCanvasJSON(tabIndex);
-      // const page = getPage(tabIndex);
-      // page.contentJSON = json;
-      // canvasObjects.current[tabIndex][newState.fileInfo.currentPageNumber || 1] = json;
+    // const json = getCanvasJSON(tabIndex);
+    // const page = getPage(tabIndex);
+    // page.contentJSON = json;
+    // canvasObjects.current[tabIndex][newState.fileInfo.currentPageNumber || 1] = json;
 
-      props.onCanvasRender &&
-        runDebounce(
-          'CanvasRender',
-          () => props.onCanvasRender(getCurrentWhiteboardState(tabIndex)),
-          200,
-        );
-    }
-  }, 300);
+    props.onCanvasRender &&
+      runDebounce(
+        'CanvasRender',
+        () => props.onCanvasRender(getCurrentWhiteboardState(tabIndex)),
+        250,
+      );
+  }, 200);
+
+  const handleCanvasChange = ({ tabIndex, pageNumber }, json) => {
+    props.onCanvasChange &&
+      runDebounce(
+        'onCanvasChange',
+        () => props.onCanvasChange(getCurrentWhiteboardState(tabIndex)),
+        250,
+      );
+  };
 
   const deleteTab = (tabIndex) => {
     stateRefMap.set(tabIndex, null);
@@ -653,6 +659,9 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
             onFileAdded={handleAddDocument}
             onPageChange={(data: FileInfo) => {
               handlePageChange(data, tabIndex, pageNumber);
+            }}
+            onCanvasChange={(data, e) => {
+              handleCanvasChange({ tabIndex, pageNumber }, data);
             }}
             activeTabIndex={tabIndex}
           />

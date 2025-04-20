@@ -299,17 +299,16 @@ const WhiteboardCore = ({
 
     canvas.on('object:removed', (event) => {
       const json = event.target.toJSON();
-      onObjectRemoved(event.target.toJSON(), event, canvas);
+      onObjectRemoved(json, event, canvas);
       handleSaveCanvasState(json);
-      onCanvasChange(event.target.toJSON(), event, canvas);
+      onCanvasChange(json, event, canvas);
     });
 
     canvas.on('object:modified', (event) => {
       const json = event.target.toJSON();
-      console.log('object:modified', json);
-      onObjectModified(event.target.toJSON(), event, canvas);
+      onObjectModified(json, event, canvas);
       handleSaveCanvasState(json);
-      onCanvasChange(event.target.toJSON(), event, canvas);
+      onCanvasChange(json, event, canvas);
     });
 
     canvas.on('canvas:resized', (event) => {
