@@ -21,7 +21,7 @@ const App = () => {
     }, 1000);
   }, []);
 
-  const defaultFunction = (name, data) => {
+  const handleWhiteboardEvent = (name, data) => {
     console.log(name, data);
   };
 
@@ -38,21 +38,67 @@ const App = () => {
                 pageNumber: 0,
               },
             }}
-            onObjectAdded={(data) => defaultFunction('onObjectAdded', data)}
-            onObjectRemoved={(data) => defaultFunction('onObjectRemoved', data)}
-            onObjectModified={(data) => defaultFunction('onObjectModified', data)}
-            onCanvasRender={(data) => defaultFunction('onCanvasRender', data)}
-            onCanvasChange={(data) => defaultFunction('onCanvasChange', data)}
-            onZoom={(data) => defaultFunction('onZoom', data)}
-            onImageUploaded={(data) => defaultFunction('onImageUploaded', data)}
-            onPDFUploaded={(data) => defaultFunction('onPDFUploaded', data)}
-            onPDFUpdated={(data) => defaultFunction('onPDFUpdated', data)}
-            onPageChange={(data) => defaultFunction('onPageChange', data)}
-            onOptionsChange={(data) => defaultFunction('onOptionsChange', data)}
-            onSaveCanvasAsImage={(data) => defaultFunction('onSaveCanvasAsImage', data)}
-            onConfigChange={(data) => defaultFunction('onConfigChange', data)}
-            onSaveCanvasState={(data) => defaultFunction('onSaveCanvasState', data)}
-            onDocumentChanged={(data) => defaultFunction('onDocumentChanged', data)}
+            activeTabIndex={0}
+            contentJSON={JSON.stringify(canvasSettings.contentJSON)}
+            drawingSettings={{
+              brushWidth: 5,
+              currentMode: 'PENCIL',
+              currentColor: '#000000',
+              fill: false,
+            }}
+            controls={{
+              PENCIL: true,
+              LINE: true,
+              RECTANGLE: true,
+              ELLIPSE: true,
+              TRIANGLE: true,
+              TEXT: true,
+              SELECT: true,
+              ERASER: true,
+              CLEAR: true,
+              FILL: true,
+              BRUSH: true,
+              COLOR_PICKER: true,
+              DEFAULT_COLORS: true,
+              FILES: true,
+              SAVE_AS_IMAGE: true,
+              GO_TO_START: true,
+              SAVE_AND_LOAD: true,
+              ZOOM: true,
+              TABS: true,
+            }}
+            onFileAdded={(fileData) => handleWhiteboardEvent('onFileAdded', fileData)}
+            onObjectAdded={(data, event, canvas) => handleWhiteboardEvent('onObjectAdded', data)}
+            onObjectRemoved={(data, event, canvas) =>
+              handleWhiteboardEvent('onObjectRemoved', data)
+            }
+            onObjectModified={(data, event, canvas) =>
+              handleWhiteboardEvent('onObjectModified', data)
+            }
+            onCanvasRender={(state) => handleWhiteboardEvent('onCanvasRender', state)}
+            onCanvasChange={(state) => handleWhiteboardEvent('onCanvasChange', state)}
+            onZoom={(data, event, canvas) => handleWhiteboardEvent('onZoom', data)}
+            onImageUploaded={(file, event, canvas) =>
+              handleWhiteboardEvent('onImageUploaded', file)
+            }
+            onPDFUploaded={(file, event, canvas) => handleWhiteboardEvent('onPDFUploaded', file)}
+            onPDFUpdated={(fileInfo, event, canvas) =>
+              handleWhiteboardEvent('onPDFUpdated', fileInfo)
+            }
+            onPageChange={(state) => handleWhiteboardEvent('onPageChange', state)}
+            onOptionsChange={(options, state) =>
+              handleWhiteboardEvent('onOptionsChange', { options, state })
+            }
+            onSaveCanvasAsImage={(blob, event, canvas) =>
+              handleWhiteboardEvent('onSaveCanvasAsImage', blob)
+            }
+            onConfigChange={(settings, event, canvas) =>
+              handleWhiteboardEvent('onConfigChange', settings)
+            }
+            onTabStateChange={(state) => handleWhiteboardEvent('onTabStateChange', state)}
+            onDocumentChanged={(fileInfo, state) =>
+              handleWhiteboardEvent('onDocumentChanged', { fileInfo, state })
+            }
           />
         </MainS>
       </AppS>
