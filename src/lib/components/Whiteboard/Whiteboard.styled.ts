@@ -10,7 +10,12 @@ export const WrapperS = styled.div`
   flex-direction: column;
   width: 100%;
   height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   background: white;
+  overflow: hidden;
 `;
 
 export const TabsS = styled.div`
@@ -39,10 +44,18 @@ export const WhiteBoardS = styled.div`
   font-family: Arial, Helvetica, sans-serif;
   position: relative;
   flex: 1;
-  width: 100%;
-  height: 100%;
-  min-width: 100%;
-  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+`;
+export const BoardWrapperS = styled.div`
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const ButtonS = styled.button`

@@ -654,7 +654,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
           <WhiteboardCore
             {...props}
             style={{
-              display: tabIndex === activeTabIndex ? 'block' : 'none',
+              display: tabIndex === activeTabIndex ? 'flex' : 'none',
             }}
             pageData={page}
             canvasList={canvasList}

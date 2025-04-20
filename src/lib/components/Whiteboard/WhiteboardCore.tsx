@@ -15,6 +15,7 @@ import {
   SeparatorS,
   ToolbarHolderS,
   PDFWrapperS,
+  BoardWrapperS,
 } from './Whiteboard.styled';
 import { PdfReader } from '../PdfReader/index';
 import { saveAs } from 'file-saver';
@@ -535,32 +536,35 @@ const WhiteboardCore = ({
           )}
         </ZoomBarS>
       </ToolbarHolderS>
+      <BoardWrapperS>
+        <PDFWrapperS>
+          <PdfReader
+            fileReaderInfo={fileInfo}
+            viewportTransform={viewportTransform}
+            file={documents.get(activeTabIndex)}
+            //onPageChange={handlePageChange}
+            updateFileReaderInfo={updateFileInfo}
+          />
+        </PDFWrapperS>
 
-      <PDFWrapperS>
-        <PdfReader
-          fileReaderInfo={fileInfo}
-          viewportTransform={viewportTransform}
-          file={documents.get(activeTabIndex)}
-          //onPageChange={handlePageChange}
-          updateFileReaderInfo={updateFileInfo}
+        <canvas
+          style={{
+            backgroundColor: 'transparent',
+            zIndex: 1,
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            right: 0,
+            bottom: 0,
+            top: 0,
+            left: 0,
+            overflow: 'hidden',
+          }}
+          className="canvas"
+          ref={canvasRef}
+          id="canvas"
         />
-      </PDFWrapperS>
-
-      <canvas
-        style={{
-          backgroundColor: 'transparent',
-          zIndex: 1,
-          width: '100%',
-          height: '100%',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          overflow: 'hidden',
-        }}
-        className="canvas"
-        ref={canvasRef}
-        id="canvas"
-      />
+      </BoardWrapperS>
     </WhiteBoardS>
   );
 };

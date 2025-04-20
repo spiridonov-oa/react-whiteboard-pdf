@@ -3,6 +3,8 @@ import styled from 'styled-components';
 export const PDFReaderS = styled.div`
   flex: 1;
   display: flex;
+  width: 100%;
+  height: 100%;
   font-size: 14px;
   justify-content: center;
   align-items: center;
@@ -12,14 +14,12 @@ export const PDFReaderS = styled.div`
 export const FileContainer = styled.div`
   margin: 0 auto;
   width: 100%;
-  overflow: hidden;
   display: flex;
   justify-content: center;
 
   .import-pdf-page {
     canvas {
       max-width: 100%;
-      height: auto;
     }
   }
 `;
