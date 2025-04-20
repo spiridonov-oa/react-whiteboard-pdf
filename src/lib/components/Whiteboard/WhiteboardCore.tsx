@@ -180,25 +180,6 @@ const WhiteboardCore = ({
     boardRef.current?.setDrawingSettings(drawingSettings);
   }, [drawingSettings, boardRef.current, resizedCount]);
 
-  const openPageTimer = useRef(null);
-  const setBackgroundPage = (page?: any) => {
-    if (!boardRef.current || !resizedCount) return;
-
-    page = page || fileInfo.currentPage;
-
-    if (fileInfo.currentPage) {
-      if (openPageTimer.current) {
-        clearTimeout(openPageTimer.current);
-      }
-      openPageTimer.current = setTimeout(() => {
-        if (!boardRef.current) return;
-        //boardRef.current.openPage(fileInfo.currentPage);
-
-        boardRef.current.canvas.requestRenderAll();
-      }, 100);
-    }
-  };
-
   const applyJSON = (contentJSON) => {
     if (!boardRef.current) return;
     let json: any = contentJSON;
@@ -213,9 +194,6 @@ const WhiteboardCore = ({
       boardRef.current.applyJSON(json);
     } else {
       boardRef.current.clearCanvas();
-    }
-    if (fileInfo.currentPage) {
-      setBackgroundPage(fileInfo.currentPage);
     }
     boardRef.current.canvas.requestRenderAll();
   };
@@ -486,6 +464,14 @@ const WhiteboardCore = ({
         <ToolbarS>
           {getControls()}
 
+          {!!enabledControls.GO_TO_START && (
+            <ToolbarItemS>
+              <ButtonS onClick={bringControlTOStartPosition}>
+                <img style={{ width: '22px', height: '22px' }} src={Recenter} alt="Recenter" />
+              </ButtonS>
+            </ToolbarItemS>
+          )}
+
           {!!enabledControls.CLEAR && (
             <ButtonS type="button" onClick={() => boardRef.current.clearCanvas()}>
               <img style={{ width: '22px', height: '22px' }} src={DeleteIcon} alt="Delete" />
@@ -517,19 +503,11 @@ const WhiteboardCore = ({
             </ToolbarItemS>
           )}
 
-          {!!enabledControls.GO_TO_START && (
-            <ToolbarItemS>
-              <ButtonS onClick={bringControlTOStartPosition}>
-                <img style={{ width: '22px', height: '22px' }} src={Recenter} alt="Recenter" />
-              </ButtonS>
-            </ToolbarItemS>
-          )}
-
-          {!!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && (
+          {/* {!!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && (
             <ToolbarItemS>
               <ButtonS onClick={() => handleLoadCanvasState(canvasSaveData[0])}>Load</ButtonS>
             </ToolbarItemS>
-          )}
+          )} */}
         </ToolbarS>
         <ZoomBarS>
           {!!enabledControls.ZOOM && (
@@ -557,17 +535,17 @@ const WhiteboardCore = ({
           )}
         </ZoomBarS>
       </ToolbarHolderS>
-      {documents.get(activeTabIndex) && (
-        <PDFWrapperS>
-          <PdfReader
-            fileReaderInfo={fileInfo}
-            viewportTransform={viewportTransform}
-            file={documents.get(activeTabIndex)}
-            //onPageChange={handlePageChange}
-            updateFileReaderInfo={updateFileInfo}
-          />
-        </PDFWrapperS>
-      )}
+
+      <PDFWrapperS>
+        <PdfReader
+          fileReaderInfo={fileInfo}
+          viewportTransform={viewportTransform}
+          file={documents.get(activeTabIndex)}
+          //onPageChange={handlePageChange}
+          updateFileReaderInfo={updateFileInfo}
+        />
+      </PDFWrapperS>
+
       <canvas
         style={{
           backgroundColor: 'transparent',

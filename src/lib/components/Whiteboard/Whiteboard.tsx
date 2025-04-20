@@ -395,7 +395,9 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       fileInfo: nextTabState.fileInfo,
     });
 
-    loadPageState(nextIndex, nextTabState.fileInfo.currentPageNumber);
+    setTimeout(() => {
+      loadPageState(nextIndex, nextTabState.fileInfo.currentPageNumber);
+    }, 20);
 
     const stateResponse = getCurrentWhiteboardState(nextIndex);
     if (!stateResponse) {
@@ -434,7 +436,9 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
     updateTabState(newTabIndex, {
       fileInfo: getInitFileInfo(name),
     });
-    loadPageState(newTabIndex, 0);
+    setTimeout(() => {
+      loadPageState(newTabIndex, 0);
+    }, 20);
 
     const stateResponse = getCurrentWhiteboardState(newTabIndex);
     if (!stateResponse) {
@@ -488,7 +492,10 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       fileInfo: newFileData,
       drawingSettings: tabState.drawingSettings,
     });
-    loadPageState(tabIndex, data.currentPageNumber);
+
+    setTimeout(() => {
+      loadPageState(tabIndex, data.currentPageNumber);
+    }, 20);
 
     if (props.onPageChange) {
       runDebounce(
@@ -535,7 +542,10 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       }
       setActiveTabIndex(newActiveTabIndex);
       setSelectedTabState(stateRefMap.get(newActiveTabIndex));
-      loadPageState(newActiveTabIndex);
+
+      setTimeout(() => {
+        loadPageState(newActiveTabIndex);
+      }, 20);
     } else {
       newActiveTabIndex = activeTabIndex;
       setActiveTabIndex(newActiveTabIndex);
