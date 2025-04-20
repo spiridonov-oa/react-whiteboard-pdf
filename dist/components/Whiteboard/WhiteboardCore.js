@@ -65,6 +65,7 @@ const WhiteboardCore = _ref => {
   const [canvasSaveData, setCanvasSaveData] = (0, _react.useState)([]);
   const boardRef = (0, _react.useRef)(null);
   const [resizedCount, setResizedCount] = (0, _react.useState)(1);
+  const [canvasReady, setCanvasReady] = (0, _react.useState)(false);
   // const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
   const [zoom, setZoom] = (0, _react.useState)(pageData.zoom);
   const [viewportTransform, setViewportTransform] = (0, _react.useState)(pageData.viewportTransform);
@@ -144,9 +145,9 @@ const WhiteboardCore = _ref => {
     boardRef.current.canvas.requestRenderAll();
   };
   (0, _react.useEffect)(() => {
-    if (!boardRef.current || !resizedCount) return;
+    if (!boardRef.current || !canvasReady) return;
     applyJSON(contentJSON);
-  }, [contentJSON, fileInfo.currentPage, resizedCount]);
+  }, [contentJSON, fileInfo.currentPage, canvasReady]);
   (0, _react.useEffect)(() => {
     if (!boardRef.current || !resizedCount || !pageData.viewportTransform) return;
     setViewportTransform(pageData.viewportTransform);
@@ -220,6 +221,9 @@ const WhiteboardCore = _ref => {
     });
     canvas.on('canvas:resized', event => {
       setResizedCount(p => p + 1);
+    });
+    canvas.on('canvas:ready', event => {
+      setCanvasReady(true);
     });
   };
   const handleSaveCanvasState = content => {

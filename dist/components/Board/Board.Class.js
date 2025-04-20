@@ -31,6 +31,7 @@ class Board {
     (0, _defineProperty2.default)(this, "init", false);
     (0, _defineProperty2.default)(this, "element", null);
     (0, _defineProperty2.default)(this, "editedTextObject", null);
+    (0, _defineProperty2.default)(this, "isRendered", false);
     (0, _defineProperty2.default)(this, "canvasConfig", {
       zoom: 1,
       contentJSON: null,
@@ -74,6 +75,34 @@ class Board {
             width: this.canvas.width,
             height: this.canvas.height
           });
+          if (!this.isRendered) {
+            this.isRendered = true;
+            this.canvas.fire('canvas:ready');
+            const width = this.canvas.width;
+            const height = this.canvas.height;
+            // Set viewportTransform: [scaleX, skewX, skewY, scaleY, translateX, translateY]
+            this.canvas.setViewportTransform([1, 0, 0, 1, width / 2, height / 2]);
+            const crossSize = 30;
+            const crossColor = 'red';
+            const centerCrossH = new _fabric.Line([-crossSize, 0, crossSize, 0], {
+              stroke: crossColor,
+              strokeWidth: 10,
+              selectable: false,
+              evented: false,
+              excludeFromExport: true
+            });
+            const centerCrossV = new _fabric.Line([0, -crossSize, 0, crossSize], {
+              stroke: crossColor,
+              strokeWidth: 10,
+              selectable: false,
+              evented: false,
+              excludeFromExport: true
+            });
+            this.canvas.add(centerCrossH, centerCrossV);
+            // ---------
+
+            this.canvas.requestRenderAll();
+          }
         };
         this.element = this.handleResize(resizeCallback, onResizeComplete);
         this.element.observe(parentElement);

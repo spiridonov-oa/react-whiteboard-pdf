@@ -20,6 +20,7 @@ export declare class Board {
     init: boolean;
     element: ResizeObserver | null;
     editedTextObject: Textbox | null;
+    isRendered: boolean;
     canvasConfig: {
         zoom: number;
         contentJSON: any;
