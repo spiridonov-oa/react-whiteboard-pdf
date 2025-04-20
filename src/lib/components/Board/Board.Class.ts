@@ -1,6 +1,6 @@
 import { Canvas, PencilBrush, Line, Rect, Ellipse, Triangle, Textbox, FabricImage } from 'fabric';
-import { getCursor } from '../Whiteboard/cursors';
-import { throttle } from '../Whiteboard/utils';
+import { getCursor } from './cursors';
+import { throttle } from '../utils/utils';
 
 export const modes = {
   PENCIL: 'PENCIL',
@@ -140,6 +140,15 @@ export class Board {
       this.changeZoom({ scale: 1 });
     }
     this.canvas.fire('config:change');
+
+    this.canvas.defaultCursor = this.cursorPencil;
+    this.canvas.hoverCursor = this.cursorPencil;
+
+    // Notify about viewport change when config is applied
+    this.fireViewportChangeEvent({
+      viewportTransform: this.canvas.viewportTransform,
+      zoom: this.canvas.getZoom(),
+    });
   };
 
   applyJSON = (json) => {
@@ -221,10 +230,16 @@ export class Board {
           // x, y coordinates used to zoom out the screen at the end of the wall (To prevent the screen from going beyond the border of the transparent wall I set when reducing the screen)
           that.nowX = vpt[4];
           that.nowY = vpt[5];
+
+          // Fire viewport change event after panning
         } catch (error) {
           console.log(error);
         }
-
+        that.fireViewportChangeEvent({
+          viewportTransform: canvas.viewportTransform,
+          zoom: canvas.getZoom(),
+          action: 'mouse:wheel',
+        });
         canvas.requestRenderAll();
       }
     });
@@ -254,7 +269,12 @@ export class Board {
           };
 
           const scale = zoom;
-
+          this.fireViewportChangeEvent({
+            ...params,
+            zoom: scale,
+            viewportTransform: canvas.viewportTransform,
+            action: 'touch:gesture',
+          });
           that.changeZoom({ point, scale });
           canvas.requestRenderAll();
 
@@ -390,8 +410,8 @@ export class Board {
     this.removeCanvasListener(canvas);
     canvas.selection = false;
     canvas.isDrawingMode = false;
-    canvas.defaultCursor = 'auto';
-    canvas.hoverCursor = 'auto';
+    canvas.defaultCursor = this.cursorPencil;
+    canvas.hoverCursor = this.cursorPencil;
     canvas.getObjects().map((item) => item.set({ selectable: false }));
   };
 
@@ -412,6 +432,7 @@ export class Board {
 
   resizeCanvas = (canvas, whiteboard) => {
     return function () {
+      if (!canvas) return;
       const width = whiteboard.clientWidth;
       const height = whiteboard.clientHeight;
       this.changeZoom({ scale: 1 });
@@ -457,6 +478,10 @@ export class Board {
     if (!this.canvas) return;
     const canvas = this.canvas;
     const drawingSettings = this.drawingSettings;
+
+    canvas.defaultCursor = this.cursorPencil;
+    canvas.hoverCursor = this.cursorPencil;
+
     return function ({ e }) {
       this.mouseDown = true;
 
@@ -873,6 +898,7 @@ export class Board {
     drawingSettings.currentMode = '';
     canvas.isDrawingMode = false;
     canvas.selection = true;
+    this.canvas.defaultCursor = 'auto';
 
     canvas.getObjects().map((item) => item.set({ selectable: true }));
     canvas.hoverCursor = 'all-scroll';
@@ -941,12 +967,44 @@ export class Board {
     const scale = 1;
     this.canvas.zoomToPoint(point, scale);
     this.onZoom({ point, scale });
+
+    // Fire viewport change event after resetting zoom
+    this.fireViewportChangeEvent({
+      viewportTransform: this.canvas.viewportTransform,
+      zoom: scale,
+      action: 'reset',
+    });
   };
 
   onZoom = (params) => {
     if (!this.canvas) return;
     this.addZoomListeners(params);
     this.canvas.fire('zoom:change', params);
+    // Fire viewport change event after zooming
+    this.fireViewportChangeEvent(params);
+  };
+
+  // Replace notifyViewportChange with fireViewportChangeEvent
+  fireViewportChangeEvent = (params: any) => {
+    if (!this.canvas) return;
+
+    // Include current canvas state in params
+    const fullParams = {
+      ...params,
+      canvasWidth: this.canvas.width,
+      canvasHeight: this.canvas.height,
+      zoom: params.zoom || this.canvas.getZoom(),
+      timestamp: Date.now(),
+    };
+
+    // Save current state to canvas config
+    this.canvasConfig.viewportTransform = [
+      ...(params.viewportTransform || this.canvas.viewportTransform),
+    ];
+    this.canvasConfig.zoom = fullParams.zoom;
+
+    // Fire the canvas event
+    this.canvas.fire('viewport:change', fullParams);
   };
 
   openPage = (page) => {

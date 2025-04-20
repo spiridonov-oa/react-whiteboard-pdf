@@ -22,23 +22,21 @@ import { Board, modes } from '../Board/Board.Class';
 import { ColorPicker } from '../ColorPicker';
 
 import SelectIcon from './../images/cursor.svg';
-import EraserIcon from './../images/eraser.svg';
+import EraserIcon from './../images/eraser-icon.svg';
 import TextIcon from './../images/text.svg';
 import RectangleIcon from './../images/rectangle.svg';
 import LineIcon from './../images/line.svg';
 import EllipseIcon from './../images/ellipse.svg';
 import TriangleIcon from './../images/triangle.svg';
-import PencilIcon from './../images/pencil.svg';
+import PencilIcon from './../images/pencil-edit.svg';
 import DeleteIcon from './../images/delete.svg';
 import ZoomInIcon from './../images/zoom-in.svg';
 import ZoomOutIcon from './../images/zoom-out.svg';
 import DownloadIcon from './../images/download.svg';
-import UploadIcon from './../images/add-photo.svg';
+import AddFileIcon from './../images/add-file.svg';
 import FillIcon from './../images/color-fill.svg';
-import Recenter from './../images/focus.svg';
+import Recenter from './../images/center-focus.svg';
 import { FileInfo, DrawingSettings, TabState, PageData } from '../../../types/config';
-import { Canvas as FabricCanvas } from 'fabric';
-
 import { Canvas } from 'fabric';
 
 const fn: any = () => {};
@@ -105,8 +103,8 @@ const WhiteboardCore = ({
   const boardRef = useRef(null);
   const [resizedCount, setResizedCount] = useState(1);
   // const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
-  const canvasSettings = pageData;
-  const [zoom, setZoom] = useState(canvasSettings.zoom);
+  const [zoom, setZoom] = useState(pageData.zoom);
+  const [viewportTransform, setViewportTransform] = useState(pageData.viewportTransform);
   const canvasRef = useRef(null);
   const whiteboardRef = useRef(null);
   const uploadPdfRef = useRef(null);
@@ -140,20 +138,6 @@ const WhiteboardCore = ({
     [controls],
   );
 
-  const applyJSON = () => {
-    if (!boardRef.current) return;
-    let json = contentJSON;
-    if (json) {
-      if (typeof json === 'string') {
-        json = JSON.parse(json);
-      }
-      boardRef.current.applyJSON(json);
-    } else {
-      boardRef.current.clearCanvas();
-    }
-    boardRef.current.canvas.requestRenderAll();
-  };
-
   useEffect(() => {
     if (imageSlot) {
       fileChanger(imageSlot);
@@ -165,14 +149,14 @@ const WhiteboardCore = ({
 
     const newBoard = new Board({
       drawingSettings: drawingSettings,
-      canvasConfig: canvasSettings,
+      canvasConfig: pageData,
       canvasRef: canvasRef,
     });
 
     canvasList.current.set(activeTabIndex, newBoard.canvas);
 
     boardRef.current = newBoard;
-    boardRef.current.setCanvasConfig(canvasSettings);
+    boardRef.current.setCanvasConfig(pageData);
 
     addListeners(newBoard.canvas);
 
@@ -185,10 +169,10 @@ const WhiteboardCore = ({
 
   useEffect(() => {
     if (!boardRef.current || !resizedCount) return;
-    boardRef.current.setCanvasConfig(canvasSettings);
+    boardRef.current.setCanvasConfig(pageData);
 
-    onConfigChange(canvasSettings, null, boardRef.current.canvas);
-  }, [canvasSettings, resizedCount]);
+    onConfigChange(pageData, null, boardRef.current.canvas);
+  }, [pageData, resizedCount]);
 
   useEffect(() => {
     if (!boardRef.current || !resizedCount || !drawingSettings) return;
@@ -197,8 +181,10 @@ const WhiteboardCore = ({
   }, [drawingSettings, boardRef.current, resizedCount]);
 
   const openPageTimer = useRef(null);
-  useEffect(() => {
+  const setBackgroundPage = (page?: any) => {
     if (!boardRef.current || !resizedCount) return;
+
+    page = page || fileInfo.currentPage;
 
     if (fileInfo.currentPage) {
       if (openPageTimer.current) {
@@ -206,30 +192,52 @@ const WhiteboardCore = ({
       }
       openPageTimer.current = setTimeout(() => {
         if (!boardRef.current) return;
-        boardRef.current.openPage(fileInfo.currentPage);
+        //boardRef.current.openPage(fileInfo.currentPage);
 
         boardRef.current.canvas.requestRenderAll();
       }, 100);
     }
-  }, [fileInfo.fileName, fileInfo.currentPage, resizedCount]);
+  };
+
+  const applyJSON = (contentJSON) => {
+    if (!boardRef.current) return;
+    let json: any = contentJSON;
+    if (json) {
+      if (typeof json === 'string') {
+        json = JSON.parse(json);
+      }
+      if (json.backgroundImage) {
+        delete json.backgroundImage;
+      }
+
+      boardRef.current.applyJSON(json);
+    } else {
+      boardRef.current.clearCanvas();
+    }
+    if (fileInfo.currentPage) {
+      setBackgroundPage(fileInfo.currentPage);
+    }
+    boardRef.current.canvas.requestRenderAll();
+  };
+
+  useEffect(() => {
+    if (!boardRef.current || !resizedCount) return;
+
+    applyJSON(contentJSON);
+  }, [contentJSON, fileInfo.currentPage, resizedCount]);
 
   useEffect(() => {
     if (!boardRef.current || !resizedCount || !pageData.viewportTransform) return;
 
+    setViewportTransform(pageData.viewportTransform);
     boardRef.current.canvas.setViewportTransform(pageData.viewportTransform);
   }, [pageData.viewportTransform, resizedCount]);
 
   useEffect(() => {
     if (!boardRef.current || !resizedCount || !pageData.zoom) return;
-
+    setZoom(pageData.zoom);
     boardRef.current.canvas.setZoom(pageData.zoom);
   }, [pageData.zoom, resizedCount]);
-
-  useEffect(() => {
-    if (!boardRef.current || !resizedCount) return;
-
-    applyJSON();
-  }, [contentJSON, resizedCount]);
 
   /**
    * Handles image upload process and error handling
@@ -250,29 +258,57 @@ const WhiteboardCore = ({
     handleImageUpload(boardRef.current.processImageFile(file), { file: file });
   };
 
+  const timerViewportChangeId = useRef(null);
+
   const addListeners = (canvas) => {
     canvas.on('after:render', (e) => {
       onCanvasRender(e, canvas);
     });
 
+    canvas.on('viewport:change', function (data) {
+      if (!data.viewportTransform) return;
+      timerViewportChangeId.current = setTimeout(() => {
+        if (!boardRef.current || !data.viewportTransform) return;
+        setViewportTransform([...data.viewportTransform]);
+        setZoom(data.viewportTransform?.[0]);
+        onZoom(data, null, canvas);
+        onConfigChange(
+          {
+            ...pageData,
+            zoom: data.viewportTransform?.[0],
+            viewportTransform: [...data.viewportTransform],
+          },
+          null,
+          canvas,
+        );
+      }, 100);
+    });
+
     canvas.on('zoom:change', function (data) {
       onZoom(data, null, canvas);
+      setViewportTransform(canvas.viewportTransform);
       setZoom(data.scale);
     });
 
     canvas.on('object:added', (event) => {
-      onObjectAdded(event.target.toJSON(), event, canvas);
-      onCanvasChange(event.target.toJSON(), event, canvas);
+      const json = event.target.toJSON();
+      onObjectAdded(json, event, canvas);
+      onCanvasChange(json, event, canvas);
+      handleSaveCanvasState(json);
     });
 
     canvas.on('object:removed', (event) => {
+      const json = event.target.toJSON();
       onObjectRemoved(event.target.toJSON(), event, canvas);
-
+      handleSaveCanvasState(json);
       onCanvasChange(event.target.toJSON(), event, canvas);
     });
 
     canvas.on('object:modified', (event) => {
+      const json = event.target.toJSON();
+      console.log('object:modified', json);
       onObjectModified(event.target.toJSON(), event, canvas);
+      handleSaveCanvasState(json);
       onCanvasChange(event.target.toJSON(), event, canvas);
     });
 
@@ -281,9 +317,8 @@ const WhiteboardCore = ({
     });
   };
 
-  const handleSaveCanvasState = () => {
-    const newCanvasState = boardRef.current.canvas.toJSON();
-    setCanvasSaveData((prevStates) => [...prevStates, newCanvasState]);
+  const handleSaveCanvasState = (content) => {
+    setCanvasSaveData((prevStates) => [...prevStates, content].slice(-20));
   };
 
   const handleLoadCanvasState = (state) => {
@@ -404,7 +439,7 @@ const WhiteboardCore = ({
           className={`${drawingSettings.currentMode === buttonKey ? 'selected' : ''}`}
           onClick={(e) => changeMode(buttonKey, e)}
         >
-          <img src={btn.icon} alt={btn.name} />
+          <img style={{ width: '22px', height: '22px' }} src={btn.icon} alt={btn.name} />
         </ButtonS>
       );
     });
@@ -445,7 +480,7 @@ const WhiteboardCore = ({
               className={drawingSettings.fill ? 'selected' : ''}
               onClick={changeFill}
             >
-              <img src={FillIcon} alt="Delete" />
+              <img style={{ width: '22px', height: '22px' }} src={FillIcon} alt="Delete" />
             </ButtonS>
           )}
         </ColorBarS>
@@ -454,7 +489,7 @@ const WhiteboardCore = ({
 
           {!!enabledControls.CLEAR && (
             <ButtonS type="button" onClick={() => boardRef.current.clearCanvas()}>
-              <img src={DeleteIcon} alt="Delete" />
+              <img style={{ width: '22px', height: '22px' }} src={DeleteIcon} alt="Delete" />
             </ButtonS>
           )}
 
@@ -470,7 +505,7 @@ const WhiteboardCore = ({
                 onChange={onFileChange}
               />
               <ButtonS onClick={() => uploadPdfRef.current.click()}>
-                <img src={UploadIcon} alt="Delete" />
+                <img style={{ width: '22px', height: '22px' }} src={AddFileIcon} alt="Delete" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -478,7 +513,7 @@ const WhiteboardCore = ({
           {!!enabledControls.SAVE_AS_IMAGE && (
             <ToolbarItemS>
               <ButtonS onClick={handleSaveCanvasAsImage}>
-                <img src={DownloadIcon} alt="Download" />
+                <img style={{ width: '22px', height: '22px' }} src={DownloadIcon} alt="Download" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -486,15 +521,7 @@ const WhiteboardCore = ({
           {!!enabledControls.GO_TO_START && (
             <ToolbarItemS>
               <ButtonS onClick={bringControlTOStartPosition}>
-                <img src={Recenter} alt="Recenter" />
-              </ButtonS>
-            </ToolbarItemS>
-          )}
-
-          {!!enabledControls.SAVE_AND_LOAD && (
-            <ToolbarItemS>
-              <ButtonS type="button" onClick={handleSaveCanvasState}>
-                Save
+                <img style={{ width: '22px', height: '22px' }} src={Recenter} alt="Recenter" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -509,7 +536,7 @@ const WhiteboardCore = ({
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
               <ButtonS onClick={handleZoomIn} title="Zoom In">
-                <img src={ZoomInIcon} alt="Zoom In" />
+                <img style={{ width: '22px', height: '22px' }} src={ZoomInIcon} alt="Zoom In" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -525,30 +552,33 @@ const WhiteboardCore = ({
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
               <ButtonS onClick={handleZoomOut} title="Zoom Out">
-                <img src={ZoomOutIcon} alt="Zoom Out" />
+                <img style={{ width: '22px', height: '22px' }} src={ZoomOutIcon} alt="Zoom Out" />
               </ButtonS>
             </ToolbarItemS>
           )}
         </ZoomBarS>
       </ToolbarHolderS>
-
-      <PDFWrapperS>
-        <PdfReader
-          fileReaderInfo={fileInfo}
-          file={documents.get(activeTabIndex)}
-          //onPageChange={handlePageChange}
-          updateFileReaderInfo={updateFileInfo}
-        />
-      </PDFWrapperS>
-
+      {documents.get(activeTabIndex) && (
+        <PDFWrapperS>
+          <PdfReader
+            fileReaderInfo={fileInfo}
+            viewportTransform={viewportTransform}
+            file={documents.get(activeTabIndex)}
+            //onPageChange={handlePageChange}
+            updateFileReaderInfo={updateFileInfo}
+          />
+        </PDFWrapperS>
+      )}
       <canvas
         style={{
+          backgroundColor: 'transparent',
           zIndex: 1,
           width: '100%',
           height: '100%',
           position: 'absolute',
           top: 0,
           left: 0,
+          overflow: 'hidden',
         }}
         className="canvas"
         ref={canvasRef}

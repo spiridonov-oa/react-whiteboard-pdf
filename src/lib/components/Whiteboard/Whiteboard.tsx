@@ -8,7 +8,7 @@ import {
   PageData,
   WhiteboardState,
 } from '../../../types/config';
-import { isNumber, throttle } from './utils';
+import { isNumber, throttle } from '../utils/utils';
 
 interface WhiteboardContainerProps {
   state?: WhiteboardState;
@@ -86,10 +86,32 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
     selectedTabState?.fileInfo?.pages?.[activeTabIndex]?.contentJSON || '',
   );
 
+  /**
+   * Debounce function for React components.
+   * Usage: const debouncedFn = useDebounce(fn, delay)
+   */
+  const timeoutRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const runDebounce = (name = 'default', callback: () => void, delay: number) => {
+    if (timeoutRef.current[name]) {
+      clearTimeout(timeoutRef.current[name]);
+    }
+    timeoutRef.current[name] = setTimeout(() => {
+      callback();
+    }, delay);
+  };
+
   useEffect(() => {
     if (props.state) {
-      let { content, tabIndex, pageNumber, page, tabsState, fileInfo, file }: WhiteboardState =
-        props.state;
+      let {
+        content,
+        tabIndex,
+        newTabIndex,
+        pageNumber,
+        page,
+        tabsState,
+        fileInfo,
+        file,
+      }: WhiteboardState = props.state;
       if (!isNumber(tabIndex)) {
         console.error('tabIndex is undefined in props.state');
         tabIndex = activeTabIndex;
@@ -119,17 +141,20 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
 
       setTabsList(Array.from(stateRefMap.keys()));
 
-      if (activeTabIndex !== tabIndex) {
-        setPrevTabIndex(activeTabIndex);
+      if (isNumber(newTabIndex)) {
+        if (activeTabIndex !== tabIndex) {
+          setPrevTabIndex(activeTabIndex);
+        }
+        setActiveTabIndex(tabIndex);
       }
-      setActiveTabIndex(tabIndex);
 
       if (content?.json) {
         try {
           if (isNumber(content?.pageNumber)) {
             const parsedJSON = JSON.stringify(content.json);
-            if (stateRefMap.get(tabIndex)?.fileInfo?.pages?.[content.pageNumber]) {
-              stateRefMap.get(tabIndex).fileInfo.pages[content.pageNumber].contentJSON = parsedJSON;
+            if (stateRefMap.get(content.tabIndex)?.fileInfo?.pages?.[content.pageNumber]) {
+              stateRefMap.get(content.tabIndex).fileInfo.pages[content.pageNumber].contentJSON =
+                parsedJSON;
               setContentJSON(parsedJSON);
             }
           }
@@ -148,11 +173,15 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       }
 
       if (fileInfo) {
-        const newFileInfo = {
-          ...stateRefMap.get(tabIndex).fileInfo,
-          ...fileInfo,
-        };
-        stateRefMap.get(tabIndex).fileInfo = newFileInfo;
+        if (!stateRefMap.get(tabIndex)?.fileInfo) {
+          stateRefMap.set(tabIndex, { ...initTabState, fileInfo: { ...fileInfo } });
+        } else {
+          const newFileInfo = {
+            ...stateRefMap.get(tabIndex).fileInfo,
+            ...fileInfo,
+          };
+          stateRefMap.get(tabIndex).fileInfo = newFileInfo;
+        }
       }
 
       if (file) {
@@ -194,8 +223,9 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
 
     return {
       content: {
-        json: json,
+        tabIndex: activeTabIndex,
         pageNumber: pageNumber,
+        json: json,
       },
       pageNumber: pageNumber,
       tabIndex: activeTabIndex,
@@ -318,7 +348,11 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
   };
 
   const updateTabState = (tabIndex: number, newState: Partial<TabState>) => {
-    if (!newState) return;
+    if (!newState) {
+      stateRefMap.set(tabIndex, null);
+      setTabsList(Array.from(stateRefMap.keys()));
+      return;
+    }
 
     const currentState = stateRefMap.get(tabIndex) || initTabState;
     const updatedState = {
@@ -372,7 +406,15 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       props.onDocumentChanged(stateRefMap.get(nextIndex).fileInfo, stateResponse);
     }
     if (props.onTabStateChange) {
-      props.onTabStateChange(getCurrentWhiteboardState(nextIndex));
+      runDebounce(
+        'onTabStateChange',
+        () =>
+          props.onTabStateChange({
+            ...getCurrentWhiteboardState(nextIndex),
+            newTabIndex: nextIndex,
+          }),
+        200,
+      );
     }
   };
 
@@ -403,7 +445,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       props.onDocumentChanged(stateRefMap.get(newTabIndex).fileInfo, stateResponse);
     }
     if (props.onTabStateChange) {
-      props.onTabStateChange(stateResponse);
+      props.onTabStateChange({ ...getCurrentWhiteboardState(newTabIndex), newTabIndex });
     }
     return { tabIndex: newTabIndex, fileInfo: stateRefMap.get(newTabIndex).fileInfo };
   };
@@ -448,7 +490,15 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
     });
     loadPageState(tabIndex, data.currentPageNumber);
 
-    props.onPageChange && props.onPageChange(getCurrentWhiteboardState(tabIndex));
+    if (props.onPageChange) {
+      runDebounce(
+        'pageChange',
+        () => {
+          props.onPageChange(getCurrentWhiteboardState(tabIndex));
+        },
+        400,
+      );
+    }
   };
 
   const handleCanvasRender = throttle((tabIndex) => {
@@ -459,9 +509,39 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       // page.contentJSON = json;
       // canvasObjects.current[tabIndex][newState.fileInfo.currentPageNumber || 1] = json;
 
-      props.onCanvasRender && props.onCanvasRender(getCurrentWhiteboardState(tabIndex));
+      props.onCanvasRender &&
+        runDebounce(
+          'CanvasRender',
+          () => props.onCanvasRender(getCurrentWhiteboardState(tabIndex)),
+          200,
+        );
     }
   }, 300);
+
+  const deleteTab = (tabIndex) => {
+    stateRefMap.set(tabIndex, null);
+
+    let newActiveTabIndex = tabIndex === 0 ? 0 : tabIndex - 1;
+    if (tabIndex === activeTabIndex) {
+      newActiveTabIndex = tabIndex === 0 ? 0 : tabIndex - 1;
+      if (newActiveTabIndex === prevTabIndex) {
+        setPrevTabIndex(null);
+      }
+      setActiveTabIndex(newActiveTabIndex);
+      setSelectedTabState(stateRefMap.get(newActiveTabIndex));
+      loadPageState(newActiveTabIndex);
+    } else {
+      newActiveTabIndex = activeTabIndex;
+      setActiveTabIndex(newActiveTabIndex);
+      setSelectedTabState({ ...stateRefMap.get(activeTabIndex) });
+    }
+    updateTabState(tabIndex, null);
+    props.onTabStateChange &&
+      props.onTabStateChange({
+        ...getCurrentWhiteboardState(activeTabIndex),
+        newTabIndex: newActiveTabIndex,
+      });
+  };
 
   return (
     <WrapperS>
@@ -492,19 +572,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
                 <span
                   onClick={(e) => {
                     e.stopPropagation();
-                    stateRefMap.set(tabIndex, null);
-
-                    if (tabIndex === activeTabIndex) {
-                      const newActiveTabIndex = tabIndex === 0 ? 0 : tabIndex - 1;
-                      if (newActiveTabIndex === prevTabIndex) {
-                        setPrevTabIndex(null);
-                      }
-                      setActiveTabIndex(newActiveTabIndex);
-                      setSelectedTabState(stateRefMap.get(newActiveTabIndex));
-                      loadPageState(newActiveTabIndex);
-                    } else {
-                      setSelectedTabState({ ...stateRefMap.get(activeTabIndex) });
-                    }
+                    deleteTab(tabIndex);
                   }}
                   style={{
                     position: 'absolute',

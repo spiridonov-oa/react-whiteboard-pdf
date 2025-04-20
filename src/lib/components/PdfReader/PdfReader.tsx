@@ -22,6 +22,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 const PDFReader = ({
   fileReaderInfo,
   file,
+  viewportTransform,
   updateFileReaderInfo,
   onPageChange = (pageNumber: number) => {},
 }) => {
@@ -93,31 +94,42 @@ const PDFReader = ({
     console.log(`Loading document: ${progress}%`);
   }, []);
 
+  // Create a transform string from the viewportTransform matrix
+  const transformStyle = {
+    width: `100%`,
+    height: `100%`,
+    transform: `matrix(${viewportTransform.join(', ')})`,
+    transformOrigin: '0 0',
+    overflow: 'hidden',
+  };
+
   if (!file) {
     return <div></div>;
   }
 
   return (
     <PDFReaderS>
-      <FileContainer>
-        <Document
-          file={file}
-          onLoadSuccess={onDocumentLoadSuccess}
-          onLoadProgress={handleLoadProgress}
-          error={<div>An error occurred while loading the PDF.</div>}
-          loading={<div>Loading PDF... {loadingProgress}%</div>}
-        >
-          <Page
-            className="import-pdf-page"
-            onRenderSuccess={onRenderSuccess}
-            pageNumber={currentPageNumber + 1}
-            scale={1.0}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-            error={<div>An error occurred while rendering the page.</div>}
-          />
-        </Document>
-      </FileContainer>
+      <div style={transformStyle}>
+        <FileContainer>
+          <Document
+            file={file}
+            onLoadSuccess={onDocumentLoadSuccess}
+            onLoadProgress={handleLoadProgress}
+            error={<div>An error occurred while loading the PDF.</div>}
+            loading={<div>Loading PDF... {loadingProgress}%</div>}
+          >
+            <Page
+              className="import-pdf-page"
+              onRenderSuccess={onRenderSuccess}
+              pageNumber={currentPageNumber + 1}
+              //scale={zoom * 1.3}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
+              error={<div>An error occurred while rendering the page.</div>}
+            />
+          </Document>
+        </FileContainer>
+      </div>
       {totalPages > 1 && (
         <PageInfoS>
           <NavigationButton

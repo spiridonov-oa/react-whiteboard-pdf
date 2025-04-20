@@ -2,10 +2,12 @@ import { Canvas as FabricCanvas } from 'fabric';
 
 interface WhiteboardState {
   content?: {
+    tabIndex: number;
     json?: JSON;
     pageNumber?: number;
   };
   tabIndex: number;
+  newTabIndex?: number;
   pageNumber?: number;
   fileInfo?: FileInfo;
   page?: {

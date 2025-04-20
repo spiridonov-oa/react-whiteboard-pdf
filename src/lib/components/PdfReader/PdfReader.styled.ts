@@ -1,16 +1,27 @@
 import styled from 'styled-components';
 
 export const PDFReaderS = styled.div`
-  width: 100%;
+  flex: 1;
   display: flex;
   font-size: 14px;
   justify-content: center;
   align-items: center;
-  background-color: 'red';
+  overflow: hidden;
 `;
 
 export const FileContainer = styled.div`
-  display: none;
+  margin: 0 auto;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+
+  .import-pdf-page {
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+  }
 `;
 
 export const PageInfoS = styled.div`

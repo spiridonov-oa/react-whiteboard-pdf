@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import theme from '../../theme';
+import theme from './theme';
 
 const color = theme.color;
 
@@ -150,9 +150,10 @@ export const ToolbarHolderS = styled.div`
 
 export const PDFWrapperS = styled.div`
   position: absolute;
-  top: 50px;
+  top: 0;
+  left: 0;
+  right: 0;
   bottom: 0;
-  width: 100%;
 `;
 
 export const ColorButtonS = styled.button`

@@ -1,10 +1,45 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<svg fill="#000000" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-	 viewBox="0 0 489.997 489.997" xml:space="preserve">
-<g>
-	<path d="M136.485,475.076l-135.3-448.8c-5.2-15,7.3-30.9,26-25l448.7,135.4c17.3,5.2,19.5,31.5,2.1,38.5l-213.4,89.6l-89.5,213.5
-		C168.385,495.276,142.385,493.376,136.485,475.076z M51.085,51.276l108.3,358.2l70.8-168.7c2.1-5.2,6.2-9.4,10.4-10.4l168.6-70.8
-		L51.085,51.276z"/>
-</g>
+
+<svg
+   fill="#000000"
+   height="800"
+   width="800"
+   version="1.1"
+   id="Capa_1"
+   viewBox="0 0 600 600"
+   xmlns="http://www.w3.org/2000/svg">
+  <defs
+     id="defs12470">
+    <linearGradient
+       id="linearGradient18189">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop18187" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient18191"
+       x1="-0.00010246921"
+       y1="244.99883"
+       x2="489.99731"
+       y2="244.99883"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="linearGradient21255"
+       gradientUnits="userSpaceOnUse"
+       x1="-0.00010246921"
+       y1="244.99883"
+       x2="489.99731"
+       y2="244.99883" />
+  </defs>
+  <g
+     id="g12465"
+     transform="matrix(0.97802503,-0.00510955,0.00510955,0.97802503,76.675196,84.219116)"
+     style="stroke:url(#linearGradient18191);stroke-width:12.5004;stroke-dasharray:none">
+    <path
+       d="M 136.485,475.076 1.185,26.276 c -5.2,-15 7.3,-30.9 26,-25 l 448.7,135.4 c 17.3,5.2 19.5,31.5 2.1,38.5 l -213.4,89.6 -89.5,213.5 c -6.7,17 -32.7,15.1 -38.6,-3.2 z m -85.4,-423.8 108.3,358.2 70.8,-168.7 c 2.1,-5.2 6.2,-9.4 10.4,-10.4 l 168.6,-70.8 z"
+       id="path12463"
+       style="stroke:url(#linearGradient21255);stroke-width:12.5004;stroke-dasharray:none" />
+  </g>
 </svg>

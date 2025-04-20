@@ -6,6 +6,6 @@ export const cursors = {
   pencil: `url(${PencilIcon}) 0 80, auto`,
 };
 
-export const getCursor = (type) => {
+export const getCursor = (type: 'pencil' | 'eraser') => {
   return cursors[type];
 };
