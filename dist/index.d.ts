@@ -1,2 +1,1 @@
-import Whiteboard from './components/Whiteboard';
-export default Whiteboard;
+export { default as Whiteboard } from './components/Whiteboard';

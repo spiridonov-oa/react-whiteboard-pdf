@@ -17,7 +17,7 @@ interface WhiteboardContainerProps {
     onObjectRemoved?: (data: any, event: any, canvas: any) => void;
     onObjectModified?: (data: any, event: any, canvas: any) => void;
     onCanvasRender?: (state: WhiteboardState) => void;
-    onCanvasChange?: (data: any, event: any, canvas: any) => void;
+    onCanvasChange?: (state: WhiteboardState) => void;
     onZoom?: (data: any, event: any, canvas: any) => void;
     onImageUploaded?: (file: File, event: any, canvas: any) => void;
     onPDFUploaded?: (file: File, event: any, canvas: any) => void;

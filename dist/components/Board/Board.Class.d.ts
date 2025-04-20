@@ -13,7 +13,7 @@ export declare class Board {
     canvas: any;
     canvasNode: HTMLElement | null;
     modes: any;
-    cursorPencil: any;
+    cursorPencil: string;
     mouseDown: boolean;
     drawInstance: any;
     drawingSettings: any;
@@ -99,6 +99,7 @@ export declare class Board {
     }) => void;
     resetZoom: () => void;
     onZoom: (params: any) => void;
+    fireViewportChangeEvent: (params: any) => void;
     openPage: (page: any) => Promise<unknown>;
     getCanvasContentBoundaries: () => {
         minX: number;

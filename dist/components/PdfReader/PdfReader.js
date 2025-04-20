@@ -22,6 +22,7 @@ const PDFReader = _ref => {
   let {
     fileReaderInfo,
     file,
+    viewportTransform,
     updateFileReaderInfo,
     onPageChange = pageNumber => {}
   } = _ref;
@@ -83,10 +84,21 @@ const PDFReader = _ref => {
     setLoadingProgress(progress);
     console.log(`Loading document: ${progress}%`);
   }, []);
+
+  // Create a transform string from the viewportTransform matrix
+  const transformStyle = {
+    width: `100%`,
+    height: `100%`,
+    transform: `matrix(${viewportTransform.join(', ')})`,
+    transformOrigin: '0 0',
+    overflow: 'hidden'
+  };
   if (!file) {
     return /*#__PURE__*/_react.default.createElement("div", null);
   }
-  return /*#__PURE__*/_react.default.createElement(_PdfReader.PDFReaderS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.FileContainer, null, /*#__PURE__*/_react.default.createElement(_reactPdf.Document, {
+  return /*#__PURE__*/_react.default.createElement(_PdfReader.PDFReaderS, null, /*#__PURE__*/_react.default.createElement("div", {
+    style: transformStyle
+  }, /*#__PURE__*/_react.default.createElement(_PdfReader.FileContainer, null, /*#__PURE__*/_react.default.createElement(_reactPdf.Document, {
     file: file,
     onLoadSuccess: onDocumentLoadSuccess,
     onLoadProgress: handleLoadProgress,
@@ -95,12 +107,13 @@ const PDFReader = _ref => {
   }, /*#__PURE__*/_react.default.createElement(_reactPdf.Page, {
     className: "import-pdf-page",
     onRenderSuccess: onRenderSuccess,
-    pageNumber: currentPageNumber + 1,
-    scale: 1.0,
+    pageNumber: currentPageNumber + 1
+    //scale={zoom * 1.3}
+    ,
     renderTextLayer: false,
     renderAnnotationLayer: false,
     error: /*#__PURE__*/_react.default.createElement("div", null, "An error occurred while rendering the page.")
-  }))), totalPages > 1 && /*#__PURE__*/_react.default.createElement(_PdfReader.PageInfoS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.NavigationButton, {
+  })))), totalPages > 1 && /*#__PURE__*/_react.default.createElement(_PdfReader.PageInfoS, null, /*#__PURE__*/_react.default.createElement(_PdfReader.NavigationButton, {
     type: "button",
     disabled: currentPageNumber <= 0,
     onClick: previousPage,

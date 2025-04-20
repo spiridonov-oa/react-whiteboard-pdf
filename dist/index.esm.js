@@ -4,6 +4,10 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+Object.defineProperty(exports, "Whiteboard", {
+  enumerable: true,
+  get: function () {
+    return _Whiteboard.default;
+  }
+});
 var _Whiteboard = _interopRequireDefault(require("./components/Whiteboard"));
-var _default = exports.default = _Whiteboard.default;

@@ -7,8 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.modes = exports.Board = void 0;
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 var _fabric = require("fabric");
-var _cursors = require("../Whiteboard/cursors");
-var _utils = require("../Whiteboard/utils");
+var _cursors = require("./cursors");
+var _utils = require("../utils/utils");
 const modes = exports.modes = {
   PENCIL: 'PENCIL',
   LINE: 'LINE',
@@ -98,6 +98,14 @@ class Board {
         });
       }
       this.canvas.fire('config:change');
+      this.canvas.defaultCursor = this.cursorPencil;
+      this.canvas.hoverCursor = this.cursorPencil;
+
+      // Notify about viewport change when config is applied
+      this.fireViewportChangeEvent({
+        viewportTransform: this.canvas.viewportTransform,
+        zoom: this.canvas.getZoom()
+      });
     });
     (0, _defineProperty2.default)(this, "applyJSON", json => {
       if (!this.canvas) {
@@ -189,14 +197,20 @@ class Board {
             // x, y coordinates used to zoom out the screen at the end of the wall (To prevent the screen from going beyond the border of the transparent wall I set when reducing the screen)
             that.nowX = vpt[4];
             that.nowY = vpt[5];
+
+            // Fire viewport change event after panning
           } catch (error) {
             console.log(error);
           }
+          that.fireViewportChangeEvent({
+            viewportTransform: canvas.viewportTransform,
+            zoom: canvas.getZoom(),
+            action: 'mouse:wheel'
+          });
           canvas.requestRenderAll();
         }
       });
       canvas.on('touch:gesture', event => {
-        console.log('1 touch:gesture');
         if (event.e.touches && event.e.touches.length === 2) {
           const point1 = {
             x: event.e.touches[0].clientX,
@@ -208,7 +222,6 @@ class Board {
           };
           let prevDistance = canvas.getPointerDistance(point1, point2);
           canvas.on('touch:gesture', event => {
-            console.log('2 touch:gesture');
             const newDistance = canvas.getPointerDistance(point1, point2);
             const zoom = newDistance / prevDistance;
             const point = {
@@ -216,6 +229,12 @@ class Board {
               y: (point1.y + point2.y) / 2
             };
             const scale = zoom;
+            this.fireViewportChangeEvent({
+              ...params,
+              zoom: scale,
+              viewportTransform: canvas.viewportTransform,
+              action: 'touch:gesture'
+            });
             that.changeZoom({
               point,
               scale
@@ -351,8 +370,8 @@ class Board {
       this.removeCanvasListener(canvas);
       canvas.selection = false;
       canvas.isDrawingMode = false;
-      canvas.defaultCursor = 'auto';
-      canvas.hoverCursor = 'auto';
+      canvas.defaultCursor = this.cursorPencil;
+      canvas.hoverCursor = this.cursorPencil;
       canvas.getObjects().map(item => item.set({
         selectable: false
       }));
@@ -373,6 +392,7 @@ class Board {
     });
     (0, _defineProperty2.default)(this, "resizeCanvas", (canvas, whiteboard) => {
       return function () {
+        if (!canvas) return;
         const width = whiteboard.clientWidth;
         const height = whiteboard.clientHeight;
         this.changeZoom({
@@ -416,6 +436,8 @@ class Board {
       if (!this.canvas) return;
       const canvas = this.canvas;
       const drawingSettings = this.drawingSettings;
+      canvas.defaultCursor = this.cursorPencil;
+      canvas.hoverCursor = this.cursorPencil;
       return function (_ref2) {
         let {
           e
@@ -813,6 +835,7 @@ class Board {
       drawingSettings.currentMode = '';
       canvas.isDrawingMode = false;
       canvas.selection = true;
+      this.canvas.defaultCursor = 'auto';
       canvas.getObjects().map(item => item.set({
         selectable: true
       }));
@@ -897,11 +920,40 @@ class Board {
         point,
         scale
       });
+
+      // Fire viewport change event after resetting zoom
+      this.fireViewportChangeEvent({
+        viewportTransform: this.canvas.viewportTransform,
+        zoom: scale,
+        action: 'reset'
+      });
     });
     (0, _defineProperty2.default)(this, "onZoom", params => {
       if (!this.canvas) return;
       this.addZoomListeners(params);
       this.canvas.fire('zoom:change', params);
+      // Fire viewport change event after zooming
+      this.fireViewportChangeEvent(params);
+    });
+    // Replace notifyViewportChange with fireViewportChangeEvent
+    (0, _defineProperty2.default)(this, "fireViewportChangeEvent", params => {
+      if (!this.canvas) return;
+
+      // Include current canvas state in params
+      const fullParams = {
+        ...params,
+        canvasWidth: this.canvas.width,
+        canvasHeight: this.canvas.height,
+        zoom: params.zoom || this.canvas.getZoom(),
+        timestamp: Date.now()
+      };
+
+      // Save current state to canvas config
+      this.canvasConfig.viewportTransform = [...(params.viewportTransform || this.canvas.viewportTransform)];
+      this.canvasConfig.zoom = fullParams.zoom;
+
+      // Fire the canvas event
+      this.canvas.fire('viewport:change', fullParams);
     });
     (0, _defineProperty2.default)(this, "openPage", page => {
       if (!this.canvas) return Promise.reject('Canvas not initialized');

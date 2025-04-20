@@ -14,20 +14,20 @@ var _fileSaver = require("file-saver");
 var _Board = require("../Board/Board.Class");
 var _ColorPicker = require("../ColorPicker");
 var _cursor = _interopRequireDefault(require("./../images/cursor.svg"));
-var _eraser = _interopRequireDefault(require("./../images/eraser.svg"));
+var _eraserIcon = _interopRequireDefault(require("./../images/eraser-icon.svg"));
 var _text = _interopRequireDefault(require("./../images/text.svg"));
 var _rectangle = _interopRequireDefault(require("./../images/rectangle.svg"));
 var _line = _interopRequireDefault(require("./../images/line.svg"));
 var _ellipse = _interopRequireDefault(require("./../images/ellipse.svg"));
 var _triangle = _interopRequireDefault(require("./../images/triangle.svg"));
-var _pencil = _interopRequireDefault(require("./../images/pencil.svg"));
+var _pencilEdit = _interopRequireDefault(require("./../images/pencil-edit.svg"));
 var _delete = _interopRequireDefault(require("./../images/delete.svg"));
 var _zoomIn = _interopRequireDefault(require("./../images/zoom-in.svg"));
 var _zoomOut = _interopRequireDefault(require("./../images/zoom-out.svg"));
 var _download = _interopRequireDefault(require("./../images/download.svg"));
-var _addPhoto = _interopRequireDefault(require("./../images/add-photo.svg"));
+var _addFile = _interopRequireDefault(require("./../images/add-file.svg"));
 var _colorFill = _interopRequireDefault(require("./../images/color-fill.svg"));
-var _focus = _interopRequireDefault(require("./../images/focus.svg"));
+var _centerFocus = _interopRequireDefault(require("./../images/center-focus.svg"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
 // Add these two imports for react-pdf text layer support
@@ -66,8 +66,8 @@ const WhiteboardCore = _ref => {
   const boardRef = (0, _react.useRef)(null);
   const [resizedCount, setResizedCount] = (0, _react.useState)(1);
   // const [canvasObjectsPerPage, setCanvasObjectsPerPage] = useState({});
-  const canvasSettings = pageData;
-  const [zoom, setZoom] = (0, _react.useState)(canvasSettings.zoom);
+  const [zoom, setZoom] = (0, _react.useState)(pageData.zoom);
+  const [viewportTransform, setViewportTransform] = (0, _react.useState)(pageData.viewportTransform);
   const canvasRef = (0, _react.useRef)(null);
   const whiteboardRef = (0, _react.useRef)(null);
   const uploadPdfRef = (0, _react.useRef)(null);
@@ -95,19 +95,6 @@ const WhiteboardCore = _ref => {
       ...controls
     };
   }, [controls]);
-  const applyJSON = () => {
-    if (!boardRef.current) return;
-    let json = contentJSON;
-    if (json) {
-      if (typeof json === 'string') {
-        json = JSON.parse(json);
-      }
-      boardRef.current.applyJSON(json);
-    } else {
-      boardRef.current.clearCanvas();
-    }
-    boardRef.current.canvas.requestRenderAll();
-  };
   (0, _react.useEffect)(() => {
     if (imageSlot) {
       fileChanger(imageSlot);
@@ -117,12 +104,12 @@ const WhiteboardCore = _ref => {
     if (!canvasRef.current) return;
     const newBoard = new _Board.Board({
       drawingSettings: drawingSettings,
-      canvasConfig: canvasSettings,
+      canvasConfig: pageData,
       canvasRef: canvasRef
     });
     canvasList.current.set(activeTabIndex, newBoard.canvas);
     boardRef.current = newBoard;
-    boardRef.current.setCanvasConfig(canvasSettings);
+    boardRef.current.setCanvasConfig(pageData);
     addListeners(newBoard.canvas);
     return () => {
       if (newBoard) {
@@ -132,40 +119,63 @@ const WhiteboardCore = _ref => {
   }, []);
   (0, _react.useEffect)(() => {
     if (!boardRef.current || !resizedCount) return;
-    boardRef.current.setCanvasConfig(canvasSettings);
-    onConfigChange(canvasSettings, null, boardRef.current.canvas);
-  }, [canvasSettings, resizedCount]);
+    boardRef.current.setCanvasConfig(pageData);
+    onConfigChange(pageData, null, boardRef.current.canvas);
+  }, [pageData, resizedCount]);
   (0, _react.useEffect)(() => {
     var _boardRef$current;
     if (!boardRef.current || !resizedCount || !drawingSettings) return;
     (_boardRef$current = boardRef.current) === null || _boardRef$current === void 0 || _boardRef$current.setDrawingSettings(drawingSettings);
   }, [drawingSettings, boardRef.current, resizedCount]);
   const openPageTimer = (0, _react.useRef)(null);
-  (0, _react.useEffect)(() => {
+  const setBackgroundPage = page => {
     if (!boardRef.current || !resizedCount) return;
+    page = page || fileInfo.currentPage;
     if (fileInfo.currentPage) {
       if (openPageTimer.current) {
         clearTimeout(openPageTimer.current);
       }
       openPageTimer.current = setTimeout(() => {
         if (!boardRef.current) return;
-        boardRef.current.openPage(fileInfo.currentPage);
+        //boardRef.current.openPage(fileInfo.currentPage);
+
         boardRef.current.canvas.requestRenderAll();
       }, 100);
     }
-  }, [fileInfo.fileName, fileInfo.currentPage, resizedCount]);
+  };
+  const applyJSON = contentJSON => {
+    if (!boardRef.current) return;
+    let json = contentJSON;
+    if (json) {
+      if (typeof json === 'string') {
+        json = JSON.parse(json);
+      }
+      if (json.backgroundImage) {
+        delete json.backgroundImage;
+      }
+      boardRef.current.applyJSON(json);
+    } else {
+      boardRef.current.clearCanvas();
+    }
+    if (fileInfo.currentPage) {
+      setBackgroundPage(fileInfo.currentPage);
+    }
+    boardRef.current.canvas.requestRenderAll();
+  };
+  (0, _react.useEffect)(() => {
+    if (!boardRef.current || !resizedCount) return;
+    applyJSON(contentJSON);
+  }, [contentJSON, fileInfo.currentPage, resizedCount]);
   (0, _react.useEffect)(() => {
     if (!boardRef.current || !resizedCount || !pageData.viewportTransform) return;
+    setViewportTransform(pageData.viewportTransform);
     boardRef.current.canvas.setViewportTransform(pageData.viewportTransform);
   }, [pageData.viewportTransform, resizedCount]);
   (0, _react.useEffect)(() => {
     if (!boardRef.current || !resizedCount || !pageData.zoom) return;
+    setZoom(pageData.zoom);
     boardRef.current.canvas.setZoom(pageData.zoom);
   }, [pageData.zoom, resizedCount]);
-  (0, _react.useEffect)(() => {
-    if (!boardRef.current || !resizedCount) return;
-    applyJSON();
-  }, [contentJSON, resizedCount]);
 
   /**
    * Handles image upload process and error handling
@@ -184,33 +194,55 @@ const WhiteboardCore = _ref => {
       file: file
     });
   };
+  const timerViewportChangeId = (0, _react.useRef)(null);
   const addListeners = canvas => {
     canvas.on('after:render', e => {
       onCanvasRender(e, canvas);
     });
+    canvas.on('viewport:change', function (data) {
+      if (!data.viewportTransform) return;
+      timerViewportChangeId.current = setTimeout(() => {
+        var _data$viewportTransfo, _data$viewportTransfo2;
+        if (!boardRef.current || !data.viewportTransform) return;
+        setViewportTransform([...data.viewportTransform]);
+        setZoom((_data$viewportTransfo = data.viewportTransform) === null || _data$viewportTransfo === void 0 ? void 0 : _data$viewportTransfo[0]);
+        onZoom(data, null, canvas);
+        onConfigChange({
+          ...pageData,
+          zoom: (_data$viewportTransfo2 = data.viewportTransform) === null || _data$viewportTransfo2 === void 0 ? void 0 : _data$viewportTransfo2[0],
+          viewportTransform: [...data.viewportTransform]
+        }, null, canvas);
+      }, 100);
+    });
     canvas.on('zoom:change', function (data) {
       onZoom(data, null, canvas);
+      setViewportTransform(canvas.viewportTransform);
       setZoom(data.scale);
     });
     canvas.on('object:added', event => {
-      onObjectAdded(event.target.toJSON(), event, canvas);
-      onCanvasChange(event.target.toJSON(), event, canvas);
+      const json = event.target.toJSON();
+      onObjectAdded(json, event, canvas);
+      onCanvasChange(json, event, canvas);
+      handleSaveCanvasState(json);
     });
     canvas.on('object:removed', event => {
-      onObjectRemoved(event.target.toJSON(), event, canvas);
-      onCanvasChange(event.target.toJSON(), event, canvas);
+      const json = event.target.toJSON();
+      onObjectRemoved(json, event, canvas);
+      handleSaveCanvasState(json);
+      onCanvasChange(json, event, canvas);
     });
     canvas.on('object:modified', event => {
-      onObjectModified(event.target.toJSON(), event, canvas);
-      onCanvasChange(event.target.toJSON(), event, canvas);
+      const json = event.target.toJSON();
+      onObjectModified(json, event, canvas);
+      handleSaveCanvasState(json);
+      onCanvasChange(json, event, canvas);
     });
     canvas.on('canvas:resized', event => {
       setResizedCount(p => p + 1);
     });
   };
-  const handleSaveCanvasState = () => {
-    const newCanvasState = boardRef.current.canvas.toJSON();
-    setCanvasSaveData(prevStates => [...prevStates, newCanvasState]);
+  const handleSaveCanvasState = content => {
+    setCanvasSaveData(prevStates => [...prevStates, content].slice(-20));
   };
   const handleLoadCanvasState = state => {
     if (boardRef.current && state) {
@@ -316,7 +348,7 @@ const WhiteboardCore = _ref => {
         name: 'Select'
       },
       [_Board.modes.PENCIL]: {
-        icon: _pencil.default,
+        icon: _pencilEdit.default,
         name: 'Pencil'
       },
       [_Board.modes.LINE]: {
@@ -340,7 +372,7 @@ const WhiteboardCore = _ref => {
         name: 'Text'
       },
       [_Board.modes.ERASER]: {
-        icon: _eraser.default,
+        icon: _eraserIcon.default,
         name: 'Eraser'
       }
     };
@@ -353,6 +385,10 @@ const WhiteboardCore = _ref => {
         className: `${drawingSettings.currentMode === buttonKey ? 'selected' : ''}`,
         onClick: e => changeMode(buttonKey, e)
       }, /*#__PURE__*/_react.default.createElement("img", {
+        style: {
+          width: '22px',
+          height: '22px'
+        },
         src: btn.icon,
         alt: btn.name
       }));
@@ -380,12 +416,20 @@ const WhiteboardCore = _ref => {
     className: drawingSettings.fill ? 'selected' : '',
     onClick: changeFill
   }, /*#__PURE__*/_react.default.createElement("img", {
+    style: {
+      width: '22px',
+      height: '22px'
+    },
     src: _colorFill.default,
     alt: "Delete"
   }))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarS, null, getControls(), !!enabledControls.CLEAR && /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     type: "button",
     onClick: () => boardRef.current.clearCanvas()
   }, /*#__PURE__*/_react.default.createElement("img", {
+    style: {
+      width: '22px',
+      height: '22px'
+    },
     src: _delete.default,
     alt: "Delete"
   })), /*#__PURE__*/_react.default.createElement(_Whiteboard.SeparatorS, null), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement("input", {
@@ -397,27 +441,40 @@ const WhiteboardCore = _ref => {
   }), /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: () => uploadPdfRef.current.click()
   }, /*#__PURE__*/_react.default.createElement("img", {
-    src: _addPhoto.default,
+    style: {
+      width: '22px',
+      height: '22px'
+    },
+    src: _addFile.default,
     alt: "Delete"
   }))), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleSaveCanvasAsImage
   }, /*#__PURE__*/_react.default.createElement("img", {
+    style: {
+      width: '22px',
+      height: '22px'
+    },
     src: _download.default,
     alt: "Download"
   }))), !!enabledControls.GO_TO_START && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: bringControlTOStartPosition
   }, /*#__PURE__*/_react.default.createElement("img", {
-    src: _focus.default,
+    style: {
+      width: '22px',
+      height: '22px'
+    },
+    src: _centerFocus.default,
     alt: "Recenter"
-  }))), !!enabledControls.SAVE_AND_LOAD && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
-    type: "button",
-    onClick: handleSaveCanvasState
-  }, "Save")), !!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }))), !!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: () => handleLoadCanvasState(canvasSaveData[0])
   }, "Load"))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleZoomIn,
     title: "Zoom In"
   }, /*#__PURE__*/_react.default.createElement("img", {
+    style: {
+      width: '22px',
+      height: '22px'
+    },
     src: _zoomIn.default,
     alt: "Zoom In"
   }))), !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
@@ -431,22 +488,29 @@ const WhiteboardCore = _ref => {
     onClick: handleZoomOut,
     title: "Zoom Out"
   }, /*#__PURE__*/_react.default.createElement("img", {
+    style: {
+      width: '22px',
+      height: '22px'
+    },
     src: _zoomOut.default,
     alt: "Zoom Out"
-  }))))), /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_index.PdfReader, {
+  }))))), documents.get(activeTabIndex) && /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_index.PdfReader, {
     fileReaderInfo: fileInfo,
+    viewportTransform: viewportTransform,
     file: documents.get(activeTabIndex)
     //onPageChange={handlePageChange}
     ,
     updateFileReaderInfo: updateFileInfo
   })), /*#__PURE__*/_react.default.createElement("canvas", {
     style: {
+      backgroundColor: 'transparent',
       zIndex: 1,
       width: '100%',
       height: '100%',
       position: 'absolute',
       top: 0,
-      left: 0
+      left: 0,
+      overflow: 'hidden'
     },
     className: "canvas",
     ref: canvasRef,

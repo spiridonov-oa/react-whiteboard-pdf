@@ -7,15 +7,26 @@ Object.defineProperty(exports, "__esModule", {
 exports.PageInfoS = exports.PageInfoDetails = exports.PDFReaderS = exports.NavigationButton = exports.FileContainer = void 0;
 var _styledComponents = _interopRequireDefault(require("styled-components"));
 const PDFReaderS = exports.PDFReaderS = _styledComponents.default.div`
-  width: 100%;
+  flex: 1;
   display: flex;
   font-size: 14px;
   justify-content: center;
   align-items: center;
-  background-color: 'red';
+  overflow: hidden;
 `;
 const FileContainer = exports.FileContainer = _styledComponents.default.div`
-  display: none;
+  margin: 0 auto;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+
+  .import-pdf-page {
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+  }
 `;
 const PageInfoS = exports.PageInfoS = _styledComponents.default.div`
   position: absolute;

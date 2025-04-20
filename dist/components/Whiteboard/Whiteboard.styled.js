@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.ZoomBarS = exports.WrapperS = exports.WhiteBoardS = exports.ToolbarS = exports.ToolbarItemS = exports.ToolbarHolderS = exports.TabsS = exports.TabS = exports.SeparatorS = exports.RangeInputS = exports.PDFWrapperS = exports.ColorButtonS = exports.ColorBarS = exports.ButtonS = void 0;
 var _styledComponents = _interopRequireDefault(require("styled-components"));
-var _theme = _interopRequireDefault(require("../../theme"));
+var _theme = _interopRequireDefault(require("./theme"));
 const color = _theme.default.color;
 const WrapperS = exports.WrapperS = _styledComponents.default.div`
   font-family: inherit;
@@ -144,9 +144,10 @@ const ToolbarHolderS = exports.ToolbarHolderS = _styledComponents.default.div`
 `;
 const PDFWrapperS = exports.PDFWrapperS = _styledComponents.default.div`
   position: absolute;
-  top: 50px;
+  top: 0;
+  left: 0;
+  right: 0;
   bottom: 0;
-  width: 100%;
 `;
 const ColorButtonS = exports.ColorButtonS = _styledComponents.default.button`
   z-index: 2;
