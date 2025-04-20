@@ -9,6 +9,8 @@ var _styledComponents = _interopRequireDefault(require("styled-components"));
 const PDFReaderS = exports.PDFReaderS = _styledComponents.default.div`
   flex: 1;
   display: flex;
+  width: 100%;
+  height: 100%;
   font-size: 14px;
   justify-content: center;
   align-items: center;
@@ -17,14 +19,12 @@ const PDFReaderS = exports.PDFReaderS = _styledComponents.default.div`
 const FileContainer = exports.FileContainer = _styledComponents.default.div`
   margin: 0 auto;
   width: 100%;
-  overflow: hidden;
   display: flex;
   justify-content: center;
 
   .import-pdf-page {
     canvas {
       max-width: 100%;
-      height: auto;
     }
   }
 `;

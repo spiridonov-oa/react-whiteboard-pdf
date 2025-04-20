@@ -4,7 +4,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.ZoomBarS = exports.WrapperS = exports.WhiteBoardS = exports.ToolbarS = exports.ToolbarItemS = exports.ToolbarHolderS = exports.TabsS = exports.TabS = exports.SeparatorS = exports.RangeInputS = exports.PDFWrapperS = exports.ColorButtonS = exports.ColorBarS = exports.ButtonS = void 0;
+exports.ZoomBarS = exports.WrapperS = exports.WhiteBoardS = exports.ToolbarS = exports.ToolbarItemS = exports.ToolbarHolderS = exports.TabsS = exports.TabS = exports.SeparatorS = exports.RangeInputS = exports.PDFWrapperS = exports.ColorButtonS = exports.ColorBarS = exports.ButtonS = exports.BoardWrapperS = void 0;
 var _styledComponents = _interopRequireDefault(require("styled-components"));
 var _theme = _interopRequireDefault(require("./theme"));
 const color = _theme.default.color;
@@ -15,7 +15,12 @@ const WrapperS = exports.WrapperS = _styledComponents.default.div`
   flex-direction: column;
   width: 100%;
   height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   background: white;
+  overflow: hidden;
 `;
 const TabsS = exports.TabsS = _styledComponents.default.div`
   display: flex;
@@ -41,10 +46,18 @@ const WhiteBoardS = exports.WhiteBoardS = _styledComponents.default.div`
   font-family: Arial, Helvetica, sans-serif;
   position: relative;
   flex: 1;
-  width: 100%;
-  height: 100%;
-  min-width: 100%;
-  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+`;
+const BoardWrapperS = exports.BoardWrapperS = _styledComponents.default.div`
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
 const ButtonS = exports.ButtonS = _styledComponents.default.button`
   display: flex;

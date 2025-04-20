@@ -473,7 +473,7 @@ const WhiteboardCore = _ref => {
     },
     src: _zoomOut.default,
     alt: "Zoom Out"
-  }))))), /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_index.PdfReader, {
+  }))))), /*#__PURE__*/_react.default.createElement(_Whiteboard.BoardWrapperS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.PDFWrapperS, null, /*#__PURE__*/_react.default.createElement(_index.PdfReader, {
     fileReaderInfo: fileInfo,
     viewportTransform: viewportTransform,
     file: documents.get(activeTabIndex)
@@ -487,6 +487,8 @@ const WhiteboardCore = _ref => {
       width: '100%',
       height: '100%',
       position: 'absolute',
+      right: 0,
+      bottom: 0,
       top: 0,
       left: 0,
       overflow: 'hidden'
@@ -494,6 +496,6 @@ const WhiteboardCore = _ref => {
     className: "canvas",
     ref: canvasRef,
     id: "canvas"
-  }));
+  })));
 };
 var _default = exports.default = WhiteboardCore;

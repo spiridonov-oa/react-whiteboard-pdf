@@ -577,7 +577,7 @@ const Whiteboard = props => {
     canvasList.current.set(tabIndex, getCanvas(tabIndex) || null);
     return /*#__PURE__*/_react.default.createElement(_WhiteboardCore.default, (0, _extends2.default)({}, props, {
       style: {
-        display: tabIndex === activeTabIndex ? 'block' : 'none'
+        display: tabIndex === activeTabIndex ? 'flex' : 'none'
       },
       pageData: page,
       canvasList: canvasList,

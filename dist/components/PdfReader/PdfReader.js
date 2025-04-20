@@ -88,10 +88,12 @@ const PDFReader = _ref => {
   // Create a transform string from the viewportTransform matrix
   const transformStyle = {
     width: `100%`,
-    height: `100%`,
     transform: `matrix(${viewportTransform.join(', ')})`,
     transformOrigin: '0 0',
-    overflow: 'hidden'
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%'
   };
   if (!file) {
     return /*#__PURE__*/_react.default.createElement("div", null);
@@ -107,7 +109,8 @@ const PDFReader = _ref => {
   }, /*#__PURE__*/_react.default.createElement(_reactPdf.Page, {
     className: "import-pdf-page",
     onRenderSuccess: onRenderSuccess,
-    pageNumber: currentPageNumber + 1
+    pageNumber: currentPageNumber + 1,
+    height: 1000
     //scale={zoom * 1.3}
     ,
     renderTextLayer: false,
