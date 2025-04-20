@@ -6,8 +6,8 @@ export const PDFReaderS = styled.div`
   width: 100%;
   height: 100%;
   font-size: 14px;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   overflow: hidden;
 `;
 
@@ -15,7 +15,7 @@ export const FileContainer = styled.div`
   margin: 0 auto;
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 
   .import-pdf-page {
     canvas {
@@ -27,14 +27,14 @@ export const FileContainer = styled.div`
 export const PageInfoS = styled.div`
   position: absolute;
   z-index: 2;
-  bottom: 50px;
+  left: 5px;
+  bottom: 5px;
   display: flex;
   align-items: center;
   background: white;
   border-radius: 8px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   border: none;
-  margin-bottom: 10px;
   overflow: hidden;
 `;
 
