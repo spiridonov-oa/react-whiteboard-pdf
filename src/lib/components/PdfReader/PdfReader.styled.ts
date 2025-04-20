@@ -1,0 +1,66 @@
+import styled from 'styled-components';
+
+export const PDFReaderS = styled.div`
+  flex: 1;
+  display: flex;
+  font-size: 14px;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+`;
+
+export const FileContainer = styled.div`
+  margin: 0 auto;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+
+  .import-pdf-page {
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+`;
+
+export const PageInfoS = styled.div`
+  position: absolute;
+  z-index: 2;
+  bottom: 50px;
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  border: none;
+  margin-bottom: 10px;
+  overflow: hidden;
+`;
+
+export const PageInfoDetails = styled.span`
+  color: #333;
+  display: flex;
+  align-items: center;
+  padding: 0 1em;
+`;
+
+export const NavigationButton = styled.button`
+  padding: 12px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  color: #333;
+  background-color: transparent;
+  outline: none;
+  cursor: pointer;
+
+  img {
+    width: 16px;
+    vertical-align: middle;
+  }
+
+  &:hover {
+    background-color: #eee;
+  }
+`;

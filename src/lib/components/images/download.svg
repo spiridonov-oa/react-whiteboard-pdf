@@ -1,11 +1,60 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg fill="#000000" height="800px" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-	 viewBox="0 0 309.197 309.197" xml:space="preserve">
-<g>
-	<polygon points="225.276,110.7 188.393,110.7 188.393,10.034 120.809,10.034 120.809,110.702 83.915,110.702 154.596,211.585 	"/>
-	<polygon points="260.002,176.673 260.002,249.962 49.196,249.962 49.196,176.673 0,176.673 0,299.163 309.197,299.163 
-		309.197,176.673 	"/>
-</g>
+
+<svg
+   width="800"
+   height="800"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#000000"
+   version="1.1"
+   id="svg4642"
+   xmlns="http://www.w3.org/2000/svg">
+  <defs
+     id="defs4646">
+    <linearGradient
+       id="linearGradient5187">
+      <stop
+         style="stop-color:;stop-opacity:1;"
+         offset="0"
+         id="stop5185" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5179">
+      <stop
+         style="stop-opacity:1;"
+         offset="0"
+         id="stop5177" />
+    </linearGradient>
+    <linearGradient
+       href="#linearGradient5187"
+       id="linearGradient5189"
+       x1="7.25"
+       y1="9.5"
+       x2="16.75"
+       y2="9.5"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       href="#linearGradient5187"
+       id="linearGradient5191"
+       x1="2.2499752"
+       y1="18.000011"
+       x2="21.750025"
+       y2="18.000011"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <path
+     d="m 12,3 v 13 m 0,0 4,-4.375 M 12,16 8,11.625"
+     stroke-width="1.5"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path4638"
+     style="stroke:url(#linearGradient5189);stroke-width:2.25;stroke-dasharray:none" />
+  <path
+     d="M 15,21 H 9 C 6.17157,21 4.75736,21 3.87868,20.1213 3,19.2426 3,17.8284 3,15 m 18,0 c 0,2.8284 0,4.2426 -0.8787,5.1213 -0.2998,0.2998 -0.6619,0.4973 -1.1213,0.6274"
+     stroke-width="1.5"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path4640"
+     style="stroke:url(#linearGradient5191);stroke-width:2.25;stroke-dasharray:none" />
 </svg>

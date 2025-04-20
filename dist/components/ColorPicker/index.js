@@ -1,7 +1,13 @@
 "use strict";
 
-exports.__esModule = true;
-exports.ColorPicker = void 0;
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "ColorPicker", {
+  enumerable: true,
+  get: function () {
+    return _ColorPicker.default;
+  }
+});
 var _ColorPicker = _interopRequireDefault(require("./ColorPicker"));
-exports.ColorPicker = _ColorPicker.default;
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
