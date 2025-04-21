@@ -123,30 +123,6 @@ export class Board {
           this.isRendered = true;
           this.canvas.fire('canvas:ready');
 
-          const width = this.canvas.width;
-          const height = this.canvas.height;
-          // Set viewportTransform: [scaleX, skewX, skewY, scaleY, translateX, translateY]
-          this.canvas.setViewportTransform([1, 0, 0, 1, width / 2, height / 2]);
-
-          const crossSize = 30;
-          const crossColor = 'red';
-          const centerCrossH = new Line([-crossSize, 0, crossSize, 0], {
-            stroke: crossColor,
-            strokeWidth: 10,
-            selectable: false,
-            evented: false,
-            excludeFromExport: true,
-          });
-          const centerCrossV = new Line([0, -crossSize, 0, crossSize], {
-            stroke: crossColor,
-            strokeWidth: 10,
-            selectable: false,
-            evented: false,
-            excludeFromExport: true,
-          });
-          this.canvas.add(centerCrossH, centerCrossV);
-          // ---------
-
           this.canvas.requestRenderAll();
         }
       };
@@ -1172,7 +1148,12 @@ export class Board {
   };
 
   removeBoard = () => {
-    this.element.disconnect();
+    if (this.element) {
+      this.element.disconnect();
+      this.element = null;
+    }
+
+    if (!this.canvas) return;
     if (this.canvas) {
       this.canvas.off();
       this.canvas.dispose();

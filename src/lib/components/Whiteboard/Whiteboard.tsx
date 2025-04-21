@@ -236,8 +236,9 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
 
   const getPage = (tabIndex?: number, pageNumber?: number): PageData => {
     const index = tabIndex;
-    const page =
-      pageNumber === 0 ? 0 : pageNumber || stateRefMap.get(index).fileInfo.currentPageNumber || 0;
+    const page = isNumber(pageNumber)
+      ? pageNumber
+      : stateRefMap.get(index).fileInfo.currentPageNumber || 0;
     return stateRefMap.get(index).fileInfo.pages[page] || getInitPageData();
   };
 
@@ -301,8 +302,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       console.error('Tab state not found for index:', tabIndex);
       return;
     } else {
-      const pageNumber =
-        pageNum === 0 || pageNum ? pageNum : tabState?.fileInfo?.currentPageNumber || 0;
+      const pageNumber = isNumber(pageNum) ? pageNum : tabState?.fileInfo?.currentPageNumber || 0;
       const page = getPage(tabIndex, pageNumber);
       const pageCanvasJSON = page?.contentJSON;
       setContentJSON(pageCanvasJSON || '');
