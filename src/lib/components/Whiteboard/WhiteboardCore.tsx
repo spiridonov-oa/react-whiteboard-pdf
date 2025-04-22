@@ -34,7 +34,8 @@ import DeleteIcon from './../images/delete.svg';
 import ZoomInIcon from './../images/zoom-in.svg';
 import ZoomOutIcon from './../images/zoom-out.svg';
 import DownloadIcon from './../images/download.svg';
-import AddFileIcon from './../images/add-file.svg';
+import AddFileIcon from './../images/pdf-file.svg';
+import AddPhotoIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
 import Recenter from './../images/center-focus.svg';
 import { FileInfo, DrawingSettings, TabState, PageData } from '../../../types/config';
@@ -128,9 +129,9 @@ const WhiteboardCore = ({
         COLOR_PICKER: true,
         DEFAULT_COLORS: true,
         FILES: true,
-        SAVE_AS_IMAGE: true,
+        SAVE_AS_IMAGE: false,
         GO_TO_START: true,
-        SAVE_AND_LOAD: true,
+        SAVE_AND_LOAD: false,
         ZOOM: true,
         TABS: true,
 
@@ -351,14 +352,17 @@ const WhiteboardCore = ({
     boardRef.current.nowY = 0;
   };
 
-  const onFileChange = (event) => {
+  const onImageChange = (event) => {
     const file = event.target?.files?.[0];
-    if (!file) return;
-
-    if (file.type.includes('image/')) {
+    if (file?.type?.includes('image/')) {
       uploadImageFile(file);
       onImageUploaded(file, event, boardRef.current.canvas);
-    } else if (file.type.includes('pdf')) {
+    }
+  };
+
+  const onPFDChange = (event) => {
+    const file = event.target?.files?.[0];
+    if (file?.type?.includes('pdf')) {
       // Pass to parent component to handle document addition
       onFileAdded(file);
       onPDFUploaded(file, event, boardRef.current.canvas);
@@ -491,10 +495,18 @@ const WhiteboardCore = ({
               <input
                 ref={uploadPdfRef}
                 hidden
-                accept="image/*,.pdf"
+                accept="image/*"
                 type="file"
-                onChange={onFileChange}
+                onChange={onImageChange}
               />
+              <ButtonS onClick={() => uploadPdfRef.current.click()}>
+                <img style={{ width: '22px', height: '22px' }} src={AddPhotoIcon} alt="Delete" />
+              </ButtonS>
+            </ToolbarItemS>
+          )}
+          {!!enabledControls.FILES && (
+            <ToolbarItemS>
+              <input ref={uploadPdfRef} hidden accept=".pdf" type="file" onChange={onPFDChange} />
               <ButtonS onClick={() => uploadPdfRef.current.click()}>
                 <img style={{ width: '22px', height: '22px' }} src={AddFileIcon} alt="Delete" />
               </ButtonS>
@@ -509,11 +521,11 @@ const WhiteboardCore = ({
             </ToolbarItemS>
           )}
 
-          {/* {!!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && (
+          {!!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && (
             <ToolbarItemS>
               <ButtonS onClick={() => handleLoadCanvasState(canvasSaveData[0])}>Load</ButtonS>
             </ToolbarItemS>
-          )} */}
+          )}
         </ToolbarS>
         <ZoomBarS>
           {!!enabledControls.ZOOM && (
