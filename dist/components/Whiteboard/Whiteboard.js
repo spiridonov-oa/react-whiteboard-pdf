@@ -222,7 +222,7 @@ const Whiteboard = props => {
   };
   const getPage = (tabIndex, pageNumber) => {
     const index = tabIndex;
-    const page = pageNumber === 0 ? 0 : pageNumber || stateRefMap.get(index).fileInfo.currentPageNumber || 0;
+    const page = (0, _utils.isNumber)(pageNumber) ? pageNumber : stateRefMap.get(index).fileInfo.currentPageNumber || 0;
     return stateRefMap.get(index).fileInfo.pages[page] || getInitPageData();
   };
   const getCanvasJSON = tabIndex => {
@@ -281,7 +281,7 @@ const Whiteboard = props => {
       return;
     } else {
       var _tabState$fileInfo;
-      const pageNumber = pageNum === 0 || pageNum ? pageNum : (tabState === null || tabState === void 0 || (_tabState$fileInfo = tabState.fileInfo) === null || _tabState$fileInfo === void 0 ? void 0 : _tabState$fileInfo.currentPageNumber) || 0;
+      const pageNumber = (0, _utils.isNumber)(pageNum) ? pageNum : (tabState === null || tabState === void 0 || (_tabState$fileInfo = tabState.fileInfo) === null || _tabState$fileInfo === void 0 ? void 0 : _tabState$fileInfo.currentPageNumber) || 0;
       const page = getPage(tabIndex, pageNumber);
       const pageCanvasJSON = page === null || page === void 0 ? void 0 : page.contentJSON;
       setContentJSON(pageCanvasJSON || '');
@@ -348,16 +348,19 @@ const Whiteboard = props => {
     setTabsList(Array.from(stateRefMap.keys()));
   };
   const changeTab = nextIndex => {
+    var _currentTabState$file;
     if (nextIndex === activeTabIndex) return;
-    if (nextIndex < 0 || nextIndex >= tabsList.length) return;
+    if (nextIndex < 0 || nextIndex >= stateRefMap.size) return;
 
     // Save current tab's canvas state
     const currentTabState = stateRefMap.get(activeTabIndex);
-    saveCanvasJSON(activeTabIndex, currentTabState.fileInfo.currentPageNumber);
-    saveCanvasSettings(activeTabIndex);
-    updateTabState(activeTabIndex, {
-      fileInfo: currentTabState.fileInfo
-    });
+    if ((0, _utils.isNumber)(currentTabState === null || currentTabState === void 0 || (_currentTabState$file = currentTabState.fileInfo) === null || _currentTabState$file === void 0 ? void 0 : _currentTabState$file.currentPageNumber)) {
+      saveCanvasJSON(activeTabIndex, currentTabState.fileInfo.currentPageNumber);
+      saveCanvasSettings(activeTabIndex);
+      updateTabState(activeTabIndex, {
+        fileInfo: currentTabState.fileInfo
+      });
+    }
 
     // Switch to next tab
     setPrevTabIndex(activeTabIndex);
@@ -387,10 +390,13 @@ const Whiteboard = props => {
     }
   };
   const createNewTab = (name, file) => {
-    saveCanvasJSON(activeTabIndex, selectedTabState.fileInfo.currentPageNumber);
-    updateTabState(activeTabIndex, {
-      fileInfo: selectedTabState.fileInfo
-    });
+    var _selectedTabState$fil2;
+    if ((0, _utils.isNumber)(selectedTabState === null || selectedTabState === void 0 || (_selectedTabState$fil2 = selectedTabState.fileInfo) === null || _selectedTabState$fil2 === void 0 ? void 0 : _selectedTabState$fil2.currentPageNumber)) {
+      saveCanvasJSON(activeTabIndex, selectedTabState.fileInfo.currentPageNumber);
+      updateTabState(activeTabIndex, {
+        fileInfo: selectedTabState.fileInfo
+      });
+    }
     const newTabIndex = tabsList.length;
     const updatedDocuments = new Map(documents);
     updatedDocuments.set(newTabIndex, file);
@@ -412,10 +418,10 @@ const Whiteboard = props => {
       props.onDocumentChanged(stateRefMap.get(newTabIndex).fileInfo, stateResponse);
     }
     if (props.onTabStateChange) {
-      props.onTabStateChange({
+      runDebounce('onTabStateChange', () => props.onTabStateChange({
         ...getCurrentWhiteboardState(newTabIndex),
-        newTabIndex
-      });
+        newTabIndex: newTabIndex
+      }), 200);
     }
     return {
       tabIndex: newTabIndex,
@@ -565,7 +571,8 @@ const Whiteboard = props => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      boxShadow: 'none'
+      boxShadow: 'none',
+      minHeight: '40px'
     }
   }, "+")), tabsList.map(tabIndex => {
     const tabState = stateRefMap.get(tabIndex);

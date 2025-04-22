@@ -21,6 +21,11 @@ const FileContainer = exports.FileContainer = _styledComponents.default.div`
   width: 100%;
   display: flex;
   justify-content: flex-start;
+  flex-shrink: 0;
+
+  .pdf-document {
+    flex-shrink: 0;
+  }
 
   .import-pdf-page {
     canvas {

@@ -102,6 +102,7 @@ const PDFReader = _ref => {
     style: transformStyle
   }, /*#__PURE__*/_react.default.createElement(_PdfReader.FileContainer, null, /*#__PURE__*/_react.default.createElement(_reactPdf.Document, {
     file: file,
+    className: "pdf-document",
     onLoadSuccess: onDocumentLoadSuccess,
     onLoadProgress: handleLoadProgress,
     error: /*#__PURE__*/_react.default.createElement("div", null, "An error occurred while loading the PDF."),
