@@ -115,6 +115,7 @@ const PDFReader = ({
         <FileContainer>
           <Document
             file={file}
+            className="pdf-document"
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadProgress={handleLoadProgress}
             error={<div>An error occurred while loading the PDF.</div>}
