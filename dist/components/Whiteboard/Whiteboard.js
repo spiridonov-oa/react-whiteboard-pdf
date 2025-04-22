@@ -371,9 +371,7 @@ const Whiteboard = props => {
     updateTabState(nextIndex, {
       fileInfo: nextTabState.fileInfo
     });
-    setTimeout(() => {
-      loadPageState(nextIndex, nextTabState.fileInfo.currentPageNumber);
-    }, 20);
+    loadPageState(nextIndex, nextTabState.fileInfo.currentPageNumber);
     const stateResponse = getCurrentWhiteboardState(nextIndex);
     if (!stateResponse) {
       console.error('State not found for nextIndex:', nextIndex);
@@ -389,12 +387,13 @@ const Whiteboard = props => {
       }), 200);
     }
   };
-  const createNewTab = (name, file) => {
-    var _selectedTabState$fil2;
-    if ((0, _utils.isNumber)(selectedTabState === null || selectedTabState === void 0 || (_selectedTabState$fil2 = selectedTabState.fileInfo) === null || _selectedTabState$fil2 === void 0 ? void 0 : _selectedTabState$fil2.currentPageNumber)) {
-      saveCanvasJSON(activeTabIndex, selectedTabState.fileInfo.currentPageNumber);
+  const createNewTab = (name, file, tabIndex) => {
+    var _currentTabState$file2;
+    const currentTabState = stateRefMap.get(tabIndex);
+    if ((0, _utils.isNumber)(currentTabState === null || currentTabState === void 0 || (_currentTabState$file2 = currentTabState.fileInfo) === null || _currentTabState$file2 === void 0 ? void 0 : _currentTabState$file2.currentPageNumber)) {
+      saveCanvasJSON(activeTabIndex, currentTabState.fileInfo.currentPageNumber);
       updateTabState(activeTabIndex, {
-        fileInfo: selectedTabState.fileInfo
+        fileInfo: currentTabState.fileInfo
       });
     }
     const newTabIndex = tabsList.length;
@@ -406,9 +405,7 @@ const Whiteboard = props => {
     updateTabState(newTabIndex, {
       fileInfo: getInitFileInfo(name)
     });
-    setTimeout(() => {
-      loadPageState(newTabIndex, 0);
-    }, 20);
+    loadPageState(newTabIndex, 0);
     const stateResponse = getCurrentWhiteboardState(newTabIndex);
     if (!stateResponse) {
       console.error('State not found for newTabIndex:', newTabIndex);
@@ -428,8 +425,8 @@ const Whiteboard = props => {
       fileInfo: stateRefMap.get(newTabIndex).fileInfo
     };
   };
-  const handleAddDocument = file => {
-    const data = createNewTab(file.name || 'File', file);
+  const handleAddDocument = (file, tabIndex) => {
+    const data = createNewTab(file.name || 'File', file, tabIndex);
     if (props.onFileAdded) {
       props.onFileAdded({
         ...data,
@@ -464,9 +461,7 @@ const Whiteboard = props => {
       fileInfo: newFileData,
       drawingSettings: tabState.drawingSettings
     });
-    setTimeout(() => {
-      loadPageState(tabIndex, data.currentPageNumber);
-    }, 20);
+    loadPageState(tabIndex, data.currentPageNumber);
     if (props.onPageChange) {
       runDebounce('pageChange', () => {
         props.onPageChange(getCurrentWhiteboardState(tabIndex));
@@ -498,9 +493,7 @@ const Whiteboard = props => {
       }
       setActiveTabIndex(newActiveTabIndex);
       setSelectedTabState(stateRefMap.get(newActiveTabIndex));
-      setTimeout(() => {
-        loadPageState(newActiveTabIndex);
-      }, 20);
+      loadPageState(newActiveTabIndex);
     } else {
       newActiveTabIndex = activeTabIndex;
       setActiveTabIndex(newActiveTabIndex);
@@ -560,7 +553,7 @@ const Whiteboard = props => {
     }, "\xD7"));
   }), /*#__PURE__*/_react.default.createElement(_Whiteboard.TabS, {
     onClick: () => {
-      createNewTab(`Document ${stateRefMap.size + 1}`);
+      createNewTab(`Document ${stateRefMap.size + 1}`, null, activeTabIndex);
     },
     style: {
       backgroundColor: '#fff',
@@ -590,13 +583,13 @@ const Whiteboard = props => {
       canvasList: canvasList,
       documents: documents,
       activeTabState: selectedTabState,
-      onCanvasRender: (canvas, e) => handleCanvasRender(tabIndex, canvas, e),
+      onCanvasRender: (canvas, e) => handleCanvasRender(tabIndex, pageNumber, canvas, e),
       contentJSON: contentJSON,
       key: tabIndex,
       drawingSettings: tabState.drawingSettings,
       fileInfo: tabState.fileInfo,
       onOptionsChange: newSettings => handleDrawingSettingsChange(tabIndex, newSettings),
-      onFileAdded: handleAddDocument,
+      onFileAdded: file => handleAddDocument(file, tabIndex),
       onPageChange: data => {
         handlePageChange(data, tabIndex, pageNumber);
       },

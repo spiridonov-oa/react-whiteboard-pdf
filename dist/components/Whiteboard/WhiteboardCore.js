@@ -25,7 +25,8 @@ var _delete = _interopRequireDefault(require("./../images/delete.svg"));
 var _zoomIn = _interopRequireDefault(require("./../images/zoom-in.svg"));
 var _zoomOut = _interopRequireDefault(require("./../images/zoom-out.svg"));
 var _download = _interopRequireDefault(require("./../images/download.svg"));
-var _addFile = _interopRequireDefault(require("./../images/add-file.svg"));
+var _pdfFile = _interopRequireDefault(require("./../images/pdf-file.svg"));
+var _addPhoto = _interopRequireDefault(require("./../images/add-photo.svg"));
 var _colorFill = _interopRequireDefault(require("./../images/color-fill.svg"));
 var _centerFocus = _interopRequireDefault(require("./../images/center-focus.svg"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
@@ -72,6 +73,7 @@ const WhiteboardCore = _ref => {
   const canvasRef = (0, _react.useRef)(null);
   const whiteboardRef = (0, _react.useRef)(null);
   const uploadPdfRef = (0, _react.useRef)(null);
+  const uploadImageRef = (0, _react.useRef)(null);
   const enabledControls = (0, _react.useMemo)(function () {
     return {
       [_Board.modes.PENCIL]: true,
@@ -88,9 +90,9 @@ const WhiteboardCore = _ref => {
       COLOR_PICKER: true,
       DEFAULT_COLORS: true,
       FILES: true,
-      SAVE_AS_IMAGE: true,
+      SAVE_AS_IMAGE: false,
       GO_TO_START: true,
-      SAVE_AND_LOAD: true,
+      SAVE_AND_LOAD: false,
       ZOOM: true,
       TABS: true,
       ...controls
@@ -280,14 +282,18 @@ const WhiteboardCore = _ref => {
     boardRef.current.nowX = 0;
     boardRef.current.nowY = 0;
   };
-  const onFileChange = event => {
-    var _event$target;
+  const onImageChange = event => {
+    var _event$target, _file$type;
     const file = (_event$target = event.target) === null || _event$target === void 0 || (_event$target = _event$target.files) === null || _event$target === void 0 ? void 0 : _event$target[0];
-    if (!file) return;
-    if (file.type.includes('image/')) {
+    if (file !== null && file !== void 0 && (_file$type = file.type) !== null && _file$type !== void 0 && _file$type.includes('image/')) {
       uploadImageFile(file);
       onImageUploaded(file, event, boardRef.current.canvas);
-    } else if (file.type.includes('pdf')) {
+    }
+  };
+  const onPFDChange = event => {
+    var _event$target2, _file$type2;
+    const file = (_event$target2 = event.target) === null || _event$target2 === void 0 || (_event$target2 = _event$target2.files) === null || _event$target2 === void 0 ? void 0 : _event$target2[0];
+    if (file !== null && file !== void 0 && (_file$type2 = file.type) !== null && _file$type2 !== void 0 && _file$type2.includes('pdf')) {
       // Pass to parent component to handle document addition
       onFileAdded(file);
       onPDFUploaded(file, event, boardRef.current.canvas);
@@ -427,11 +433,26 @@ const WhiteboardCore = _ref => {
     src: _delete.default,
     alt: "Delete"
   })), /*#__PURE__*/_react.default.createElement(_Whiteboard.SeparatorS, null), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement("input", {
+    ref: uploadImageRef,
+    hidden: true,
+    accept: "image/*",
+    type: "file",
+    onChange: onImageChange
+  }), /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+    onClick: () => uploadImageRef.current.click()
+  }, /*#__PURE__*/_react.default.createElement("img", {
+    style: {
+      width: '22px',
+      height: '22px'
+    },
+    src: _addPhoto.default,
+    alt: "Delete"
+  }))), !!enabledControls.FILES && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement("input", {
     ref: uploadPdfRef,
     hidden: true,
-    accept: "image/*,.pdf",
+    accept: ".pdf",
     type: "file",
-    onChange: onFileChange
+    onChange: onPFDChange
   }), /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: () => uploadPdfRef.current.click()
   }, /*#__PURE__*/_react.default.createElement("img", {
@@ -439,7 +460,7 @@ const WhiteboardCore = _ref => {
       width: '22px',
       height: '22px'
     },
-    src: _addFile.default,
+    src: _pdfFile.default,
     alt: "Delete"
   }))), !!enabledControls.SAVE_AS_IMAGE && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleSaveCanvasAsImage
@@ -450,7 +471,9 @@ const WhiteboardCore = _ref => {
     },
     src: _download.default,
     alt: "Download"
-  })))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+  }))), !!enabledControls.SAVE_AND_LOAD && canvasSaveData && canvasSaveData.length > 0 && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
+    onClick: () => handleLoadCanvasState(canvasSaveData[0])
+  }, "Load"))), /*#__PURE__*/_react.default.createElement(_Whiteboard.ZoomBarS, null, !!enabledControls.ZOOM && /*#__PURE__*/_react.default.createElement(_Whiteboard.ToolbarItemS, null, /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
     onClick: handleZoomIn,
     title: "Zoom In"
   }, /*#__PURE__*/_react.default.createElement("img", {
