@@ -397,9 +397,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       fileInfo: nextTabState.fileInfo,
     });
 
-    setTimeout(() => {
-      loadPageState(nextIndex, nextTabState.fileInfo.currentPageNumber);
-    }, 20);
+    loadPageState(nextIndex, nextTabState.fileInfo.currentPageNumber);
 
     const stateResponse = getCurrentWhiteboardState(nextIndex);
     if (!stateResponse) {
@@ -422,11 +420,12 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
     }
   };
 
-  const createNewTab = (name: string, file?: File) => {
-    if (isNumber(selectedTabState?.fileInfo?.currentPageNumber)) {
-      saveCanvasJSON(activeTabIndex, selectedTabState.fileInfo.currentPageNumber);
+  const createNewTab = (name: string, file?: File, tabIndex?: number) => {
+    const currentTabState = stateRefMap.get(tabIndex);
+    if (isNumber(currentTabState?.fileInfo?.currentPageNumber)) {
+      saveCanvasJSON(activeTabIndex, currentTabState.fileInfo.currentPageNumber);
       updateTabState(activeTabIndex, {
-        fileInfo: selectedTabState.fileInfo,
+        fileInfo: currentTabState.fileInfo,
       });
     }
 
@@ -440,9 +439,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
     updateTabState(newTabIndex, {
       fileInfo: getInitFileInfo(name),
     });
-    setTimeout(() => {
-      loadPageState(newTabIndex, 0);
-    }, 20);
+    loadPageState(newTabIndex, 0);
 
     const stateResponse = getCurrentWhiteboardState(newTabIndex);
     if (!stateResponse) {
@@ -466,8 +463,8 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
     return { tabIndex: newTabIndex, fileInfo: stateRefMap.get(newTabIndex).fileInfo };
   };
 
-  const handleAddDocument = (file) => {
-    const data = createNewTab(file.name || 'File', file);
+  const handleAddDocument = (file, tabIndex) => {
+    const data = createNewTab(file.name || 'File', file, tabIndex);
 
     if (props.onFileAdded) {
       props.onFileAdded({ ...data, file });
@@ -505,9 +502,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       drawingSettings: tabState.drawingSettings,
     });
 
-    setTimeout(() => {
-      loadPageState(tabIndex, data.currentPageNumber);
-    }, 20);
+    loadPageState(tabIndex, data.currentPageNumber);
 
     if (props.onPageChange) {
       runDebounce(
@@ -554,10 +549,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       }
       setActiveTabIndex(newActiveTabIndex);
       setSelectedTabState(stateRefMap.get(newActiveTabIndex));
-
-      setTimeout(() => {
-        loadPageState(newActiveTabIndex);
-      }, 20);
+      loadPageState(newActiveTabIndex);
     } else {
       newActiveTabIndex = activeTabIndex;
       setActiveTabIndex(newActiveTabIndex);
@@ -632,7 +624,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
           })}
           <TabS
             onClick={() => {
-              createNewTab(`Document ${stateRefMap.size + 1}`);
+              createNewTab(`Document ${stateRefMap.size + 1}`, null, activeTabIndex);
             }}
             style={{
               backgroundColor: '#fff',
@@ -673,13 +665,13 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
             canvasList={canvasList}
             documents={documents}
             activeTabState={selectedTabState}
-            onCanvasRender={(canvas, e) => handleCanvasRender(tabIndex, canvas, e)}
+            onCanvasRender={(canvas, e) => handleCanvasRender(tabIndex, pageNumber, canvas, e)}
             contentJSON={contentJSON}
             key={tabIndex}
             drawingSettings={tabState.drawingSettings}
             fileInfo={tabState.fileInfo}
             onOptionsChange={(newSettings) => handleDrawingSettingsChange(tabIndex, newSettings)}
-            onFileAdded={handleAddDocument}
+            onFileAdded={(file) => handleAddDocument(file, tabIndex)}
             onPageChange={(data: FileInfo) => {
               handlePageChange(data, tabIndex, pageNumber);
             }}
