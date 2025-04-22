@@ -374,16 +374,18 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
 
   const changeTab = (nextIndex) => {
     if (nextIndex === activeTabIndex) return;
-    if (nextIndex < 0 || nextIndex >= tabsList.length) return;
+    if (nextIndex < 0 || nextIndex >= stateRefMap.size) return;
 
     // Save current tab's canvas state
     const currentTabState = stateRefMap.get(activeTabIndex);
-    saveCanvasJSON(activeTabIndex, currentTabState.fileInfo.currentPageNumber);
-    saveCanvasSettings(activeTabIndex);
+    if (isNumber(currentTabState?.fileInfo?.currentPageNumber)) {
+      saveCanvasJSON(activeTabIndex, currentTabState.fileInfo.currentPageNumber);
+      saveCanvasSettings(activeTabIndex);
 
-    updateTabState(activeTabIndex, {
-      fileInfo: currentTabState.fileInfo,
-    });
+      updateTabState(activeTabIndex, {
+        fileInfo: currentTabState.fileInfo,
+      });
+    }
 
     // Switch to next tab
     setPrevTabIndex(activeTabIndex);
@@ -421,10 +423,12 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
   };
 
   const createNewTab = (name: string, file?: File) => {
-    saveCanvasJSON(activeTabIndex, selectedTabState.fileInfo.currentPageNumber);
-    updateTabState(activeTabIndex, {
-      fileInfo: selectedTabState.fileInfo,
-    });
+    if (isNumber(selectedTabState?.fileInfo?.currentPageNumber)) {
+      saveCanvasJSON(activeTabIndex, selectedTabState.fileInfo.currentPageNumber);
+      updateTabState(activeTabIndex, {
+        fileInfo: selectedTabState.fileInfo,
+      });
+    }
 
     const newTabIndex = tabsList.length;
     const updatedDocuments = new Map(documents);
@@ -449,7 +453,15 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
       props.onDocumentChanged(stateRefMap.get(newTabIndex).fileInfo, stateResponse);
     }
     if (props.onTabStateChange) {
-      props.onTabStateChange({ ...getCurrentWhiteboardState(newTabIndex), newTabIndex });
+      runDebounce(
+        'onTabStateChange',
+        () =>
+          props.onTabStateChange({
+            ...getCurrentWhiteboardState(newTabIndex),
+            newTabIndex: newTabIndex,
+          }),
+        200,
+      );
     }
     return { tabIndex: newTabIndex, fileInfo: stateRefMap.get(newTabIndex).fileInfo };
   };
@@ -632,6 +644,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
               justifyContent: 'center',
               alignItems: 'center',
               boxShadow: 'none',
+              minHeight: '40px',
             }}
           >
             +
