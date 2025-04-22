@@ -111,6 +111,7 @@ const WhiteboardCore = ({
   const canvasRef = useRef(null);
   const whiteboardRef = useRef(null);
   const uploadPdfRef = useRef(null);
+  const uploadImageRef = useRef(null);
 
   const enabledControls = useMemo(
     function () {
@@ -493,13 +494,13 @@ const WhiteboardCore = ({
           {!!enabledControls.FILES && (
             <ToolbarItemS>
               <input
-                ref={uploadPdfRef}
+                ref={uploadImageRef}
                 hidden
                 accept="image/*"
                 type="file"
                 onChange={onImageChange}
               />
-              <ButtonS onClick={() => uploadPdfRef.current.click()}>
+              <ButtonS onClick={() => uploadImageRef.current.click()}>
                 <img style={{ width: '22px', height: '22px' }} src={AddPhotoIcon} alt="Delete" />
               </ButtonS>
             </ToolbarItemS>
