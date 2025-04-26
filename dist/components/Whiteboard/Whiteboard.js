@@ -26,7 +26,7 @@ const getInitPageData = initPageData => {
   return {
     contentJSON: '',
     zoom: 1,
-    viewportTransform: [1, 0, 0, 1, 0, 0],
+    viewportTransform: [1, 0, 0, 1, 50, 130],
     ...initPageData
   };
 };

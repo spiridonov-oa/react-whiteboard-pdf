@@ -37,7 +37,7 @@ class Board {
       contentJSON: null,
       minZoom: 0.05,
       maxZoom: 9.99,
-      viewportTransform: [1, 0, 0, 1, 0, 0]
+      viewportTransform: [1, 0, 0, 1, 50, 130]
     });
     // [Sketch range limits]
     (0, _defineProperty2.default)(this, "nowX", 0);
