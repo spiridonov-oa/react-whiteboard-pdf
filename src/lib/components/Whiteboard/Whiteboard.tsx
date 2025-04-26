@@ -50,7 +50,7 @@ const getInitPageData = (initPageData?: Partial<PageData>): PageData => {
   return {
     contentJSON: '',
     zoom: 1,
-    viewportTransform: [1, 0, 0, 1, 0, 0],
+    viewportTransform: [1, 0, 0, 1, 50, 130],
     ...initPageData,
   };
 };

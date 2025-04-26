@@ -346,7 +346,7 @@ const WhiteboardCore = ({
   };
 
   const bringControlTOStartPosition = () => {
-    boardRef.current.canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
+    boardRef.current.canvas.viewportTransform = [1, 0, 0, 1, 50, 130];
     boardRef.current.resetZoom(1);
 
     boardRef.current.nowX = 0;
