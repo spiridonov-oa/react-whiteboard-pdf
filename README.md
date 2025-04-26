@@ -17,7 +17,7 @@ Check App demo here:
 
 <br/>
 
-## If you like this project you can help us with $1,000,000 donation or any other amount
+## If you like this project you can help us with any donation
 
 github: [github.com/sponsors/spiridonov-oa](https://github.com/sponsors/spiridonov-oa)
 patreon: [patreon.com/OlegSpiridonov](https://patreon.com/OlegSpiridonov)
