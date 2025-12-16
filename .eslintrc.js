@@ -26,7 +26,10 @@ module.exports = {
   rules: {
     'react/prop-types': 'off',
     '@typescript-eslint/no-empty-function': 'off',
-    '@typescript-eslint/no-this-alias': 'off'
+    '@typescript-eslint/no-this-alias': 'off',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    'prefer-const': 'warn',
+    '@typescript-eslint/no-unused-vars': ['warn', { "args": "none", "varsIgnorePattern": "^_" }]
   },
   overrides: [
     {
