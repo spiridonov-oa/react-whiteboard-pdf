@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 var _react = _interopRequireWildcard(require("react"));
 require("../PdfReader/TextLayer.css");
 require("../PdfReader/AnnotationLayer.css");
@@ -31,8 +32,8 @@ var _colorFill = _interopRequireDefault(require("./../images/color-fill.svg"));
 var _centerFocus = _interopRequireDefault(require("./../images/center-focus.svg"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
-// Add these two imports for react-pdf text layer support
-
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0, _defineProperty2.default)(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; } // Add these two imports for react-pdf text layer support
 const fn = () => {};
 const defaultFunction = (data, event, canvas) => {};
 const WhiteboardCore = _ref => {
@@ -75,7 +76,7 @@ const WhiteboardCore = _ref => {
   const uploadPdfRef = (0, _react.useRef)(null);
   const uploadImageRef = (0, _react.useRef)(null);
   const enabledControls = (0, _react.useMemo)(function () {
-    return {
+    return _objectSpread({
       [_Board.modes.PENCIL]: true,
       [_Board.modes.LINE]: true,
       [_Board.modes.RECTANGLE]: true,
@@ -94,9 +95,8 @@ const WhiteboardCore = _ref => {
       GO_TO_START: true,
       SAVE_AND_LOAD: false,
       ZOOM: true,
-      TABS: true,
-      ...controls
-    };
+      TABS: true
+    }, controls);
   }, [controls]);
   (0, _react.useEffect)(() => {
     if (imageSlot) {
@@ -191,11 +191,10 @@ const WhiteboardCore = _ref => {
         setViewportTransform([...data.viewportTransform]);
         setZoom((_data$viewportTransfo = data.viewportTransform) === null || _data$viewportTransfo === void 0 ? void 0 : _data$viewportTransfo[0]);
         onZoom(data, null, canvas);
-        onConfigChange({
-          ...pageData,
+        onConfigChange(_objectSpread(_objectSpread({}, pageData), {}, {
           zoom: (_data$viewportTransfo2 = data.viewportTransform) === null || _data$viewportTransfo2 === void 0 ? void 0 : _data$viewportTransfo2[0],
           viewportTransform: [...data.viewportTransform]
-        }, null, canvas);
+        }), null, canvas);
       }, 100);
     });
     canvas.on('zoom:change', function (data) {
@@ -241,38 +240,34 @@ const WhiteboardCore = _ref => {
   const changeBrushWidth = e => {
     const intValue = parseInt(e.target.value);
     boardRef.current.canvas.freeDrawingBrush.width = intValue;
-    const newOptions = {
-      ...drawingSettings,
+    const newOptions = _objectSpread(_objectSpread({}, drawingSettings), {}, {
       brushWidth: intValue
-    };
+    });
     onOptionsChange(newOptions, e, boardRef.current.canvas);
   };
   const changeMode = (mode, e) => {
     if (drawingSettings.currentMode === mode) return;
-    const newOptions = {
-      ...drawingSettings,
+    const newOptions = _objectSpread(_objectSpread({}, drawingSettings), {}, {
       currentMode: mode
-    };
+    });
     onOptionsChange(newOptions, e, boardRef.current.canvas);
   };
   const changeCurrentColor = (color, e) => {
     boardRef.current.canvas.freeDrawingBrush.color = color;
-    const newOptions = {
-      ...drawingSettings,
+    const newOptions = _objectSpread(_objectSpread({}, drawingSettings), {}, {
       currentColor: color
-    };
+    });
     onOptionsChange(newOptions, e, boardRef.current.canvas);
   };
   const changeFill = e => {
-    const newOptions = {
-      ...drawingSettings,
+    const newOptions = _objectSpread(_objectSpread({}, drawingSettings), {}, {
       fill: !drawingSettings.fill
-    };
+    });
     onOptionsChange(newOptions, e, boardRef.current.canvas);
   };
   const handleSaveCanvasAsImage = () => {
     canvasRef.current.toBlob(function (blob) {
-      (0, _fileSaver.saveAs)(blob, `${fileInfo.fileName}-${fileInfo.currentPageNumber ? '_page-' : ''}.png`);
+      (0, _fileSaver.saveAs)(blob, "".concat(fileInfo.fileName, "-").concat(fileInfo.currentPageNumber ? '_page-' : '', ".png"));
       onSaveCanvasAsImage(blob, null, boardRef.current.canvas);
     });
   };
@@ -373,7 +368,7 @@ const WhiteboardCore = _ref => {
       return /*#__PURE__*/_react.default.createElement(_Whiteboard.ButtonS, {
         key: buttonKey,
         type: "button",
-        className: `${drawingSettings.currentMode === buttonKey ? 'selected' : ''}`,
+        className: "".concat(drawingSettings.currentMode === buttonKey ? 'selected' : ''),
         onClick: e => changeMode(buttonKey, e)
       }, /*#__PURE__*/_react.default.createElement("img", {
         style: {

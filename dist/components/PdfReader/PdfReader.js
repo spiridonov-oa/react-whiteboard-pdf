@@ -82,13 +82,13 @@ const PDFReader = _ref => {
     } = _ref3;
     const progress = Math.round(loaded / total * 100);
     setLoadingProgress(progress);
-    console.log(`Loading document: ${progress}%`);
+    console.log("Loading document: ".concat(progress, "%"));
   }, []);
 
   // Create a transform string from the viewportTransform matrix
   const transformStyle = {
-    width: `100%`,
-    transform: `matrix(${viewportTransform.join(', ')})`,
+    width: "100%",
+    transform: "matrix(".concat(viewportTransform.join(', '), ")"),
     transformOrigin: '0 0',
     display: 'flex',
     justifyContent: 'center',

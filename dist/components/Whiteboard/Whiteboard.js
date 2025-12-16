@@ -6,12 +6,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 var _react = _interopRequireWildcard(require("react"));
 var _WhiteboardCore = _interopRequireDefault(require("./WhiteboardCore"));
 var _Whiteboard = require("./Whiteboard.styled");
 var _utils = require("../utils/utils");
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0, _defineProperty2.default)(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 const getInitFileInfo = name => {
   return {
     fileName: name || 'New Document',
@@ -23,12 +26,11 @@ const getInitFileInfo = name => {
   };
 };
 const getInitPageData = initPageData => {
-  return {
+  return _objectSpread({
     contentJSON: '',
     zoom: 1,
-    viewportTransform: [1, 0, 0, 1, 50, 130],
-    ...initPageData
-  };
+    viewportTransform: [1, 0, 0, 1, 50, 130]
+  }, initPageData);
 };
 const initDrawingSettings = {
   brushWidth: 5,
@@ -39,21 +41,12 @@ const initDrawingSettings = {
 };
 const Whiteboard = props => {
   var _selectedTabState$fil, _props$controls;
-  const initFileInfo = {
-    ...getInitFileInfo('Document'),
-    ...props.fileInfo
-  };
+  const initFileInfo = _objectSpread(_objectSpread({}, getInitFileInfo('Document')), props.fileInfo);
   const [documents, setDocuments] = (0, _react.useState)(new Map());
   const initTabIndex = props.activeTabIndex || 0;
   const initTabState = {
-    drawingSettings: {
-      ...initDrawingSettings,
-      ...props.drawingSettings
-    },
-    fileInfo: {
-      ...initFileInfo,
-      ...props.fileInfo
-    }
+    drawingSettings: _objectSpread(_objectSpread({}, initDrawingSettings), props.drawingSettings),
+    fileInfo: _objectSpread(_objectSpread({}, initFileInfo), props.fileInfo)
   };
   const canvasList = (0, _react.useRef)(new Map());
   const [tabsList, setTabsList] = (0, _react.useState)([0]);
@@ -104,23 +97,15 @@ const Whiteboard = props => {
             return;
           }
           if (!itemState) {
-            stateRefMap.set(index, {
-              ...state,
-              fileInfo: {
-                ...state.fileInfo
-              }
-            });
+            stateRefMap.set(index, _objectSpread(_objectSpread({}, state), {}, {
+              fileInfo: _objectSpread({}, state.fileInfo)
+            }));
           } else {
             stateRefMap.set(index, {
-              drawingSettings: {
-                ...(itemState === null || itemState === void 0 ? void 0 : itemState.drawingSettings),
-                ...(state === null || state === void 0 ? void 0 : state.drawingSettings)
-              },
-              fileInfo: {
-                ...(itemState === null || itemState === void 0 ? void 0 : itemState.fileInfo),
-                ...state.fileInfo,
+              drawingSettings: _objectSpread(_objectSpread({}, itemState === null || itemState === void 0 ? void 0 : itemState.drawingSettings), state === null || state === void 0 ? void 0 : state.drawingSettings),
+              fileInfo: _objectSpread(_objectSpread(_objectSpread({}, itemState === null || itemState === void 0 ? void 0 : itemState.fileInfo), state.fileInfo), {}, {
                 pages: state.fileInfo.pages
-              }
+              })
             });
           }
         });
@@ -159,17 +144,11 @@ const Whiteboard = props => {
       if (fileInfo) {
         var _stateRefMap$get3;
         if (!((_stateRefMap$get3 = stateRefMap.get(tabIndex)) !== null && _stateRefMap$get3 !== void 0 && _stateRefMap$get3.fileInfo)) {
-          stateRefMap.set(tabIndex, {
-            ...initTabState,
-            fileInfo: {
-              ...fileInfo
-            }
-          });
+          stateRefMap.set(tabIndex, _objectSpread(_objectSpread({}, initTabState), {}, {
+            fileInfo: _objectSpread({}, fileInfo)
+          }));
         } else {
-          const newFileInfo = {
-            ...stateRefMap.get(tabIndex).fileInfo,
-            ...fileInfo
-          };
+          const newFileInfo = _objectSpread(_objectSpread({}, stateRefMap.get(tabIndex).fileInfo), fileInfo);
           stateRefMap.get(tabIndex).fileInfo = newFileInfo;
         }
       }
@@ -201,7 +180,7 @@ const Whiteboard = props => {
     }
     const json = ((_canvasList$current$g = canvasList.current.get(activeTabIndex)) === null || _canvasList$current$g === void 0 ? void 0 : _canvasList$current$g.toJSON()) || '';
     if (!json) {
-      console.error(`Canvas JSON not found for tab ${activeTabIndex}:`, activeTabIndex);
+      console.error("Canvas JSON not found for tab ".concat(activeTabIndex, ":"), activeTabIndex);
     }
     const pageNumber = currentState.fileInfo.currentPageNumber;
     const pageData = currentState.fileInfo.pages[pageNumber];
@@ -286,10 +265,9 @@ const Whiteboard = props => {
       const pageCanvasJSON = page === null || page === void 0 ? void 0 : page.contentJSON;
       setContentJSON(pageCanvasJSON || '');
       updateTabState(tabIndex, {
-        fileInfo: {
-          ...tabState.fileInfo,
+        fileInfo: _objectSpread(_objectSpread({}, tabState.fileInfo), {}, {
           currentPageNumber: pageNumber
-        }
+        })
       });
     }
   };
@@ -334,14 +312,8 @@ const Whiteboard = props => {
     }
     const currentState = stateRefMap.get(tabIndex) || initTabState;
     const updatedState = {
-      drawingSettings: {
-        ...currentState.drawingSettings,
-        ...newState.drawingSettings
-      },
-      fileInfo: {
-        ...currentState.fileInfo,
-        ...newState.fileInfo
-      }
+      drawingSettings: _objectSpread(_objectSpread({}, currentState.drawingSettings), newState.drawingSettings),
+      fileInfo: _objectSpread(_objectSpread({}, currentState.fileInfo), newState.fileInfo)
     };
     stateRefMap.set(tabIndex, updatedState);
     setSelectedTabState(updatedState);
@@ -381,10 +353,9 @@ const Whiteboard = props => {
       props.onDocumentChanged(stateRefMap.get(nextIndex).fileInfo, stateResponse);
     }
     if (props.onTabStateChange) {
-      runDebounce('onTabStateChange', () => props.onTabStateChange({
-        ...getCurrentWhiteboardState(nextIndex),
+      runDebounce('onTabStateChange', () => props.onTabStateChange(_objectSpread(_objectSpread({}, getCurrentWhiteboardState(nextIndex)), {}, {
         newTabIndex: nextIndex
-      }), 200);
+      })), 200);
     }
   };
   const createNewTab = (name, file, tabIndex) => {
@@ -415,10 +386,9 @@ const Whiteboard = props => {
       props.onDocumentChanged(stateRefMap.get(newTabIndex).fileInfo, stateResponse);
     }
     if (props.onTabStateChange) {
-      runDebounce('onTabStateChange', () => props.onTabStateChange({
-        ...getCurrentWhiteboardState(newTabIndex),
+      runDebounce('onTabStateChange', () => props.onTabStateChange(_objectSpread(_objectSpread({}, getCurrentWhiteboardState(newTabIndex)), {}, {
         newTabIndex: newTabIndex
-      }), 200);
+      })), 200);
     }
     return {
       tabIndex: newTabIndex,
@@ -428,10 +398,9 @@ const Whiteboard = props => {
   const handleAddDocument = (file, tabIndex) => {
     const data = createNewTab(file.name || 'File', file, tabIndex);
     if (props.onFileAdded) {
-      props.onFileAdded({
-        ...data,
+      props.onFileAdded(_objectSpread(_objectSpread({}, data), {}, {
         file
-      });
+      }));
     }
   };
   const handleDrawingSettingsChange = (tabIndex, newSettings) => {
@@ -453,10 +422,7 @@ const Whiteboard = props => {
     }
     saveCanvasJSON(tabIndex, pageNumber);
     saveCanvasSettings(tabIndex);
-    const newFileData = {
-      ...tabState.fileInfo,
-      ...data
-    };
+    const newFileData = _objectSpread(_objectSpread({}, tabState.fileInfo), data);
     updateTabState(tabIndex, {
       fileInfo: newFileData,
       drawingSettings: tabState.drawingSettings
@@ -497,15 +463,12 @@ const Whiteboard = props => {
     } else {
       newActiveTabIndex = activeTabIndex;
       setActiveTabIndex(newActiveTabIndex);
-      setSelectedTabState({
-        ...stateRefMap.get(activeTabIndex)
-      });
+      setSelectedTabState(_objectSpread({}, stateRefMap.get(activeTabIndex)));
     }
     updateTabState(tabIndex, null);
-    props.onTabStateChange && props.onTabStateChange({
-      ...getCurrentWhiteboardState(activeTabIndex),
+    props.onTabStateChange && props.onTabStateChange(_objectSpread(_objectSpread({}, getCurrentWhiteboardState(activeTabIndex)), {}, {
       newTabIndex: newActiveTabIndex
-    });
+    }));
   };
   return /*#__PURE__*/_react.default.createElement(_Whiteboard.WrapperS, {
     style: props.style
@@ -523,9 +486,9 @@ const Whiteboard = props => {
         backgroundColor: '#fff',
         boxShadow: 'none'
       } : {
-        boxShadow: `inset 0px -5px 8px -5px rgba(0, 0, 0, 0.2)`
+        boxShadow: "inset 0px -5px 8px -5px rgba(0, 0, 0, 0.2)"
       }
-    }, tabState.fileInfo.fileName || `Document ${tabIndex + 1}`, /*#__PURE__*/_react.default.createElement("span", {
+    }, tabState.fileInfo.fileName || "Document ".concat(tabIndex + 1), /*#__PURE__*/_react.default.createElement("span", {
       onClick: e => {
         e.stopPropagation();
         deleteTab(tabIndex);
@@ -555,7 +518,7 @@ const Whiteboard = props => {
     }, "\xD7"));
   }), /*#__PURE__*/_react.default.createElement(_Whiteboard.TabS, {
     onClick: () => {
-      createNewTab(`Document ${stateRefMap.size + 1}`, null, activeTabIndex);
+      createNewTab("Document ".concat(stateRefMap.size + 1), null, activeTabIndex);
     },
     style: {
       backgroundColor: '#fff',

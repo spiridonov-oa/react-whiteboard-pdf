@@ -9,6 +9,8 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
 var _fabric = require("fabric");
 var _cursors = require("./cursors");
 var _utils = require("../utils/utils");
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0, _defineProperty2.default)(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 const modes = exports.modes = {
   PENCIL: 'PENCIL',
   LINE: 'LINE',
@@ -90,10 +92,7 @@ class Board {
       if (!this.canvas || !canvasConfig) {
         return;
       }
-      this.canvasConfig = {
-        ...this.canvasConfig,
-        ...canvasConfig
-      };
+      this.canvasConfig = _objectSpread(_objectSpread({}, this.canvasConfig), canvasConfig);
       if (this.canvasConfig.zoom) {
         this.canvas.setZoom(this.canvasConfig.zoom);
       }
@@ -235,12 +234,11 @@ class Board {
               y: (point1.y + point2.y) / 2
             };
             const scale = zoom;
-            this.fireViewportChangeEvent({
-              ...params,
+            this.fireViewportChangeEvent(_objectSpread(_objectSpread({}, params), {}, {
               zoom: scale,
               viewportTransform: canvas.viewportTransform,
               action: 'touch:gesture'
-            });
+            }));
             that.changeZoom({
               point,
               scale
@@ -290,10 +288,7 @@ class Board {
     });
     (0, _defineProperty2.default)(this, "setDrawingSettings", drawingSettings => {
       if (!drawingSettings) return;
-      this.drawingSettings = {
-        ...this.drawingSettings,
-        ...drawingSettings
-      };
+      this.drawingSettings = _objectSpread(_objectSpread({}, this.drawingSettings), drawingSettings);
       this.setDrawingMode(this.drawingSettings.currentMode);
       if (this.canvas) {
         // If we're not in a specific drawing mode, update all selected objects with the new color
@@ -861,17 +856,15 @@ class Board {
         if (((_obj$data = obj.data) === null || _obj$data === void 0 ? void 0 : _obj$data.layeringState) === 'top') {
           // Object is at top, send it to bottom
           canvas.sendObjectToBack(obj);
-          obj.data = {
-            ...obj.data,
+          obj.data = _objectSpread(_objectSpread({}, obj.data), {}, {
             layeringState: 'bottom'
-          };
+          });
         } else {
           // Object is either at bottom or has no state yet, bring it to front
           canvas.bringObjectToFront(obj);
-          obj.data = {
-            ...obj.data,
+          obj.data = _objectSpread(_objectSpread({}, obj.data), {}, {
             layeringState: 'top'
-          };
+          });
         }
 
         // Ensure the canvas is refreshed
@@ -946,13 +939,12 @@ class Board {
       if (!this.canvas) return;
 
       // Include current canvas state in params
-      const fullParams = {
-        ...params,
+      const fullParams = _objectSpread(_objectSpread({}, params), {}, {
         canvasWidth: this.canvas.width,
         canvasHeight: this.canvas.height,
         zoom: params.zoom || this.canvas.getZoom(),
         timestamp: Date.now()
-      };
+      });
 
       // Save current state to canvas config
       this.canvasConfig.viewportTransform = [...(params.viewportTransform || this.canvas.viewportTransform)];
