@@ -11,6 +11,7 @@ import {
 import { isNumber, throttle } from '../utils/utils';
 
 interface WhiteboardContainerProps {
+  style?: React.CSSProperties;
   state?: WhiteboardState;
   activeTabIndex?: number;
   contentJSON?: string;
@@ -564,7 +565,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
   };
 
   return (
-    <WrapperS>
+    <WrapperS style={props.style}>
       {props.controls?.TABS !== false && (
         <TabsS>
           {tabsList.map((tabIndex) => {

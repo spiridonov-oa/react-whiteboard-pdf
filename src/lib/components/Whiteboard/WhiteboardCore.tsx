@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 // Add these two imports for react-pdf text layer support
-import 'react-pdf/dist/esm/Page/TextLayer.css';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import '../PdfReader/TextLayer.css';
+import '../PdfReader/AnnotationLayer.css';
 
 import {
   WhiteBoardS,

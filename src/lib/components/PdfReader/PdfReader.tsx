@@ -10,8 +10,8 @@ import {
 import BackIcon from './../images/back.svg';
 import NextIcon from './../images/next.svg';
 // Add these two imports for react-pdf text layer support
-import 'react-pdf/dist/esm/Page/TextLayer.css';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import './TextLayer.css';
+import './AnnotationLayer.css';
 
 // Fix worker loading by using HTTPS and ensuring version compatibility
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
