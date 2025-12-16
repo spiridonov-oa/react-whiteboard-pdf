@@ -50,9 +50,9 @@ class Board {
     (0, _defineProperty2.default)(this, "sketchHeightLimit", 1080 * this.limitScale);
     (0, _defineProperty2.default)(this, "initCanvas", canvasNode => {
       _fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
-        var object = null,
+        let object = null,
           objects = this.getObjects();
-        for (var i = 0, len = this.size(); i < len; i++) {
+        for (let i = 0, len = this.size(); i < len; i++) {
           if (objects[i][attr] && objects[i][attr] === name) {
             object = objects[i];
             break;
@@ -182,7 +182,7 @@ class Board {
           });
         } else {
           const e = opt.e;
-          let vpt = canvas.viewportTransform;
+          const vpt = canvas.viewportTransform;
           vpt[4] -= e.deltaX;
           vpt[5] -= e.deltaY;
           try {
@@ -444,7 +444,7 @@ class Board {
           e
         } = _ref2;
         this.mouseDown = true;
-        let pointer = canvas.getScenePoint(e);
+        const pointer = canvas.getScenePoint(e);
         this.drawInstance = new _fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
           strokeWidth: drawingSettings.brushWidth,
           stroke: drawingSettings.currentColor,

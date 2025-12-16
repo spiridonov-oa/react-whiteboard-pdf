@@ -253,7 +253,7 @@ const Whiteboard = props => {
     //setContentJSON(jsonString);
   };
   const loadPageState = (tabIndex, pageNum) => {
-    let tabState = stateRefMap.get(tabIndex);
+    const tabState = stateRefMap.get(tabIndex);
     if (!tabState) {
       setContentJSON('');
       console.error('Tab state not found for index:', tabIndex);
