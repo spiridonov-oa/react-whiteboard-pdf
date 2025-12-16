@@ -16,6 +16,9 @@ import {
   ToolbarHolderS,
   PDFWrapperS,
   BoardWrapperS,
+  IconImgS,
+  SmallTextS,
+  CanvasS,
 } from './Whiteboard.styled';
 import { PdfReader } from '../PdfReader/index';
 import { saveAs } from 'file-saver';
@@ -57,7 +60,7 @@ interface WhiteboardProps {
   drawingSettings: DrawingSettings;
   pageData: PageData;
   imageSlot?: File;
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
   onFileAdded?: (file: File) => void;
   onObjectAdded?: (data: any, event: any, canvas: any) => void;
   onObjectRemoved?: (data: any, event: any, canvas: any) => void;
@@ -427,7 +430,7 @@ const WhiteboardCore = ({
           className={`${drawingSettings.currentMode === buttonKey ? 'selected' : ''}`}
           onClick={(e) => changeMode(buttonKey, e)}
         >
-          <img style={{ width: '22px', height: '22px' }} src={btn.icon} alt={btn.name} />
+          <IconImgS src={btn.icon} alt={btn.name} />
         </ButtonS>
       );
     });
@@ -453,7 +456,7 @@ const WhiteboardCore = ({
                 min={1}
                 max={30}
                 step={1}
-                style={{ '--thumb-color': drawingSettings.currentColor } as React.CSSProperties}
+                thumbcolor={drawingSettings.currentColor}
                 value={drawingSettings.brushWidth}
                 onChange={changeBrushWidth}
               />
@@ -468,7 +471,7 @@ const WhiteboardCore = ({
               className={drawingSettings.fill ? 'selected' : ''}
               onClick={changeFill}
             >
-              <img style={{ width: '22px', height: '22px' }} src={FillIcon} alt="Delete" />
+              <IconImgS src={FillIcon} alt="Delete" />
             </ButtonS>
           )}
         </ColorBarS>
@@ -478,14 +481,14 @@ const WhiteboardCore = ({
           {!!enabledControls.GO_TO_START && (
             <ToolbarItemS>
               <ButtonS onClick={bringControlTOStartPosition}>
-                <img style={{ width: '22px', height: '22px' }} src={Recenter} alt="Recenter" />
+                <IconImgS src={Recenter} alt="Recenter" />
               </ButtonS>
             </ToolbarItemS>
           )}
 
           {!!enabledControls.CLEAR && (
             <ButtonS type="button" onClick={() => boardRef.current.clearCanvas()}>
-              <img style={{ width: '22px', height: '22px' }} src={DeleteIcon} alt="Delete" />
+              <IconImgS src={DeleteIcon} alt="Delete" />
             </ButtonS>
           )}
 
@@ -501,7 +504,7 @@ const WhiteboardCore = ({
                 onChange={onImageChange}
               />
               <ButtonS onClick={() => uploadImageRef.current.click()}>
-                <img style={{ width: '22px', height: '22px' }} src={AddPhotoIcon} alt="Delete" />
+                <IconImgS src={AddPhotoIcon} alt="Delete" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -509,7 +512,7 @@ const WhiteboardCore = ({
             <ToolbarItemS>
               <input ref={uploadPdfRef} hidden accept=".pdf" type="file" onChange={onPFDChange} />
               <ButtonS onClick={() => uploadPdfRef.current.click()}>
-                <img style={{ width: '22px', height: '22px' }} src={AddFileIcon} alt="Delete" />
+                <IconImgS src={AddFileIcon} alt="Delete" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -517,7 +520,7 @@ const WhiteboardCore = ({
           {!!enabledControls.SAVE_AS_IMAGE && (
             <ToolbarItemS>
               <ButtonS onClick={handleSaveCanvasAsImage}>
-                <img style={{ width: '22px', height: '22px' }} src={DownloadIcon} alt="Download" />
+                <IconImgS src={DownloadIcon} alt="Download" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -532,7 +535,7 @@ const WhiteboardCore = ({
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
               <ButtonS onClick={handleZoomIn} title="Zoom In">
-                <img style={{ width: '22px', height: '22px' }} src={ZoomInIcon} alt="Zoom In" />
+                <IconImgS src={ZoomInIcon} alt="Zoom In" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -540,7 +543,7 @@ const WhiteboardCore = ({
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
               <ButtonS onClick={handleResetZoom} title="Reset Zoom">
-                <span style={{ fontSize: '11px' }}>{Math.floor(zoom * 100)}%</span>
+                <SmallTextS>{Math.floor(zoom * 100)}%</SmallTextS>
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -548,7 +551,7 @@ const WhiteboardCore = ({
           {!!enabledControls.ZOOM && (
             <ToolbarItemS>
               <ButtonS onClick={handleZoomOut} title="Zoom Out">
-                <img style={{ width: '22px', height: '22px' }} src={ZoomOutIcon} alt="Zoom Out" />
+                <IconImgS src={ZoomOutIcon} alt="Zoom Out" />
               </ButtonS>
             </ToolbarItemS>
           )}
@@ -565,23 +568,7 @@ const WhiteboardCore = ({
           />
         </PDFWrapperS>
 
-        <canvas
-          style={{
-            backgroundColor: 'transparent',
-            zIndex: 1,
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            right: 0,
-            bottom: 0,
-            top: 0,
-            left: 0,
-            overflow: 'hidden',
-          }}
-          className="canvas"
-          ref={canvasRef}
-          id="canvas"
-        />
+        <CanvasS className="canvas" ref={canvasRef} id="canvas" />
       </BoardWrapperS>
     </WhiteBoardS>
   );

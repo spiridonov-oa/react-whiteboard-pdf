@@ -482,56 +482,18 @@ const Whiteboard = props => {
     return /*#__PURE__*/_react.default.createElement(_Whiteboard.TabS, {
       key: tabIndex,
       onClick: () => changeTab(tabIndex),
-      style: tabIndex === activeTabIndex ? {
-        backgroundColor: '#fff',
-        boxShadow: 'none'
-      } : {
-        boxShadow: "inset 0px -5px 8px -5px rgba(0, 0, 0, 0.2)"
-      }
-    }, tabState.fileInfo.fileName || "Document ".concat(tabIndex + 1), /*#__PURE__*/_react.default.createElement("span", {
+      active: tabIndex === activeTabIndex
+    }, tabState.fileInfo.fileName || "Document ".concat(tabIndex + 1), /*#__PURE__*/_react.default.createElement(_Whiteboard.CloseBtnS, {
       onClick: e => {
         e.stopPropagation();
         deleteTab(tabIndex);
-      },
-      style: {
-        position: 'absolute',
-        top: '50%',
-        right: '1px',
-        transform: 'translateY(-50%)',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        fontFamily: 'Arial, sans-serif',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '26px',
-        height: '100%',
-        lineHeight: '12px',
-        marginLeft: '5px',
-        cursor: 'pointer',
-        color: '#333'
-        // '&:hover': {
-        //   color: '#eee',
-        //   transition: 'color 0.3s ease',
-        // },
       }
     }, "\xD7"));
   }), /*#__PURE__*/_react.default.createElement(_Whiteboard.TabS, {
     onClick: () => {
       createNewTab("Document ".concat(stateRefMap.size + 1), null, activeTabIndex);
     },
-    style: {
-      backgroundColor: '#fff',
-      fontSize: '30px',
-      lineHeight: '6px',
-      padding: '0em',
-      width: '50px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      boxShadow: 'none',
-      minHeight: '40px'
-    }
+    isAdd: true
   }, "+")), tabsList.map(tabIndex => {
     const tabState = stateRefMap.get(tabIndex);
     if (!tabState) {
@@ -540,17 +502,16 @@ const Whiteboard = props => {
     const pageNumber = tabState.fileInfo.currentPageNumber || 0;
     const page = getPage(tabIndex, pageNumber);
     canvasList.current.set(tabIndex, getCanvas(tabIndex) || null);
-    return /*#__PURE__*/_react.default.createElement(_WhiteboardCore.default, (0, _extends2.default)({}, props, {
-      style: {
-        display: tabIndex === activeTabIndex ? 'flex' : 'none'
-      },
+    return /*#__PURE__*/_react.default.createElement(_Whiteboard.CoreWrapperS, {
+      key: tabIndex,
+      visible: tabIndex === activeTabIndex
+    }, /*#__PURE__*/_react.default.createElement(_WhiteboardCore.default, (0, _extends2.default)({}, props, {
       pageData: page,
       canvasList: canvasList,
       documents: documents,
       activeTabState: selectedTabState,
       onCanvasRender: (canvas, e) => handleCanvasRender(tabIndex, pageNumber, canvas, e),
       contentJSON: contentJSON,
-      key: tabIndex,
       drawingSettings: tabState.drawingSettings,
       fileInfo: tabState.fileInfo,
       onOptionsChange: newSettings => handleDrawingSettingsChange(tabIndex, newSettings),
@@ -565,7 +526,7 @@ const Whiteboard = props => {
         }, data);
       },
       activeTabIndex: tabIndex
-    }));
+    })));
   }));
 };
 var _default = exports.default = Whiteboard;

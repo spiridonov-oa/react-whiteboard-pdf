@@ -35,3 +35,15 @@ export const ColorLabelS = styled.div<ColorLabelProps>`
   width: ${({ size }) => size - 4 || 28}px;
   background: ${({ color }) => color || '#000'};
 `;
+
+export const HiddenColorInputS = styled.input`
+  opacity: 0;
+  position: absolute;
+  bottom: -1px;
+  width: 1px;
+  height: 1px;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+`;

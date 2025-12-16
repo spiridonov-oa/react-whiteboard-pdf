@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import WhiteboardCore from './WhiteboardCore';
-import { TabsS, TabS, WrapperS } from './Whiteboard.styled';
+import { TabsS, TabS, WrapperS, CloseBtnS, CoreWrapperS } from './Whiteboard.styled';
 import {
   FileInfo,
   DrawingSettings,
@@ -297,7 +297,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
   };
 
   const loadPageState = (tabIndex: number, pageNum?: number) => {
-    let tabState = stateRefMap.get(tabIndex);
+    const tabState = stateRefMap.get(tabIndex);
     if (!tabState) {
       setContentJSON('');
       console.error('Tab state not found for index:', tabIndex);
@@ -580,46 +580,17 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
               <TabS
                 key={tabIndex}
                 onClick={() => changeTab(tabIndex)}
-                style={
-                  tabIndex === activeTabIndex
-                    ? {
-                        backgroundColor: '#fff',
-                        boxShadow: 'none',
-                      }
-                    : { boxShadow: `inset 0px -5px 8px -5px rgba(0, 0, 0, 0.2)` }
-                }
+                active={tabIndex === activeTabIndex}
               >
                 {tabState.fileInfo.fileName || `Document ${tabIndex + 1}`}
-                <span
+                <CloseBtnS
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteTab(tabIndex);
                   }}
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    right: '1px',
-                    transform: 'translateY(-50%)',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    fontFamily: 'Arial, sans-serif',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '26px',
-                    height: '100%',
-                    lineHeight: '12px',
-                    marginLeft: '5px',
-                    cursor: 'pointer',
-                    color: '#333',
-                    // '&:hover': {
-                    //   color: '#eee',
-                    //   transition: 'color 0.3s ease',
-                    // },
-                  }}
                 >
                   &times;
-                </span>
+                </CloseBtnS>
               </TabS>
             );
           })}
@@ -627,18 +598,7 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
             onClick={() => {
               createNewTab(`Document ${stateRefMap.size + 1}`, null, activeTabIndex);
             }}
-            style={{
-              backgroundColor: '#fff',
-              fontSize: '30px',
-              lineHeight: '6px',
-              padding: '0em',
-              width: '50px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              boxShadow: 'none',
-              minHeight: '40px',
-            }}
+            isAdd
           >
             +
           </TabS>
@@ -657,30 +617,28 @@ const Whiteboard = (props: WhiteboardContainerProps) => {
         canvasList.current.set(tabIndex, getCanvas(tabIndex) || null);
 
         return (
-          <WhiteboardCore
-            {...props}
-            style={{
-              display: tabIndex === activeTabIndex ? 'flex' : 'none',
-            }}
-            pageData={page}
-            canvasList={canvasList}
-            documents={documents}
-            activeTabState={selectedTabState}
-            onCanvasRender={(canvas, e) => handleCanvasRender(tabIndex, pageNumber, canvas, e)}
-            contentJSON={contentJSON}
-            key={tabIndex}
-            drawingSettings={tabState.drawingSettings}
-            fileInfo={tabState.fileInfo}
-            onOptionsChange={(newSettings) => handleDrawingSettingsChange(tabIndex, newSettings)}
-            onFileAdded={(file) => handleAddDocument(file, tabIndex)}
-            onPageChange={(data: FileInfo) => {
-              handlePageChange(data, tabIndex, pageNumber);
-            }}
-            onCanvasChange={(data, e) => {
-              handleCanvasChange({ tabIndex, pageNumber }, data);
-            }}
-            activeTabIndex={tabIndex}
-          />
+          <CoreWrapperS key={tabIndex} visible={tabIndex === activeTabIndex}>
+            <WhiteboardCore
+              {...props}
+              pageData={page}
+              canvasList={canvasList}
+              documents={documents}
+              activeTabState={selectedTabState}
+              onCanvasRender={(canvas, e) => handleCanvasRender(tabIndex, pageNumber, canvas, e)}
+              contentJSON={contentJSON}
+              drawingSettings={tabState.drawingSettings}
+              fileInfo={tabState.fileInfo}
+              onOptionsChange={(newSettings) => handleDrawingSettingsChange(tabIndex, newSettings)}
+              onFileAdded={(file) => handleAddDocument(file, tabIndex)}
+              onPageChange={(data: FileInfo) => {
+                handlePageChange(data, tabIndex, pageNumber);
+              }}
+              onCanvasChange={(data, e) => {
+                handleCanvasChange({ tabIndex, pageNumber }, data);
+              }}
+              activeTabIndex={tabIndex}
+            />
+          </CoreWrapperS>
         );
       })}
     </WrapperS>

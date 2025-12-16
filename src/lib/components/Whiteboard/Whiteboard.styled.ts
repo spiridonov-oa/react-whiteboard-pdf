@@ -25,19 +25,34 @@ export const TabsS = styled.div`
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 `;
 
-export const TabS = styled.div`
+export const TabS = styled.div<{ active?: boolean; isAdd?: boolean }>`
   position: relative;
   line-height: 1em;
   padding: 1em 1em;
   padding-right: 2em;
   border-right: 1px solid rgba(0, 0, 0, 0.1);
   max-width: 200px;
-  background: rgba(0, 0, 0, 0.1);
-  box-shadow: inset 0px -2px 2px -4px rgba(0, 0, 0, 0.2);
+  background: ${({ active }) => (active ? '#fff' : 'rgba(0, 0, 0, 0.1)')};
+  box-shadow: ${({ active }) => (active ? 'none' : 'inset 0px -2px 2px -4px rgba(0, 0, 0, 0.2)')};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
+
+  ${({ isAdd }) =>
+    isAdd &&
+    `
+    background-color: #fff;
+    font-size: 30px;
+    line-height: 6px;
+    padding: 0em;
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: none;
+    min-height: 40px;
+  `}
 `;
 
 export const WhiteBoardS = styled.div`
@@ -87,6 +102,52 @@ export const ButtonS = styled.button`
   &.selected {
     background-color: ${color};
   }
+`;
+
+export const IconImgS = styled.img<{ size?: number }>`
+  width: ${({ size }) => (size ? `${size}px` : '22px')};
+  height: ${({ size }) => (size ? `${size}px` : '22px')};
+  vertical-align: middle;
+`;
+
+export const SmallTextS = styled.span`
+  font-size: 11px;
+`;
+
+export const CanvasS = styled.canvas`
+  background-color: transparent;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+`;
+
+export const CloseBtnS = styled.span`
+  position: absolute;
+  top: 50%;
+  right: 1px;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 26px;
+  height: 100%;
+  line-height: 12px;
+  margin-left: 5px;
+  cursor: pointer;
+  color: #333;
+`;
+
+export const CoreWrapperS = styled.div<{ visible?: boolean }>`
+  display: ${({ visible }) => (visible ? 'flex' : 'none')};
 `;
 
 export const ToolbarItemS = styled.div`

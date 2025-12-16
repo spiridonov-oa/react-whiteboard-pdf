@@ -26,15 +26,8 @@ function ColorPicker(_ref) {
   }, /*#__PURE__*/_react.default.createElement(_ColorPicker.ColorLabelS, {
     size: size,
     color: color
-  }), /*#__PURE__*/_react.default.createElement("input", {
+  }), /*#__PURE__*/_react.default.createElement(_ColorPicker.HiddenColorInputS, {
     ref: inputRef,
-    style: {
-      opacity: 0,
-      position: 'absolute',
-      bottom: '-1px',
-      width: '1px',
-      height: '1px'
-    },
     type: "color",
     name: "color",
     id: "color",

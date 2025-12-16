@@ -1,5 +1,5 @@
 import React, { useRef, ChangeEvent } from 'react';
-import { ColorPickerS, ColorLabelS } from './ColorPicker.styled';
+import { ColorPickerS, ColorLabelS, HiddenColorInputS } from './ColorPicker.styled';
 
 interface ColorPickerProps {
   size?: number;
@@ -19,9 +19,8 @@ function ColorPicker({ size = 34, color, onChange = () => {} }: ColorPickerProps
   return (
     <ColorPickerS size={size} onClick={emitClick}>
       <ColorLabelS size={size} color={color}></ColorLabelS>
-      <input
+      <HiddenColorInputS
         ref={inputRef}
-        style={{ opacity: 0, position: 'absolute', bottom: '-1px', width: '1px', height: '1px' }}
         type="color"
         name="color"
         id="color"

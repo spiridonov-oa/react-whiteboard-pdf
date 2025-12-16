@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "http://localhost/static/css/main.f845274b.css",
-    "main.js": "http://localhost/static/js/main.5906d17c.js",
+    "main.js": "http://localhost/static/js/main.f0cb432b.js",
     "static/media/pdf.worker.min.mjs": "http://localhost/static/media/pdf.worker.min.6caf51f0eb24193e32c2.mjs",
     "static/media/eraser-icon.svg": "http://localhost/static/media/eraser-icon.6e8ccad5ebe519725c88fb3ffa8cd368.svg",
     "static/media/pencil-edit.svg": "http://localhost/static/media/pencil-edit.30b5c62c98506af95d5aadadf70d5827.svg",
@@ -25,10 +25,10 @@
     "static/media/line.svg": "http://localhost/static/media/line.a175966e89ca17c89e61701cc2b7d8ce.svg",
     "static/media/next.svg": "http://localhost/static/media/next.ae119a8c1344fcb0c22090f497f1e97c.svg",
     "main.f845274b.css.map": "http://localhost/static/css/main.f845274b.css.map",
-    "main.5906d17c.js.map": "http://localhost/static/js/main.5906d17c.js.map"
+    "main.f0cb432b.js.map": "http://localhost/static/js/main.f0cb432b.js.map"
   },
   "entrypoints": [
     "static/css/main.f845274b.css",
-    "static/js/main.5906d17c.js"
+    "static/js/main.f0cb432b.js"
   ]
 }

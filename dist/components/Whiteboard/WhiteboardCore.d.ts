@@ -17,7 +17,7 @@ interface WhiteboardProps {
     drawingSettings: DrawingSettings;
     pageData: PageData;
     imageSlot?: File;
-    style: React.CSSProperties;
+    style?: React.CSSProperties;
     onFileAdded?: (file: File) => void;
     onObjectAdded?: (data: any, event: any, canvas: any) => void;
     onObjectRemoved?: (data: any, event: any, canvas: any) => void;
