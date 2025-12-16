@@ -507,7 +507,9 @@ const Whiteboard = props => {
       newTabIndex: newActiveTabIndex
     });
   };
-  return /*#__PURE__*/_react.default.createElement(_Whiteboard.WrapperS, null, ((_props$controls = props.controls) === null || _props$controls === void 0 ? void 0 : _props$controls.TABS) !== false && /*#__PURE__*/_react.default.createElement(_Whiteboard.TabsS, null, tabsList.map(tabIndex => {
+  return /*#__PURE__*/_react.default.createElement(_Whiteboard.WrapperS, {
+    style: props.style
+  }, ((_props$controls = props.controls) === null || _props$controls === void 0 ? void 0 : _props$controls.TABS) !== false && /*#__PURE__*/_react.default.createElement(_Whiteboard.TabsS, null, tabsList.map(tabIndex => {
     const tabState = stateRefMap.get(tabIndex);
 
     // Skip rendering if the tab was removed

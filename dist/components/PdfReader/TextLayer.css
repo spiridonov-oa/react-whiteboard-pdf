@@ -1,0 +1,22 @@
+/* Minimal TextLayer styles adapted for react-pdf/pdf.js text layer */
+.react-pdf__Page__textContent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+.react-pdf__Page__textContent span {
+  position: absolute;
+  white-space: pre;
+  transform-origin: 0 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure selectable text behaves reasonably when present */
+.react-pdf__Page__textContent {
+  color: transparent;
+}

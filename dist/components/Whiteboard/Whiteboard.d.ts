@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileInfo, DrawingSettings, PageData, WhiteboardState } from '../../../types/config';
 interface WhiteboardContainerProps {
+    style?: React.CSSProperties;
     state?: WhiteboardState;
     activeTabIndex?: number;
     contentJSON?: string;

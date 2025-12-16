@@ -1,0 +1,12 @@
+/* Minimal AnnotationLayer styles adapted for react-pdf/pdf.js annotation layer */
+.react-pdf__Page__annotations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+.react-pdf__Annotation {
+  pointer-events: auto;
+}
