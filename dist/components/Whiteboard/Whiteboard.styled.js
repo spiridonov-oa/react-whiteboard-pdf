@@ -45,7 +45,7 @@ const IconImgS = exports.IconImgS = _styledComponents.default.img(_templateObjec
 const SmallTextS = exports.SmallTextS = _styledComponents.default.span(_templateObject8 || (_templateObject8 = (0, _taggedTemplateLiteral2.default)(["\n  font-size: 11px;\n"])));
 const CanvasS = exports.CanvasS = _styledComponents.default.canvas(_templateObject9 || (_templateObject9 = (0, _taggedTemplateLiteral2.default)(["\n  background-color: transparent;\n  z-index: 1;\n  width: 100%;\n  height: 100%;\n  position: absolute;\n  right: 0;\n  bottom: 0;\n  top: 0;\n  left: 0;\n  overflow: hidden;\n"])));
 const CloseBtnS = exports.CloseBtnS = _styledComponents.default.span(_templateObject10 || (_templateObject10 = (0, _taggedTemplateLiteral2.default)(["\n  position: absolute;\n  top: 50%;\n  right: 1px;\n  transform: translateY(-50%);\n  font-size: 14px;\n  font-weight: bold;\n  font-family: Arial, sans-serif;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  width: 26px;\n  height: 100%;\n  line-height: 12px;\n  margin-left: 5px;\n  cursor: pointer;\n  color: #333;\n"])));
-const CoreWrapperS = exports.CoreWrapperS = _styledComponents.default.div(_templateObject11 || (_templateObject11 = (0, _taggedTemplateLiteral2.default)(["\n  display: ", ";\n"])), _ref6 => {
+const CoreWrapperS = exports.CoreWrapperS = _styledComponents.default.div(_templateObject11 || (_templateObject11 = (0, _taggedTemplateLiteral2.default)(["\n  display: ", ";\n  flex: 1;\n"])), _ref6 => {
   let {
     visible
   } = _ref6;
