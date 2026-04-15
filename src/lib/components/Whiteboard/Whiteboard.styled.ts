@@ -148,6 +148,7 @@ export const CloseBtnS = styled.span`
 
 export const CoreWrapperS = styled.div<{ visible?: boolean }>`
   display: ${({ visible }) => (visible ? 'flex' : 'none')};
+  flex: 1;
 `;
 
 export const ToolbarItemS = styled.div`
